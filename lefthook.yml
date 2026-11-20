@@ -1,0 +1,17 @@
+# Git hooks. Installed automatically by `npm install` (prepare script).
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,jsx,tsx,json,jsonc,css}"
+      run: npx biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    ruff:
+      glob: "scripts/**/*.py"
+      run: uv run --project scripts ruff check --fix {staged_files} && uv run --project scripts ruff format {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    check:
+      run: npm run check
