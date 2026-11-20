@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hacknation2026
 
-## Getting Started
+Live: https://hacknation2026-xi.vercel.app
 
-First, run the development server:
+Next.js 16 · TypeScript · Supabase · Drizzle ORM · shadcn/ui + Tailwind · lucide-react · Motion · Vercel
+
+## Setup
+
+**Install once:** Node.js 22+, git, and [uv](https://docs.astral.sh/uv/) (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/FroggeryBask/Hacknation2026.git
+cd Hacknation2026
+npm install
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run check   # should be all green
+npm run dev     # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Commands
 
-## Learn More
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start the dev server |
+| `npm run check` | Lint, types, Python scripts, database security audit |
+| `npm run smoke [url]` | Check that key pages respond (defaults to localhost) |
+| `npm run db:generate` | Create a migration from `src/db/schema.ts` |
+| `npm run db:migrate` | Apply migrations to the database |
+| `npm run db:audit` | Check every table is protected by RLS |
+| `npx shadcn@latest add <name>` | Add a UI component |
 
-To learn more about Next.js, take a look at the following resources:
+## Rules
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Pushing to `main` deploys to the live site immediately, so work on a branch for anything risky.
+- `npm run check` runs automatically before every push and blocks the push if it fails.
+- Schema changes: edit `src/db/schema.ts` → `npm run db:generate` → `npm run db:migrate` → `npm run db:audit`. **Never** use `drizzle-kit push`.
+- Every new table needs RLS policies (see the `notes` example in `src/db/schema.ts`).
+- We share one database: only one person makes schema changes at a time, and always pull `main` before `db:generate`.
+- No AI attribution in commits. A git hook rejects them.
+- Never commit `.env.local` or paste keys anywhere public.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Using Claude Code?
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The project rules (`CLAUDE.md`), hooks and the `/ship` command load automatically. The first time it asks to connect the Supabase connection in `.mcp.json`, log in with your Supabase account.
