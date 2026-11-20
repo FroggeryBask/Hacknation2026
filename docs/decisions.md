@@ -9,3 +9,4 @@
 - [db] Schema changes via `db:generate` + `db:migrate` only; `drizzle-kit push` is banned (v0.45 created policies without conditions = open to all logged-in users)
 - [auth] Email/password only, email confirmation on, anonymous sign-ins off
 - [tooling] Biome (not ESLint/Prettier); Python scripts via uv in `scripts/`; lefthook git hooks
+- [git] No AI attribution in commits/PRs (team rule): disabled in .claude/settings.json, blocked by lefthook commit-msg hook

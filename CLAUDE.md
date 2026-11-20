@@ -16,6 +16,7 @@ Next.js 16 (App Router, `src/`) · TypeScript · Supabase (Postgres + Auth) · D
 - Env vars: add to `.env.example` and `src/lib/env.ts`.
 - Animations: `motion/react`. Icons: `lucide-react`.
 - Keep it simple: no new dependencies or abstractions without a reason in decisions.md.
+- Git (all agents and tools): never mention AI in commits, PRs, branch names, tags or comments. No `Co-Authored-By` trailers, no "Generated with ..." lines, no AI names or emoji signatures. Author is the human committing.
 
 ## Decisions
 @docs/decisions.md
