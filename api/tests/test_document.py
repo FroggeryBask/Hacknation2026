@@ -1,5 +1,6 @@
 """Document contract (docs/pipeline.md, "Kontrakt"): blocks with IDs, field candidates, coverage."""
 
+import pytest
 from conftest import material
 
 from autoformularz.check import coverage
@@ -128,31 +129,76 @@ def test_schema_bounds_lists():
 
 
 def test_standard_sections_are_left_to_the_compiler(nadplata_spec):
-    """Form 2 on Eden: the model copied 'Dane pełnomocnika' etc. although the compiler adds them."""
+    """Form 2 on Eden: the model copied 'Dane pełnomocnika' etc. although the compiler adds them.
+    A section goes only when its title is about the applicant/proxy/contact AND its fields are personal,
+    address or contact data; statements or subject data with such words in the title stay."""
     from autoformularz.check import drop_standard_sections
 
-    f = FieldSpec(label="Miejscowość", kind=Kind.TEXT)
-    sec = lambda title: SectionSpec(title=title, fields=[f])  # noqa: E731
+    def sec(title, *labels):
+        return SectionSpec(title=title, fields=[FieldSpec(label=x, kind=Kind.TEXT) for x in labels])
+
+    address = ("Miejscowość", "Ulica", "Nr domu", "Kod pocztowy")
+    statements = sec("Oświadczenia wnioskodawcy", "Psy nie będą wykorzystywane do polowań")
     spec = FormSpec(
         title="Wniosek",
         authority_name="Urząd",
         pages=[
             PageSpec(
                 title="Dane wnioskodawcy",
-                sections=[sec("Dane identyfikacyjne wnioskodawcy"), sec("Dane pełnomocnika")],
+                sections=[
+                    sec("Dane identyfikacyjne", "Nazwa / Imię i nazwisko", "NIP"),
+                    sec("Dane pełnomocnika", *address),
+                ],
             ),
             PageSpec(
-                title="Pies", sections=[sec("Miejsce utrzymywania psa"), sec("Dane kontaktowe wnioskodawcy")]
+                title="Pies",
+                sections=[
+                    sec(
+                        "Miejsce utrzymywania psa", *address
+                    ),  # subject data: title is not about the applicant
+                    sec("Dane kontaktowe wnioskodawcy", "Telefon", "Adres e-mail"),
+                    statements,
+                    sec("Dane wnioskodawcy", "Imię i nazwisko", "Opis doświadczenia w hodowli psów"),  # 50%
+                    sec("Osoba do kontaktu w sprawie najmu", "Imię i nazwisko", "Telefon"),  # subject data
+                ],
             ),
         ],
     )
     clean, notes = drop_standard_sections(spec)
     assert [(p.title, [s.title for s in p.sections]) for p in clean.pages] == [
-        ("Pies", ["Miejsce utrzymywania psa"])
+        (
+            "Pies",
+            [
+                "Miejsce utrzymywania psa",
+                "Oświadczenia wnioskodawcy",
+                "Dane wnioskodawcy",
+                "Osoba do kontaktu w sprawie najmu",
+            ],
+        )
     ]
-    assert notes[0] == "Strona „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
-    assert len(notes) == 2
+    assert notes[0] == "Sekcja „Dane identyfikacyjne” jest w części standardowej formularza (pominięta)."
     assert drop_standard_sections(nadplata_spec) == (nadplata_spec, [])
+
+
+@pytest.mark.parametrize(
+    ("label", "standard"),
+    [
+        ("Imię i nazwisko lub nazwa firmy", True),  # form 6
+        ("Adres zamieszkania/siedziby", True),  # form 6
+        ("Adres poczty elektronicznej", True),
+        ("Nr lokalu", True),
+        ("PESEL", True),
+        ("Telefon:", True),
+        ("Rasa psa", False),
+        ("Data urodzenia psa", False),
+        ("Adres miejsca utrzymywania psa", False),
+        ("Imię i nazwisko poprzedniego właściciela psa", False),
+    ],
+)
+def test_standard_labels(label, standard):
+    from autoformularz.check import is_standard_label
+
+    assert is_standard_label(label) is standard
 
 
 def test_applicant_ids_mean_a_company_may_apply():
