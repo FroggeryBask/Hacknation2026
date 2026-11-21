@@ -10,3 +10,5 @@
 - [auth] Email/password only, email confirmation on, anonymous sign-ins off
 - [tooling] Biome (not ESLint/Prettier); Python scripts via uv in `scripts/`; lefthook git hooks
 - [git] No AI attribution in commits/PRs (team rule): disabled in .claude/settings.json, blocked by lefthook commit-msg hook
+- [ui] Design system for forms in `src/components/form` (fields 1:1 with JSON `field.type`), gov.pl-like tokens + Lato; see docs/design-system.md
+- [ui] Biome linter off for `src/components/ui/**` (generated shadcn code, kept as upstream); still formatted

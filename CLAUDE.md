@@ -17,6 +17,7 @@ The hackathon task, forms and reference materials live in `materialy/` (repo roo
 - Every new table: RLS policies in `src/db/schema.ts` (see `notes` example), one per operation, `to authenticated`. Never authorize from `user_metadata`.
 - Secrets (`DATABASE_URL`, `ANTHROPIC_API_KEY`) are server-only: never `NEXT_PUBLIC_`, never imported in `"use client"` files.
 - Env vars: add to `.env.example` and `src/lib/env.ts`.
+- Forms UI: build only from `src/components/form` (fields, sections, `FormShell`) and the tokens in `globals.css`; follow docs/design-system.md. No ad-hoc colors.
 - Animations: `motion/react`. Icons: `lucide-react`.
 - Keep it simple: no new dependencies or abstractions without a reason in decisions.md.
 - Git (all agents and tools): never mention AI in commits, PRs, branch names, tags or comments. No `Co-Authored-By` trailers, no "Generated with ..." lines, no AI names or emoji signatures. Author is the human committing.

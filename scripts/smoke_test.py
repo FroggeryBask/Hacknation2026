@@ -11,6 +11,10 @@ import httpx
 ROUTES: list[tuple[str, int]] = [
     ("/", 200),
     ("/api/health", 200),
+    ("/design-system", 200),
+    ("/design-system/formularze/numer-porzadkowy", 200),
+    ("/design-system/formularze/nadplata-podatku", 200),
+    ("/design-system/formularze/swietlica", 200),
 ]
 
 
