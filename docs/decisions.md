@@ -23,6 +23,10 @@
 - [api] JWT HS256 with shared secret from env; `AUTOFORMULARZ_AUTH_ENABLED=false` only for local dev
 - [docker] Debian slim, not Alpine (LibreOffice and PDF/imaging wheels need glibc); LibreOffice optional via build arg
 - [tooling] Biome (not ESLint/Prettier); ruff + pytest via uv for `api/` and `scripts/`; lefthook git hooks
+- [tooling] Slides in Marp (`docs/prezentacja.md` → PDF via `npm run slides`, MIT, run with npx, not a dependency): versioned with the code, theme modeled on COI visual identity (Behance board in `materialy/inspo_prezentacja`, coi.gov.pl): conic-gradient circles and squares as on coi.gov.pl, Inter Light, navy #04122f, magenta gradient #871c6c→#e10a58, blue #133692, no COI logo
 - [git] No AI attribution in commits/PRs (team rule): disabled in .claude/settings.json, blocked by lefthook commit-msg hook
 - [ui] Design system for forms in `src/components/form` (fields 1:1 with JSON `field.type`), gov.pl-like tokens + Lato; see docs/design-system.md
+- [ui] Renderer `CoiFormView` (`src/components/form/coi-form.tsx`) builds the e-form from COI JSON, not from hand-written forms; `states` evaluated with the `jsonata` package (MIT) on a copy of the JSON with `__userAnswer` injected (exact syntax from "Reguły techniczne", incl. `$repeatingSectionIndex`), so any query from the compiler or the reference files works; preview at `/podglad`
+- [ui] Start page `/` uploads the file through the Next route `/api/forms`, which signs a short-lived JWT with `AUTOFORMULARZ_JWT_SECRET` (node:crypto, no new dependency) and forwards to `POST /api/v1/forms?details=true`; the secret and API address never reach the browser
+- [ui] JSON `description` HTML is converted to React through an allowlist (no innerHTML, inline styles dropped, so only design-system tokens)
 - [ui] Biome linter off for `src/components/ui/**` (generated shadcn code, kept as upstream); still formatted

@@ -10,12 +10,15 @@
     "format": "biome check --write .",
     "check": "uv run --project scripts python scripts/check.py",
     "smoke": "uv run --project scripts python scripts/smoke_test.py",
-    "prepare": "lefthook install || true"
+    "prepare": "lefthook install || true",
+    "slides": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --pdf --allow-local-files -o docs/prezentacja.pdf",
+    "slides:png": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --images png --allow-local-files -o docs/slajdy/slajd.png"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
+    "jsonata": "^2.2.2",
     "lucide-react": "^1.77.0",
     "motion": "^14.14.0",
     "next": "16.4.6",
