@@ -13,7 +13,8 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
-from autoformularz.spec import Condition, FieldSpec, FormSpec, Kind, SectionSpec
+from autoformularz.document import Block, Document
+from autoformularz.spec import Condition, FieldSpec, FormSpec, Kind, Role, SectionSpec
 
 Json = dict[str, Any]
 
@@ -207,8 +208,9 @@ def req(required: bool, *extra: str) -> list[str]:
 
 
 class Standard:
-    def __init__(self, b: Builder, spec: FormSpec):
+    def __init__(self, b: Builder, spec: FormSpec, source: dict[Role, list[str]] | None = None):
         self.b, self.spec = b, spec
+        self.source = source or {}  # verbatim source text by role (see source_texts)
         a = spec.applicant
         self.has_subject = a.other_person or a.entity
         subject = FieldRef(DATA_TAB, "podmiot_wniosku", "wybierz_w_czyim_imieniu_wnioskujesz", False, [])
@@ -603,6 +605,10 @@ class Standard:
                     [b.field("INFO_SECTION", "podsumowanie_info", description=self.spec.summary)],
                 )
             )
+        for role, tech, title in SOURCE_SECTIONS:
+            if texts := self.source.get(role):
+                text = "\n\n".join(texts)
+                out.append(b.section(tech, title, [b.field("TEXT_BLOCK", f"{tech}_tekst", description=text)]))
         preview = (
             "Zanim przejdziesz do wyboru sposobu podpisu, sprawdź dane na podglądzie. Jeśli zobaczysz błędy, "
             "wróć do edycji."
@@ -747,10 +753,38 @@ def _norm(label: str) -> str:
     return re.sub(r"\s+", " ", label).strip().lower()
 
 
-def compile_form(spec: FormSpec) -> tuple[Json, list[str]]:
-    """Returns (form JSON, warnings)."""
+# Source text copied verbatim to the finish page (standard: "Podsumowanie i podgląd" holds text blocks).
+# Not copied: STATEMENT (standard wants short, gender-neutral statements: the model writes `consents`),
+# GDPR (standard: the information clause is linked, never placed on the form), SKIP (paper only).
+SOURCE_SECTIONS: list[tuple[Role, str, str]] = [
+    (Role.INSTRUCTION, "pouczenie", "Pouczenie"),
+    (Role.LEGAL_BASIS, "podstawa_prawna", "Podstawa prawna"),
+]
+
+
+def _plain(block: Block) -> str:
+    """Block text without table markup: '| a | b |' -> 'a b'."""
+    if block.kind == "table_row":
+        return " ".join(c.strip() for c in block.text.strip("|").split("|") if c.strip())
+    return block.text
+
+
+def source_texts(spec: FormSpec, doc: Document | None) -> dict[Role, list[str]]:
+    """Verbatim text of blocks with a copied role, in document order (the model only points to them)."""
+    if doc is None:
+        return {}
+    wanted = {r.block: r.role for r in spec.block_roles if r.role in {role for role, _, _ in SOURCE_SECTIONS}}
+    out: dict[Role, list[str]] = {}
+    for block in doc.blocks:
+        if role := wanted.get(block.id):
+            out.setdefault(role, []).append(_plain(block))
+    return out
+
+
+def compile_form(spec: FormSpec, doc: Document | None = None) -> tuple[Json, list[str]]:
+    """Returns (form JSON, warnings). `doc` (the source) adds verbatim legal text; None keeps the spec only."""
     b = Builder(spec.title)
-    std = Standard(b, spec)
+    std = Standard(b, spec, source_texts(spec, doc))
     pages = SpecPages(b, spec)
     data_sections = std.data_tab_sections()  # reserves predefined techNames first
     pages.plan()

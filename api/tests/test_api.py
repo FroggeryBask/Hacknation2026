@@ -84,3 +84,41 @@ def test_compile_and_schema(client, nadplata_spec):
     r = client.post("/api/v1/forms/compile", headers=auth(), json=nadplata_spec.model_dump(mode="json"))
     assert r.status_code == 200 and r.json()["tabs"]
     assert "properties" in client.get("/api/v1/spec/schema").json()
+
+
+def test_pipeline_passes_document_to_compiler(nadplata_spec):
+    from autoformularz.spec import BlockRole, Role
+
+    path = material("5. */*nadpłaty podatku.docx")
+    seen = {}
+
+    def fake_llm(doc, _):
+        seen["first"] = doc.blocks[0]
+        return nadplata_spec.model_copy(
+            update={"block_roles": [BlockRole(block="b1", role=Role.LEGAL_BASIS)]}
+        )
+
+    settings = Settings(_env_file=None, copy_source_text=True)
+    result = pipeline.from_file(path.name, path.read_bytes(), settings, llm=fake_llm)
+    finish = result.form["tabs"][-1]["questions"]
+    legal = [q["field"] for q in finish if q["field"]["techName"] == "podstawa_prawna"]
+    from autoformularz.compiler import _plain
+
+    assert legal, "LEGAL_BASIS block should become a finish-page section"
+    text_block = legal[0]["repeatingSectionGrid"][0]["field"]["description"]
+    assert _plain(seen["first"])[:20] in text_block
+    assert result.document is not None and result.coverage is not None
+
+
+def test_source_text_copy_is_off_by_default(nadplata_spec):
+    """Saved results showed unreliable block roles (paper instructions, GDPR as legal basis): off by default."""
+    from autoformularz.spec import BlockRole, Role
+
+    path = material("5. */*nadpłaty podatku.docx")
+    spec = nadplata_spec.model_copy(update={"block_roles": [BlockRole(block="b1", role=Role.LEGAL_BASIS)]})
+    settings = Settings(_env_file=None)
+    assert settings.copy_source_text is False
+    result = pipeline.from_file(path.name, path.read_bytes(), settings, llm=lambda doc, _: spec)
+    finish = [q["field"]["techName"] for q in result.form["tabs"][-1]["questions"]]
+    assert "podstawa_prawna" not in finish and "pouczenie" not in finish
+    assert result.document is not None  # ?details=true still shows the source blocks

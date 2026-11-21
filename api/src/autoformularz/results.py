@@ -75,7 +75,7 @@ def run(n: int, settings: Settings, *, compile_only: bool, force: bool) -> str:
         write(spec_path, spec.model_dump(mode="json"))
         usage = usage_since(start)
         model = settings.eden_model if settings.llm_provider == "eden" else settings.llm_model
-    result = pipeline.from_spec(spec)
+    result = pipeline.from_spec(spec, document if settings.copy_source_text else None)
     errors = sum(i.level == "error" for i in result.issues)
     write(OUT / f"{n:02d}.json", result.form)
     write(

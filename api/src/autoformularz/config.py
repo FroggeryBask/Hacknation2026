@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # repetition loop is cut here instead of running until the provider's limit (Eden: 400 s, ~16k tokens).
     llm_max_tokens: int = 8000
     max_pdf_pages: int = 6
+    # Copy INSTRUCTION / LEGAL_BASIS blocks verbatim to the finish page. Off until the model's block roles
+    # are reliable: on saved results it copied paper instructions and the GDPR clause (docs/decisions.md).
+    copy_source_text: bool = False
 
     # LLM provider. "eden" (Eden AI, open-weight models only) is for local development and tests only;
     # docker-compose forces "ollama" for the delivered solution.

@@ -160,3 +160,59 @@ def test_unknown_condition_is_dropped_with_warning():
     form, warnings = compile_form(spec)
     assert warnings and "Nie ma" in warnings[0]
     assert children(sections(form, "Sprawa")["sprawa"])["opis"]["states"] == []
+
+
+def _finish_texts(form: dict) -> dict[str, str]:
+    """techName of each finish-page section -> HTML of its first field."""
+    finish = form["tabs"][-1]
+    return {
+        qn["field"]["techName"]: qn["field"]["repeatingSectionGrid"][0]["field"]["description"]
+        for qn in finish["questions"]
+    }
+
+
+def test_legal_text_copied_verbatim_from_blocks(nadplata_spec):
+    from autoformularz.document import build
+    from autoformularz.lint import lint
+    from autoformularz.spec import BlockRole, Role
+
+    doc = build(
+        [
+            ("Wniosek o stwierdzenie nadpłaty", None),
+            ("| Podstawa prawna: | art. 75 § 1 Ordynacji podatkowej |", None),
+            ("Wniosek rozpatruje się w terminie 30 dni.", None),
+            ("Oświadczam, że podane dane są prawdziwe.", None),
+            ("Administratorem danych jest Wójt Gminy.", None),
+            ("Podpis wnioskodawcy ............", None),
+        ]
+    )
+    roles = {
+        "b2": Role.LEGAL_BASIS,
+        "b3": Role.INSTRUCTION,
+        "b4": Role.STATEMENT,
+        "b5": Role.GDPR,
+        "b6": Role.SKIP,
+    }
+    spec = nadplata_spec.model_copy(
+        update={"block_roles": [BlockRole(block=k, role=v) for k, v in roles.items()]}
+    )
+    form, _ = compile_form(spec, doc)
+    texts = _finish_texts(form)
+    assert list(texts) == ["pouczenie", "podstawa_prawna", "podglad_uzupelnionego_wniosku"]
+    assert "art. 75 § 1 Ordynacji podatkowej" in texts["podstawa_prawna"]  # table markup removed, text kept
+    assert "|" not in texts["podstawa_prawna"]
+    assert "Wniosek rozpatruje się w terminie 30 dni." in texts["pouczenie"]
+    everything = str(form)
+    assert "Administratorem danych" not in everything  # GDPR clause is linked, not placed on the form
+    assert "Oświadczam, że podane" not in everything  # statements come from `consents`, not verbatim
+    assert "Podpis wnioskodawcy" not in everything
+    assert not [i for i in lint(form) if i.level == "error"]
+
+
+def test_without_document_output_is_unchanged(nadplata_spec):
+    from autoformularz.document import build
+    from autoformularz.spec import BlockRole, Role
+
+    spec = nadplata_spec.model_copy(update={"block_roles": [BlockRole(block="b1", role=Role.LEGAL_BASIS)]})
+    assert compile_form(spec)[0] == compile_form(nadplata_spec)[0]
+    assert compile_form(nadplata_spec, build([("art. 1", None)]))[0] == compile_form(nadplata_spec)[0]

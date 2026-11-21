@@ -29,7 +29,7 @@ Podgląd na żywo: `/design-system` (tokeny, przyciski, wszystkie pola) i `/desi
 | `SELECT` | `SelectField` (powyżej 15 opcji lub `searchable` dostaje wyszukiwarkę) |
 | `FILE_UPLOADER` | `FileUploaderField` (`formats`, `maxSizeMb`, `maxFiles`) |
 | `TEXT_BLOCK` | `TextBlock` |
-| `INFO_SECTION` | `InfoSection` (jedyna treść dozwolona na stronie `FINISH`) |
+| `INFO_SECTION` | `InfoSection` (na stronie `FINISH` dozwolone razem z `TEXT_BLOCK`, ustalenie z mentorami) |
 | `CONSENT_SECTION` | `ConsentSection` (nigdy luźne checkboxy na zgody) |
 | tab `MAIN` / `FINISH` | `FormPage` w `FormShell` |
 
