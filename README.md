@@ -17,38 +17,7 @@ Model opisuje tylko to, czego dotyczy formularz. Sekcje wspólne dla wszystkich 
 
 ## Uruchomienie (Docker)
 
-Działa tak samo na Windows, macOS (Intel i Apple Silicon) i Linuksie (x86_64 i ARM64): obrazy bazowe są wieloarchitekturowe, a wszystkie skompilowane zależności mają wersje dla obu architektur. Potrzebny jest Docker Desktop (Windows, macOS) albo Docker Engine z wtyczką Compose **2.24 lub nowszą** (Linux).
-
-### 1. Konfiguracja
-
-Skopiuj plik z przykładowymi ustawieniami:
-
-```bash
-cp .env.example .env                 # macOS, Linux
-Copy-Item .env.example .env          # Windows (PowerShell)
-```
-
-W `.env` ustaw `AUTOFORMULARZ_JWT_SECRET`. Losowy klucz wygenerujesz na każdym systemie samym Dockerem:
-
-```bash
-docker run --rm python:3.14.10-slim-trixie python -c "import secrets; print(secrets.token_urlsafe(48))"
-```
-
-Zapisz `.env` jako UTF-8 bez BOM (domyślnie tak robią VS Code i Notatnik w Windows 11).
-
-### 2a. Demo z Eden AI (na czas hackatonu)
-
-Model open-weight w chmurze organizatorów (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
-
-```bash
-docker compose -f docker-compose.yml -f docker-compose.eden.yml up --build
-```
-
-- Startują tylko `api` i `web`; nakładka `docker-compose.eden.yml` wyłącza `ollama` i `model`. Klucz dostaje tylko `api`, nigdy `web`.
-- `GET /health` pokazuje `"provider": "eden"`, `"configured"` (czy jest klucz i model) i `"usage"`: liczbę zapytań i koszt w USD od startu kontenera.
-- Każde zapytanie kosztuje (wspólny budżet zespołu, [docs/eden-budzet.md](docs/eden-budzet.md)). Bez klucza żądania kończą się błędem `LLM_MISCONFIGURED` i nic nie jest wysyłane.
-
-### 2b. W pełni lokalnie (Ollama, wersja docelowa)
+Wymagany Docker z Compose. Do szybkiego działania modelu zalecana karta graficzna NVIDIA. Na samym procesorze model też działa, ale wolniej.
 
 ```bash
 docker compose up --build
@@ -62,26 +31,8 @@ docker compose up --build
 
 - API: http://localhost:8000 (dokumentacja OpenAPI: http://localhost:8000/docs)
 - Frontend: http://localhost:3000
-- Zatrzymanie: `docker compose down` (z tymi samymi `-f`, jeśli startowało z Eden). `docker compose down -v` usuwa też pobrany model.
-
-### Wymagania sprzętowe i czasy
-
-| Zasób | Eden AI (2a) | Ollama (2b) |
-|---|---|---|
-| Pamięć RAM dla Dockera | bez modelu: tylko API i frontend | **min. 10 GB, zalecane 12 GB** (`qwen3-vl:8b` ~6,2 GB + kontekst 16k ~2,3 GB + API i frontend) |
-| Dysk | obrazy `api` i `web` | obrazy + model ~6,2 GB |
-| Sieć | przy budowaniu obrazów i przy każdym zapytaniu | tylko przy pierwszym starcie (obrazy, pakiety, model); potem działa bez internetu |
-
-**Docker Desktop na Windows (WSL2)** domyślnie daje kontenerom połowę RAM. Na laptopie z 16 GB to ok. 7,6 GB, czyli za mało dla modelu 8B. Zwiększ limit w `C:\Users\<użytkownik>\.wslconfig`:
-
-```
-[wsl2]
-memory=12GB
-```
-
-i uruchom ponownie WSL (`wsl --shutdown`) oraz Docker Desktop. Na macOS limit pamięci ustawia się w Docker Desktop (Settings → Resources). Na słabszej maszynie użyj mniejszego modelu (`AUTOFORMULARZ_LLM_MODEL=qwen3-vl:4b` w `.env`, słabsza jakość) albo zmniejsz `AUTOFORMULARZ_LLM_NUM_CTX`.
-
-Czas pierwszego startu zależy głównie od łącza: sam model to ~6 GB (ok. 1 min przy 1 Gb/s, ok. 9 min przy 100 Mb/s). Pomiar od zera na laptopie (i5-11300H, 16 GB RAM, Docker Desktop na WSL2) przerwaliśmy na etapie budowania obrazów: przy łączu ok. 100 kB/s sama instalacja LibreOffice trwała ponad 13 minut. **Czasy odpowiedzi modelu w Dockerze nie są jeszcze zmierzone.**
+- Usługa `model` przy pierwszym starcie pobiera model (~6 GB) do wolumenu `ollama`.
+- GPU: odkomentuj blok `deploy` w `docker-compose.yml`.
 
 ### Budowanie obrazów osobno
 
@@ -125,14 +76,13 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_LLM_PROVIDER` | `ollama` | `eden` włącza Eden AI (lokalnie albo w Dockerze przez `docker-compose.eden.yml`, patrz [Model językowy](#model-językowy-ollama-domyślnie-albo-eden-ai-opcjonalnie)) |
 | `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | brak | Model i klucz Eden AI, potrzebne tylko przy `eden` |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `600` | Limit czasu odpowiedzi modelu |
-| `AUTOFORMULARZ_LLM_NUM_CTX` | `16384` | Okno kontekstu modelu w Ollamie (więcej = więcej pamięci RAM/VRAM) |
-| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `8000` | Maksymalna długość odpowiedzi modelu; dłuższa (zwykle zapętlenie) kończy się błędem `LLM_TRUNCATED` bez ponawiania |
-| `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron skanu (PDF lub obraz) przekazać modelowi jako obrazy; OCR czyta wszystkie strony (do 30) |
-| `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc; .ods jest czytany bez niego) |
-| `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |
-| `AUTOFORMULARZ_TESSDATA_DIR` | brak | Katalog z `pol.traineddata`, jeśli nie ma go w domyślnym `tessdata` (np. instalator na Windows) |
-| `AUTOFORMULARZ_COPY_SOURCE_TEXT` | `false` | Kopiuje pouczenia i podstawę prawną dosłownie ze źródła na stronę końcową (wyłączone, dopóki role bloków od modelu nie są wiarygodne) |
+| `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron zeskanowanego PDF przekazać modelowi |
+| `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc i .ods) |
 | `AUTOFORMULARZ_CORS_ORIGINS` | `http://localhost:3000` | Dozwolone adresy frontendu |
+
+## Licencje
+
+Kod projektu: MIT. Wszystkie zależności są open source i nie wymagają udostępnienia naszego kodu: biblioteki MIT, BSD, Apache-2.0, ISC; model Qwen3-VL na Apache-2.0; Ollama na MIT. LibreOffice (MPL-2.0) działa jako osobny proces do konwersji .doc/.ods, bez linkowania i bez zmian. Pełna tabela i uzasadnienie: [docs/architektura.md, „Licencje”](docs/architektura.md#7-licencje).
 
 ## REST API
 
@@ -227,7 +177,7 @@ Uruchom API (`cd api && uv run uvicorn autoformularz.main:app --reload`). `GET /
 
 **Wyłączenie.** Usuń `AUTOFORMULARZ_LLM_PROVIDER` albo ustaw go na `ollama` i zrestartuj API. Potrzebny jest wtedy model w Ollamie: `ollama pull qwen3-vl:8b`.
 
-Kolejność: `api/.env` nadpisuje `.env.local`, a zmienne środowiskowe nadpisują oba pliki. Sam `docker-compose.yml` wymusza Ollamę (`AUTOFORMULARZ_LLM_PROVIDER=ollama` i pusty `EDENAI_API_KEY`); Eden w Dockerze włącza tylko jawna nakładka `docker-compose.eden.yml`. Przez Eden używaj wyłącznie modeli open-weight, które da się uruchomić w Ollamie (bez GPT, Gemini, Claude).
+Kolejność: `api/.env` nadpisuje `.env.local`, a zmienne środowiskowe nadpisują oba pliki. `docker compose` zawsze wymusza Ollamę (`AUTOFORMULARZ_LLM_PROVIDER=ollama` i pusty `EDENAI_API_KEY`), więc Eden nie trafi do oddawanego rozwiązania. Przez Eden używaj wyłącznie modeli open-weight, które da się uruchomić w Ollamie (bez GPT, Gemini, Claude).
 
 Struktura repozytorium:
 - `api/`: rozwiązanie (Python 3.14, FastAPI),

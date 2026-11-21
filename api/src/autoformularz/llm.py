@@ -6,9 +6,12 @@ AUTOFORMULARZ_LLM_PROVIDER=eden sends the same prompt to an open-weight model on
 docker-compose forces Ollama for the delivered solution."""
 
 import base64
+import contextlib
 import json
 import logging
 import re
+from collections.abc import Callable
+from dataclasses import dataclass, field
 
 import httpx
 from pydantic import ValidationError
@@ -95,6 +98,57 @@ DEV_WARNING = (
     "LLM przez Eden AI: tryb demo i deweloperski (uzgodniony z mentorami COI); każde zapytanie kosztuje. "
     "Domyślnie rozwiązanie używa lokalnej Ollamy."
 )
+
+
+@dataclass(frozen=True)
+class Usage:
+    """Token usage of one paid Eden AI response (OpenAI `usage` object; `cost` if Eden reports it)."""
+
+    model: str
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    cost: float | None = None
+    raw: dict = field(default_factory=dict)
+
+
+# Seams for cost tracking (the team's budget file plugs in here; nothing in this module stores usage):
+# - before_eden_call: run before every HTTP call to Eden; raise LLMError to block it (e.g. budget used up),
+# - usage_hooks: run after every successful response with its Usage; errors are logged, never raised,
+#   so a failing tracker does not throw away an answer that was already paid for.
+before_eden_call: list[Callable[[str], None]] = []
+usage_hooks: list[Callable[[Usage], None]] = []
+
+
+def _usage(model: str, body: dict) -> Usage:
+    u = body.get("usage") if isinstance(body.get("usage"), dict) else {}
+    cost = u.get("cost", body.get("cost"))
+    return Usage(
+        model=model,
+        prompt_tokens=u.get("prompt_tokens"),
+        completion_tokens=u.get("completion_tokens"),
+        total_tokens=u.get("total_tokens"),
+        cost=float(cost) if isinstance(cost, int | float) else None,
+        raw=u,
+    )
+
+
+def _report(usage: Usage) -> None:
+    log.info(
+        "Eden AI usage: model=%s prompt=%s completion=%s cost=%s",
+        usage.model,
+        usage.prompt_tokens,
+        usage.completion_tokens,
+        usage.cost,
+    )
+    for hook in usage_hooks:
+        try:
+            hook(usage)
+        except Exception:
+            log.exception("Usage hook failed")
+
+
+DEV_WARNING = "LLM przez Eden AI: tryb deweloperski, nie do oddania (oddawane rozwiązanie używa Ollamy)."
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
 
 
@@ -201,12 +255,18 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
     }
 
     def post() -> httpx.Response:
+        for guard in before_eden_call:
+            guard(settings.eden_model)
         try:
-            return httpx.post(
+            r = httpx.post(
                 url, json=payload, headers={"Authorization": f"Bearer {key}"}, timeout=settings.llm_timeout_s
             )
         except httpx.HTTPError as e:
             raise LLMError("LLM_UNAVAILABLE", "Model językowy jest niedostępny (Eden AI).", 503) from e
+        if r.status_code == 200:
+            with contextlib.suppress(ValueError):  # not JSON: reported as LLM_BAD_OUTPUT below
+                _report(_usage(settings.eden_model, r.json()))
+        return r
 
     r = post()
     if 400 <= r.status_code < 500 and "response_format" in r.text:

@@ -104,7 +104,10 @@ def test_json_schema_rejected_falls_back_to_json_object(post, nadplata_spec):
     rejected = httpx.Response(400, json={"error": "response_format json_schema is not supported"})
     rec = post(rejected, completion(spec_json(nadplata_spec)))
     assert generate_spec(doc(text="x"), eden()) == nadplata_spec
-    assert [c["json"]["response_format"]["type"] for c in rec.calls] == ["json_schema", "json_object"]
+    assert [c["json"]["response_format"]["type"] for c in rec.calls] == [
+        "json_schema",
+        "json_object",
+    ]
 
 
 def test_bad_output_retried_once_then_fails(post):
@@ -160,7 +163,11 @@ def test_key_never_in_errors(post, monkeypatch):
     with pytest.raises(LLMError) as e:
         generate_spec(doc(text="x"), eden())
     errors.append(e.value)
-    assert [x.code for x in errors] == ["LLM_ERROR", "LLM_BAD_OUTPUT", "LLM_UNAVAILABLE"]
+    assert [x.code for x in errors] == [
+        "LLM_ERROR",
+        "LLM_BAD_OUTPUT",
+        "LLM_UNAVAILABLE",
+    ]
     for err in errors:
         assert KEY not in err.message and KEY not in str(err)
 
@@ -208,7 +215,10 @@ def test_answer_length_is_capped(post, nadplata_spec):
     generate_spec(doc(text="x"), eden(llm_max_tokens=1234))
     assert rec.calls[0]["json"]["max_tokens"] == 1234
     rec = post(httpx.Response(200, json={"message": {"content": spec_json(nadplata_spec)}}))
-    generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama", llm_max_tokens=99))
+    generate_spec(
+        doc(text="x"),
+        Settings(_env_file=None, llm_provider="ollama", llm_max_tokens=99),
+    )
     assert rec.calls[0]["json"]["options"]["num_predict"] == 99
 
 
@@ -216,7 +226,12 @@ def test_eden_truncated_answer_fails_without_retry(post, monkeypatch):
     """A repetition loop hits max_tokens: no second call (it would loop again), but the cost is recorded."""
     monkeypatch.setattr(llm, "EDEN_USAGE", [])
     looping = {
-        "choices": [{"message": {"content": '{"title": "x", "pages": [{"ti'}, "finish_reason": "length"}],
+        "choices": [
+            {
+                "message": {"content": '{"title": "x", "pages": [{"ti'},
+                "finish_reason": "length",
+            }
+        ],
         "usage": {"prompt_tokens": 4000, "completion_tokens": 8000},
         "cost": 0.0054,
     }
@@ -237,6 +252,70 @@ def test_ollama_truncated_answer_fails_without_retry(post):
 
 def test_health_shows_eden_cost_since_start(monkeypatch):
     monkeypatch.setattr(
-        llm, "EDEN_USAGE", [{"promptTokens": 10, "completionTokens": 5, "cost": 0.0021}, {"cost": 0.003}]
+        llm,
+        "EDEN_USAGE",
+        [{"promptTokens": 10, "completionTokens": 5, "cost": 0.0021}, {"cost": 0.003}],
     )
     assert llm_status(eden())["usage"] == {"calls": 2, "costUsd": 0.0051}
+
+
+def paid(content: str, **usage) -> httpx.Response:
+    return httpx.Response(200, json={"choices": [{"message": {"content": content}}], "usage": usage})
+
+
+@pytest.fixture
+def hooks(monkeypatch):
+    """Fresh hook lists per test (module-level registries)."""
+    monkeypatch.setattr(llm, "before_eden_call", [])
+    monkeypatch.setattr(llm, "usage_hooks", [])
+    return llm
+
+
+def test_usage_reported_for_every_paid_response(post, hooks, nadplata_spec):
+    seen: list[llm.Usage] = []
+    hooks.usage_hooks.append(seen.append)
+    post(
+        paid("{", prompt_tokens=100, completion_tokens=5),
+        paid(
+            spec_json(nadplata_spec),
+            prompt_tokens=120,
+            completion_tokens=900,
+            total_tokens=1020,
+            cost=0.0042,
+        ),
+    )
+    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+    assert [(u.prompt_tokens, u.completion_tokens) for u in seen] == [
+        (100, 5),
+        (120, 900),
+    ]  # retry is paid too
+    assert seen[1].total_tokens == 1020 and seen[1].cost == 0.0042 and seen[1].model == eden().eden_model
+
+
+def test_guard_blocks_call_before_anything_is_sent(post, hooks):
+    def over_budget(model: str) -> None:
+        raise llm.LLMError("LLM_BUDGET_EXCEEDED", "Limit budżetu Eden AI wyczerpany.", 429)
+
+    hooks.before_eden_call.append(over_budget)
+    rec = post()
+    with pytest.raises(llm.LLMError) as e:
+        generate_spec(doc(text="x"), eden())
+    assert e.value.code == "LLM_BUDGET_EXCEEDED" and rec.calls == []
+
+
+def test_failing_usage_hook_keeps_the_answer(post, hooks, nadplata_spec):
+    def broken(_: llm.Usage) -> None:
+        raise RuntimeError("tracker down")
+
+    hooks.usage_hooks.append(broken)
+    post(paid(spec_json(nadplata_spec), prompt_tokens=1))
+    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+
+
+def test_ollama_does_not_report_usage(post, hooks, nadplata_spec):
+    seen: list = []
+    hooks.usage_hooks.append(seen.append)
+    hooks.before_eden_call.append(lambda m: pytest.fail("guard is for Eden only"))
+    post(httpx.Response(200, json={"message": {"content": spec_json(nadplata_spec)}}))
+    generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama"))
+    assert seen == []
