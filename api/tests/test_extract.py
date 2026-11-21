@@ -142,3 +142,56 @@ def test_ods_matches_libreoffice_conversion(n):
         pytest.skip("brak LibreOffice")
     data = material(f"{n}. */*.[oO][dD][sS]").read_bytes()
     assert ods_text(data) == xlsx_text(convert(data, "ods", "xlsx", "soffice"))
+
+
+def _docx_with_boxes(boxes: list[tuple[str, int, int, str]]) -> bytes:
+    """DOCX whose body is one paragraph of floating text boxes: (text, x, y, relativeFrom) in EMU."""
+    import docx
+    from docx.oxml import parse_xml
+
+    ns = (
+        'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" '
+        'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" '
+        'xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" '
+        'xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape"'
+    )
+    runs = "".join(
+        f'<w:r><w:drawing><wp:anchor><wp:positionH relativeFrom="{rel}"><wp:posOffset>{x}</wp:posOffset>'
+        f'</wp:positionH><wp:positionV relativeFrom="{rel}"><wp:posOffset>{y}</wp:posOffset></wp:positionV>'
+        f'<wp:extent cx="500000" cy="130000"/><a:graphic><a:graphicData><wps:wsp><wps:txbx><w:txbxContent>'
+        f"<w:p><w:r><w:t>{text}</w:t></w:r></w:p></w:txbxContent></wps:txbx></wps:wsp></a:graphicData>"
+        f"</a:graphic></wp:anchor></w:drawing></w:r>"
+        for text, x, y, rel in boxes
+    )
+    d = docx.Document()
+    d.element.body.insert(0, parse_xml(f"<w:p {ns}>{runs}</w:p>"))
+    buf = io.BytesIO()
+    d.save(buf)
+    return buf.getvalue()
+
+
+def test_page_anchored_word_boxes_join_into_lines_left_to_right():
+    # A PDF converted to DOCX: one box per word, slightly uneven tops, not in x order within a line.
+    data = _docx_with_boxes(
+        [
+            ("Oświadczam,", 100_000, 5_000_000, "page"),
+            ("nieruchomość", 900_000, 5_004_000, "page"),
+            ("że", 500_000, 4_998_000, "page"),
+            ("Druga", 100_000, 5_200_000, "page"),
+            ("linia", 400_000, 5_200_000, "page"),
+        ]
+    )
+    assert docx_text(data).splitlines()[:2] == ["Oświadczam, że nieruchomość", "Druga linia"]
+
+
+def test_paragraph_anchored_boxes_stay_separate():
+    # Positions relative to a paragraph (material 2) say nothing about lines on the page.
+    data = _docx_with_boxes([("Imię", 100, 0, "paragraph"), ("Nazwisko", 900, 0, "paragraph")])
+    assert docx_text(data).splitlines()[:2] == ["Imię", "Nazwisko"]
+
+
+def test_material_8_reads_lines_not_single_words():
+    lines = docx_text(material("8. */*.docx").read_bytes()).splitlines()
+    assert len(lines) < 400  # 631 single-word lines before
+    assert "43. Stawka opłaty od" in lines
+    assert any(line.startswith("Oświadczam, że nieruchomość wyposażona jest w przydomowy") for line in lines)
