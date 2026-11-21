@@ -2,6 +2,7 @@ import io
 import zipfile
 
 import pytest
+from conftest import material
 
 from autoformularz.upload import Kind, UploadError, sniff, validate_filename, validate_upload
 
@@ -56,6 +57,22 @@ def test_content_must_match_extension():
         validate_upload("skan.pdf", b"\x89PNG\r\n\x1a\n....", 1000)
     assert e.value.code == "MIME_MISMATCH"
     assert validate_upload("skan.jpe", b"\xff\xd8\xff\xe0....", 1000) == Kind.JPEG
+
+
+def test_word_extensions_are_one_format():
+    """Task: "DOC (.doc .docx)". A .docx saved as .doc (materials 5 and 7) is read by its content."""
+    docx = zip_with("[Content_Types].xml", "word/document.xml")
+    ole = b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1...."
+    assert validate_upload("Wniosek.DOC", docx, 1000) == Kind.DOCX
+    assert validate_upload("Wniosek.docx", ole, 1000) == Kind.DOC
+    with pytest.raises(UploadError) as e:
+        validate_upload("Wniosek.doc", b"%PDF-1.7 ...", 1000)
+    assert e.value.code == "MIME_MISMATCH"
+
+
+def test_materials_with_docx_under_doc_name():
+    path = material("7. */*.DOC")
+    assert validate_upload(path.name, path.read_bytes(), 50 << 20) == Kind.DOCX
 
 
 def test_size_limit():

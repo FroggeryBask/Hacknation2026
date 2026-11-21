@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from itertools import pairwise
 from pathlib import Path
 
 import docx
@@ -43,8 +44,49 @@ def extract(kind: Kind, data: bytes, *, soffice: str = "soffice", max_pages: int
         case Kind.PDF:
             return pdf(data, max_pages)
         case Kind.JPEG | Kind.PNG:
-            return Document(images=[downscale(data)])
+            return scan(data, max_pages)
     raise UploadError("UNSUPPORTED_FORMAT", f"Nieobsługiwany format: {kind}.", 415)
+
+
+A4_RATIO = 2**0.5  # page height / width
+CUT_WINDOW = 0.05  # search a blank row within ±5% of a page height around the expected boundary
+
+
+def scan(data: bytes, max_pages: int) -> Document:
+    """Image scan -> one image per page. Multi-page forms often come as ONE tall image with the pages
+    stacked (materials 1, 2, 6-9: up to 16 pages, 1654x37424 px); downscaled as a whole it would be an
+    unreadable strip, so it is cut into pages first."""
+    try:
+        img = Image.open(io.BytesIO(data))
+        img.load()  # Pillow refuses decompression bombs (> MAX_IMAGE_PIXELS) here
+    except (OSError, Image.DecompressionBombError) as e:  # UnidentifiedImageError is an OSError
+        raise UploadError("UNREADABLE_IMAGE", "Nie udało się odczytać obrazu.", 422) from e
+    pages = split_pages(img)
+    out = Document(images=[_png(p) for p in pages[:max_pages]])
+    if len(pages) > max_pages:
+        out.notes.append(f"Przeanalizowano pierwsze {max_pages} stron z {len(pages)}.")
+    return out
+
+
+def split_pages(img: Image.Image) -> list[Image.Image]:
+    """Cuts a tall image of stacked A4 pages at the blankest row near each expected page boundary.
+    Deterministic: depends only on pixel values. A single page (or landscape) is returned as is."""
+    w, h = img.size
+    n = round(h / (w * A4_RATIO))
+    if n <= 1:
+        return [img]
+    # One brightness value per row (box filter = exact row mean), no extra dependencies.
+    rows = img.convert("L").resize((1, h), Image.Resampling.BOX).tobytes()
+    page_h = h / n
+    window = max(1, round(page_h * CUT_WINDOW))
+    cuts = [0]
+    for i in range(1, n):
+        target = round(i * page_h)
+        lo, hi = max(cuts[-1] + 1, target - window), min(h - 1, target + window)
+        # brightest row; ties -> closest to the expected boundary, then the upper one
+        cuts.append(max(range(lo, hi + 1), key=lambda y: (rows[y], -abs(y - target), -y)))
+    cuts.append(h)
+    return [img.crop((0, top, w, bottom)) for top, bottom in pairwise(cuts)]
 
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
@@ -166,12 +208,6 @@ def render_pdf(data: bytes, max_pages: int) -> list[bytes]:
         pil = doc[i].render(scale=2).to_pil()
         images.append(_png(pil))
     return images
-
-
-def downscale(data: bytes) -> bytes:
-    img = Image.open(io.BytesIO(data))
-    img.load()
-    return _png(img)
 
 
 def _png(img: Image.Image) -> bytes:
