@@ -58,3 +58,10 @@ def test_model_usage_goes_to_report(out, nadplata_spec, monkeypatch):
         "costUsd": 0.00255,
     }
     assert (out / "02.spec.json").exists()
+
+
+def test_files_have_unix_line_endings(out, nadplata_spec):
+    material("2. */*.docx")
+    (out / "02.spec.json").write_text(nadplata_spec.model_dump_json(), encoding="utf-8")
+    results.run(2, Settings(_env_file=None), compile_only=True, force=False)
+    assert b"\r\n" not in (out / "02.json").read_bytes()

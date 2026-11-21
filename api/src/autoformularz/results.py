@@ -42,7 +42,8 @@ def source_file(n: int) -> Path:
 
 
 def write(path: Path, data) -> None:
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # newline="\n": the same bytes on Windows and Linux (deterministic files)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
 
 
 def usage_since(start: int) -> dict:
