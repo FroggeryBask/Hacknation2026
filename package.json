@@ -10,7 +10,9 @@
     "format": "biome check --write .",
     "check": "uv run --project scripts python scripts/check.py",
     "smoke": "uv run --project scripts python scripts/smoke_test.py",
-    "prepare": "lefthook install || true"
+    "prepare": "lefthook install || true",
+    "slides": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --pdf --allow-local-files -o docs/prezentacja.pdf",
+    "slides:png": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --images png --allow-local-files -o docs/slajdy/slajd.png"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
