@@ -27,6 +27,11 @@ def test_candidates():
     assert kinds("☐ tak ☐ nie") == ["checkbox", "checkbox"]
     assert kinds("Płeć: ❑ pies ❑ suka") == ["checkbox", "checkbox"]  # form 7 PDF
     assert kinds("| Numer PESEL: | |") == ["colon"]
+    texts = lambda text: [c.text for c in find_candidates(Block("b1", text))]  # noqa: E731
+    assert texts("Miejscowość: Kod pocztowy:") == ["Miejscowość:", "Kod pocztowy:"]  # form 7
+    assert texts("| Nr domu: Nr lokalu: | Ulica: |") == ["Nr domu:", "Nr lokalu:", "Ulica:"]
+    assert kinds("Płeć: ❑ pies ❑ suka") == ["checkbox", "checkbox"]  # value after colon: not a label
+    assert kinds("Godziny pracy 8:00") == [] and kinds("1:") == []
     assert kinds("Wniosek o wydanie zaświadczenia") == []
 
 
