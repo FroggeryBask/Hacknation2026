@@ -1,7 +1,7 @@
 from conftest import material
 
-from formgen.extract import docx_text, extract, xlsx_text
-from formgen.upload import Kind
+from autoformularz.extract import docx_text, extract, xlsx_text
+from autoformularz.upload import Kind
 
 
 def test_docx_keeps_tables_and_text():

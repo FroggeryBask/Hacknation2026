@@ -1,4 +1,4 @@
-# formgen API. Official base images, pinned versions, non-root user, secrets only at runtime.
+# autoformularz API. Official base images, pinned versions, non-root user, secrets only at runtime.
 # Debian slim (not Alpine): LibreOffice and the PDF/imaging wheels are built for glibc.
 
 FROM python:3.14.10-slim-trixie AS build
@@ -25,4 +25,4 @@ ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1 HOME=/tmp
 USER app
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
-CMD ["uvicorn", "formgen.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "autoformularz.main:app", "--host", "0.0.0.0", "--port", "8000"]

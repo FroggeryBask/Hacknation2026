@@ -3,7 +3,7 @@ import zipfile
 
 import pytest
 
-from formgen.upload import Kind, UploadError, sniff, validate_filename, validate_upload
+from autoformularz.upload import Kind, UploadError, sniff, validate_filename, validate_upload
 
 
 def zip_with(*names: str, mimetype: str | None = None) -> bytes:

@@ -6,11 +6,11 @@ import json
 import httpx
 import pytest
 
-from formgen import llm
-from formgen.config import Settings
-from formgen.extract import Extracted
-from formgen.llm import LLMError, generate_spec, llm_status
-from formgen.spec import FormSpec
+from autoformularz import llm
+from autoformularz.config import Settings
+from autoformularz.extract import Extracted
+from autoformularz.llm import LLMError, generate_spec, llm_status
+from autoformularz.spec import FormSpec
 
 KEY = "sk-test-secret-123"
 PNG = b"\x89PNG\r\n\x1a\nfake"
@@ -56,7 +56,7 @@ def post(monkeypatch):
 
 
 def test_default_provider_is_ollama(monkeypatch):
-    monkeypatch.delenv("FORMGEN_LLM_PROVIDER", raising=False)
+    monkeypatch.delenv("AUTOFORMULARZ_LLM_PROVIDER", raising=False)
     s = Settings(_env_file=None)
     assert s.llm_provider == "ollama"
     assert s.eden_model is None

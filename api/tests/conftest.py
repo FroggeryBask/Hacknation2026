@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from formgen.spec import ApplicantSpec, Condition, FieldSpec, FormSpec, Kind, PageSpec, SectionSpec
+from autoformularz.spec import ApplicantSpec, Condition, FieldSpec, FormSpec, Kind, PageSpec, SectionSpec
 
 MATERIALS = Path(__file__).resolve().parents[2] / "materialy"
 

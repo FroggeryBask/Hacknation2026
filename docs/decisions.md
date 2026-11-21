@@ -6,7 +6,7 @@
 - [stack] API in Python 3.14 + FastAPI in `api/` (task allows only Java 21+/Python 3.14+ and requires REST + Docker); Next.js stays only as the optional frontend
 - [stack] No Supabase/Vercel/DB (task bans external SaaS/APIs and storing files; nothing needs persistence)
 - [ai] Delivered solution: local model via Ollama, default `qwen3-vl:8b` (Apache-2.0, reads text and scans; API-only LLMs are banned; small = cheap to deploy)
-- [ai] Eden AI (organizer-provided) is the only external AI provider, open-weight models only (same model must run locally); no Anthropic API (task rules). Chosen with `FORMGEN_LLM_PROVIDER=eden` in local dev only (plain httpx, no SDK); docker-compose forces `ollama` and an empty key. Dev pair: `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` ↔ `qwen3-vl:30b` (Eden has no Qwen3-VL 8B)
+- [ai] Eden AI (organizer-provided) is the only external AI provider, open-weight models only (same model must run locally); no Anthropic API (task rules). Chosen with `AUTOFORMULARZ_LLM_PROVIDER=eden` in local dev only (plain httpx, no SDK); docker-compose forces `ollama` and an empty key. Dev pair: `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` ↔ `qwen3-vl:30b` (Eden has no Qwen3-VL 8B)
 - [ai] LLM fills a small FormSpec (constrained by JSON Schema); a deterministic compiler builds the COI JSON (long JSON with UUIDs/jsonata from a small model is unreliable; code is testable and repeatable)
 - [ai] Predefined sections (office, applicant, address, proxy, stamp duty, contact, consent, preview) come from compiler templates, not the model (standard says use them; same techNames and queries as reference JSON)
 - [format] Follow the reference JSON where it differs from the written schema: `repeatingSectionGrid` (not `repetingSectionGrid`), also for plain SECTION; address/contact prefilled from MLPZ but editable
@@ -15,7 +15,7 @@
 - [format] `validation` lists REQUIRED + validators (PESEL, NIP, REGON, ZIP_CODE, EMAIL...); validators also inferred from labels (reference leaves it empty; validation is an extra-points item)
 - [extract] DOCX read from XML incl. text boxes (forms 2 and 8 are built from text boxes); .doc/.ods via LibreOffice headless (MPL-2.0 external process, not linked; confirm with COI mentors); scanned PDF pages rendered with pypdfium2 (PyMuPDF is AGPL)
 - [api] `POST /api/v1/forms` returns the importable JSON as-is; `?details=true` adds FormSpec, lint issues and notes for the UI
-- [api] JWT HS256 with shared secret from env; `FORMGEN_AUTH_ENABLED=false` only for local dev
+- [api] JWT HS256 with shared secret from env; `AUTOFORMULARZ_AUTH_ENABLED=false` only for local dev
 - [docker] Debian slim, not Alpine (LibreOffice and PDF/imaging wheels need glibc); LibreOffice optional via build arg
 - [tooling] Biome (not ESLint/Prettier); ruff + pytest via uv for `api/` and `scripts/`; lefthook git hooks
 - [git] No AI attribution in commits/PRs (team rule): disabled in .claude/settings.json, blocked by lefthook commit-msg hook

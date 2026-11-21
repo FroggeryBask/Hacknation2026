@@ -5,9 +5,9 @@ import pytest
 from conftest import material
 from fastapi.testclient import TestClient
 
-from formgen import pipeline
-from formgen.config import Settings, get_settings
-from formgen.main import app
+from autoformularz import pipeline
+from autoformularz.config import Settings, get_settings
+from autoformularz.main import app
 
 SECRET = "test-secret-with-at-least-32-bytes!!"
 
@@ -44,7 +44,7 @@ def test_convert_docx_returns_importable_json(client):
     assert r.status_code == 200, r.text
     body = r.json()
     assert set(body) == {"title", "tabs", "flow"}
-    assert r.headers["X-Formgen-Errors"] == "0"
+    assert r.headers["X-Autoformularz-Errors"] == "0"
 
 
 def test_convert_details(client):

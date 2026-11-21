@@ -7,16 +7,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from formgen import pipeline
-from formgen.auth import require_jwt
-from formgen.config import Settings, get_settings
-from formgen.lint import as_dicts, lint
-from formgen.llm import LLMError, llm_status, warn_if_dev_provider
-from formgen.spec import FormSpec
-from formgen.upload import UploadError
+from autoformularz import pipeline
+from autoformularz.auth import require_jwt
+from autoformularz.config import Settings, get_settings
+from autoformularz.lint import as_dicts, lint
+from autoformularz.llm import LLMError, llm_status, warn_if_dev_provider
+from autoformularz.spec import FormSpec
+from autoformularz.upload import UploadError
 
 app = FastAPI(
-    title="formgen",
+    title="autoformularz",
     version="0.1.0",
     description="Zamienia plik formularza urzędowego (PDF, DOC, DOCX, ODS, XLSX, JPG, PNG) "
     "na konfigurację formularza e-usługi w formacie JSON.",
@@ -26,7 +26,7 @@ app.add_middleware(
     allow_origins=[o.strip() for o in get_settings().cors_origins.split(",") if o.strip()],
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
-    expose_headers=["X-Formgen-Errors", "X-Formgen-Warnings"],
+    expose_headers=["X-Autoformularz-Errors", "X-Autoformularz-Warnings"],
 )
 
 warn_if_dev_provider(get_settings())
@@ -47,7 +47,10 @@ async def llm_error(_: Request, e: LLMError) -> JSONResponse:
 
 def respond(result: pipeline.Result, details: bool) -> JSONResponse:
     errors = sum(i.level == "error" for i in result.issues)
-    headers = {"X-Formgen-Errors": str(errors), "X-Formgen-Warnings": str(len(result.issues) - errors)}
+    headers = {
+        "X-Autoformularz-Errors": str(errors),
+        "X-Autoformularz-Warnings": str(len(result.issues) - errors),
+    }
     if not details:
         return JSONResponse(result.form, headers=headers)
     body: dict[str, Any] = {
@@ -97,4 +100,4 @@ def spec_schema() -> dict:
 def run() -> None:
     import uvicorn
 
-    uvicorn.run("formgen.main:app", host="0.0.0.0", port=8000)
+    uvicorn.run("autoformularz.main:app", host="0.0.0.0", port=8000)

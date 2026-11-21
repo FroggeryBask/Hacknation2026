@@ -2,9 +2,9 @@ import re
 
 from conftest import reference
 
-from formgen.compiler import compile_form, slug
-from formgen.lint import lint
-from formgen.spec import Condition, FieldSpec, FormSpec, Kind, PageSpec, SectionSpec
+from autoformularz.compiler import compile_form, slug
+from autoformularz.lint import lint
+from autoformularz.spec import Condition, FieldSpec, FormSpec, Kind, PageSpec, SectionSpec
 
 
 def sections(form: dict, tab: str) -> dict[str, dict]:

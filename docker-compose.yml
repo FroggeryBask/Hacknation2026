@@ -1,5 +1,5 @@
 # Whole solution offline: local model (Ollama) + API + frontend.
-#   cp .env.example .env   # set FORMGEN_JWT_SECRET
+#   cp .env.example .env   # set AUTOFORMULARZ_JWT_SECRET
 #   docker compose up --build
 # GPU (NVIDIA): uncomment the `deploy` block under `ollama`.
 
@@ -18,7 +18,7 @@ services:
     image: ollama/ollama:0.40.17
     environment:
       OLLAMA_HOST: http://ollama:11434
-    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${FORMGEN_LLM_MODEL:-qwen3-vl:8b}"]
+    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${AUTOFORMULARZ_LLM_MODEL:-qwen3-vl:8b}"]
     depends_on:
       - ollama
     restart: "no"
@@ -27,9 +27,9 @@ services:
     build: ./api
     env_file: .env
     environment:
-      FORMGEN_OLLAMA_URL: http://ollama:11434
+      AUTOFORMULARZ_OLLAMA_URL: http://ollama:11434
       # Delivered solution always uses the local model; Eden AI is for local development only.
-      FORMGEN_LLM_PROVIDER: ollama
+      AUTOFORMULARZ_LLM_PROVIDER: ollama
       EDENAI_API_KEY: ""
     ports:
       - "8000:8000"
@@ -42,7 +42,7 @@ services:
       dockerfile: Dockerfile.web
     env_file: .env
     environment:
-      FORMGEN_API_URL: http://api:8000
+      AUTOFORMULARZ_API_URL: http://api:8000
       EDENAI_API_KEY: ""
     ports:
       - "3000:3000"

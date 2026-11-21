@@ -1,4 +1,4 @@
-"""Runtime configuration. Every value comes from environment variables (prefix FORMGEN_),
+"""Runtime configuration. Every value comes from environment variables (prefix AUTOFORMULARZ_),
 so secrets are only supplied when the container starts (task requirement)."""
 
 from functools import lru_cache
@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     # Later env files win: api/.env overrides the repo-root .env.local (when run from api/).
     # Real environment variables override both.
     model_config = SettingsConfigDict(
-        env_prefix="FORMGEN_",
+        env_prefix="AUTOFORMULARZ_",
         env_file=("../.env.local", ".env"),
         extra="ignore",
         populate_by_name=True,

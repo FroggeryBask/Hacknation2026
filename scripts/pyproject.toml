@@ -1,7 +1,7 @@
 [project]
 name = "hackaton-scripts"
 version = "0.1.0"
-description = "Repo checks (lint, tests, smoke) for the formgen project"
+description = "Repo checks (lint, tests, smoke) for the autoformularz project"
 requires-python = ">=3.12"
 dependencies = [
     "httpx>=0.27",

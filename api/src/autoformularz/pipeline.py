@@ -3,13 +3,13 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from formgen.compiler import compile_form
-from formgen.config import Settings
-from formgen.extract import extract
-from formgen.lint import Issue, lint
-from formgen.llm import generate_spec
-from formgen.spec import FormSpec
-from formgen.upload import validate_upload
+from autoformularz.compiler import compile_form
+from autoformularz.config import Settings
+from autoformularz.extract import extract
+from autoformularz.lint import Issue, lint
+from autoformularz.llm import generate_spec
+from autoformularz.spec import FormSpec
+from autoformularz.upload import validate_upload
 
 
 @dataclass

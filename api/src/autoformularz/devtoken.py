@@ -1,17 +1,17 @@
-"""Prints a JWT signed with FORMGEN_JWT_SECRET, for local testing: `uv run formgen-token [hours]`."""
+"""Prints a JWT signed with AUTOFORMULARZ_JWT_SECRET, for local testing: `uv run autoformularz-token [hours]`."""
 
 import sys
 import time
 
 import jwt
 
-from formgen.config import get_settings
+from autoformularz.config import get_settings
 
 
 def main() -> None:
     settings = get_settings()
     if settings.jwt_secret is None:
-        sys.exit("Ustaw FORMGEN_JWT_SECRET.")
+        sys.exit("Ustaw AUTOFORMULARZ_JWT_SECRET.")
     hours = float(sys.argv[1]) if len(sys.argv) > 1 else 8
     claims = {"sub": "dev", "exp": int(time.time() + hours * 3600)}
     if settings.jwt_audience:

@@ -13,7 +13,7 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any
 
-from formgen.spec import Condition, FieldSpec, FormSpec, Kind, SectionSpec
+from autoformularz.spec import Condition, FieldSpec, FormSpec, Kind, SectionSpec
 
 Json = dict[str, Any]
 
@@ -112,7 +112,7 @@ class Builder:
     warnings: list[str] = field(default_factory=list)
 
     def id(self, path: str) -> str:
-        return str(uuid.uuid5(uuid.NAMESPACE_URL, f"formgen:{self.title}:{path}"))
+        return str(uuid.uuid5(uuid.NAMESPACE_URL, f"autoformularz:{self.title}:{path}"))
 
     def tech(self, base: str) -> str:
         name, n = base, 2

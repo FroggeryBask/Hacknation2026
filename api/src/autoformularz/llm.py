@@ -2,7 +2,7 @@
 
 Default: local Ollama with the FormSpec JSON Schema as `format`, so decoding is constrained to valid JSON of
 the right shape (task rule: no models available only through external APIs). For local development only,
-FORMGEN_LLM_PROVIDER=eden sends the same prompt to an open-weight model on Eden AI (OpenAI Chat Completions);
+AUTOFORMULARZ_LLM_PROVIDER=eden sends the same prompt to an open-weight model on Eden AI (OpenAI Chat Completions);
 docker-compose forces Ollama for the delivered solution."""
 
 import base64
@@ -13,9 +13,9 @@ import re
 import httpx
 from pydantic import ValidationError
 
-from formgen.config import Settings
-from formgen.extract import Extracted
-from formgen.spec import FormSpec
+from autoformularz.config import Settings
+from autoformularz.extract import Extracted
+from autoformularz.spec import FormSpec
 
 SYSTEM_PROMPT = """\
 Jesteś analitykiem, który zamienia papierowe formularze urzędowe na opis formularza elektronicznego (e-usługi).
@@ -52,7 +52,7 @@ działać w imieniu innej osoby (domyślnie tak dla osób fizycznych).
 """
 
 
-log = logging.getLogger("formgen.llm")
+log = logging.getLogger("autoformularz.llm")
 
 DEV_WARNING = "LLM przez Eden AI: tryb deweloperski, nie do oddania (oddawane rozwiązanie używa Ollamy)."
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
@@ -125,7 +125,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
     if not key or not settings.eden_model:
         raise LLMError(
             "LLM_MISCONFIGURED",
-            "Dostawca eden wymaga zmiennych EDENAI_API_KEY i FORMGEN_EDEN_MODEL.",
+            "Dostawca eden wymaga zmiennych EDENAI_API_KEY i AUTOFORMULARZ_EDEN_MODEL.",
             500,
         )
     url = f"{settings.eden_base_url.rstrip('/')}/chat/completions"

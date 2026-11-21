@@ -3,8 +3,8 @@ import copy
 import pytest
 from conftest import reference
 
-from formgen.compiler import compile_form
-from formgen.lint import lint
+from autoformularz.compiler import compile_form
+from autoformularz.lint import lint
 
 
 def codes(form: dict, level: str = "error") -> set[str]:

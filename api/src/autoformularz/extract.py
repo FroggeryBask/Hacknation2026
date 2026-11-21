@@ -16,7 +16,7 @@ from docx import Document
 from openpyxl import load_workbook
 from PIL import Image
 
-from formgen.upload import Kind, UploadError
+from autoformularz.upload import Kind, UploadError
 
 MAX_IMAGE_SIDE = 1600
 SCANNED_CHARS_PER_PAGE = 80

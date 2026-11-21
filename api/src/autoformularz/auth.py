@@ -1,4 +1,4 @@
-"""JWT bearer authentication (HS256 shared secret from FORMGEN_JWT_SECRET)."""
+"""JWT bearer authentication (HS256 shared secret from AUTOFORMULARZ_JWT_SECRET)."""
 
 from typing import Annotated
 
@@ -6,7 +6,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from formgen.config import Settings, get_settings
+from autoformularz.config import Settings, get_settings
 
 bearer = HTTPBearer(auto_error=False)
 
@@ -18,7 +18,9 @@ def require_jwt(
     if not settings.auth_enabled:
         return None
     if settings.jwt_secret is None:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "FORMGEN_JWT_SECRET nie jest ustawiony.")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "AUTOFORMULARZ_JWT_SECRET nie jest ustawiony."
+        )
     if creds is None:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Brak tokenu JWT.", {"WWW-Authenticate": "Bearer"})
     try:
