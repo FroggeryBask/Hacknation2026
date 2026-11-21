@@ -159,6 +159,6 @@ Struktura repozytorium:
 - `api/`: rozwiązanie (Python 3.14, FastAPI),
 - `src/`: frontend (Next.js) z design systemem formularzy,
 - `materialy/`: materiały zadania,
-- `docs/`: decyzje i research.
+- `docs/`: decyzje i research; wyjaśnienia niespójności w materiałach: [docs/wyjasnienia-materialow.md](docs/wyjasnienia-materialow.md).
 
 Zasady zespołu: brak atrybucji AI w commitach (hook to blokuje), nigdy nie commituj plików `.env`, a wszystkie zależności muszą mieć licencję open source bez copyleft (szczegóły w [CLAUDE.md](CLAUDE.md)).
