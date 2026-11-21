@@ -148,7 +148,6 @@ def _report(usage: Usage) -> None:
             log.exception("Usage hook failed")
 
 
-DEV_WARNING = "LLM przez Eden AI: tryb deweloperski, nie do oddania (oddawane rozwiązanie używa Ollamy)."
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
 
 
