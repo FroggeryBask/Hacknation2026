@@ -1,0 +1,87 @@
+{
+  "source": "materialy/8. Deklaracja o wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi - formularze do cyfryzacji/Deklaracja o wysokości opłaty.docx",
+  "sourceFormat": "docx",
+  "model": "zapisany FormSpec",
+  "errors": 0,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Kod pocztowy"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Ulica"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer budynku"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer lokalu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Numer telefonu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
+    }
+  ],
+  "notes": [
+    "Z sekcji „Dane identyfikacyjne składającego deklarację” pominięto pola z części standardowej: Nazwisko, imię / Nazwa pełna, PESEL, NIP/REGON.",
+    "Z sekcji „Adres zamieszkania / siedziby” pominięto pola z części standardowej: Kraj, Województwo, Gmina, Miejscowość, Ulica, Numer nieruchomości/domu, Numer lokalu, Kod pocztowy.",
+    "Z sekcji „Kontakt” pominięto pola z części standardowej: Nr tel./fax, Adres e-mail.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (38 zł): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (69 zł): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (81 zł): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (101 zł): informacja, nie pole.",
+    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (28 zł): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (59 zł): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (71 zł): informacja, nie pole.",
+    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (91 zł): informacja, nie pole.",
+    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole.",
+    "„Adres do korespondencji”: warunek na nieistniejącym polu „Adres do korespondencji” usunięty, pola nieobowiązkowe."
+  ],
+  "coverage": {
+    "blocks": 318,
+    "referenced": 313,
+    "unreferenced": [
+      "b1",
+      "b2",
+      "b3",
+      "b29",
+      "b318"
+    ],
+    "candidates": 15,
+    "candidatesWithoutField": [
+      "b22",
+      "b212",
+      "b227",
+      "b261",
+      "b282",
+      "b297"
+    ],
+    "unknownRefs": []
+  },
+  "edenUsage": {
+    "calls": 0,
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "costUsd": 0
+  }
+}
