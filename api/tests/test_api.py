@@ -122,3 +122,19 @@ def test_source_text_copy_is_off_by_default(nadplata_spec):
     finish = [q["field"]["techName"] for q in result.form["tabs"][-1]["questions"]]
     assert "podstawa_prawna" not in finish and "pouczenie" not in finish
     assert result.document is not None  # ?details=true still shows the source blocks
+
+
+def test_schema_endpoint_matches_what_compile_accepts(client):
+    """UI contract: the editor validates against this schema and sends the spec to /compile. The stricter
+    model schema (max 40 roles, no FIELD_LABEL/HEADING) would reject saved specs such as wyniki/02, 07, 09."""
+    import json
+    from pathlib import Path
+
+    from autoformularz.spec import FormSpec, model_schema
+
+    schema = client.get("/api/v1/spec/schema").json()
+    assert schema == FormSpec.model_json_schema() and schema != model_schema()
+    for path in sorted((Path(__file__).resolve().parents[2] / "wyniki").glob("*.spec.json")):
+        spec = json.loads(path.read_text(encoding="utf-8"))
+        r = client.post("/api/v1/forms/compile", headers=auth(), json=spec)
+        assert r.status_code == 200, path.name
