@@ -7,8 +7,12 @@ REST API that turns a paper form file (PDF, DOC, DOCX, ODS, XLSX, JPG, PNG) into
 ## Task materials (MANDATORY)
 The hackathon task, forms and reference materials live in `materialy/` (repo root). This is the source of truth: read the relevant files there before planning or building anything, and stick to them strictly (fields, wording, requirements). Don't invent requirements that aren't in `materialy/`; if something is unclear or missing, ask instead of guessing. Full task text: `materialy/COI - Pełna treść zadania konkursowego.pdf`. Research and open questions: `docs/research-cyfryzacja-formularzy.md`.
 
+## AI access (MANDATORY)
+Organizers provide LLM/OCR via Eden AI (OpenAI-compatible `https://api.edenai.run/v3/chat/completions`, plus upload and OCR endpoints). Full mail with endpoints, model naming and examples: `materialy/Dostęp do AI (Eden AI) - mail od organizatorów.md`. Key: `EDENAI_API_KEY` (server-only secret). Use it only for the "Cyfryzacja formularzy" task. Eden AI is the ONLY external AI provider: no Anthropic API (`ANTHROPIC_API_KEY`), no other direct provider keys or SDKs.
+The task also bans LLMs available only through an API, so through Eden use ONLY open-weight models that can run locally too (e.g. `google/gemma-*`, `mistral/mistral-small-*`, Qwen, Llama), never closed ones (GPT, Gemini, Claude). The same model must work via local Ollama for the final Docker setup.
+
 ## Hard constraints from the task (never break)
-- No external APIs, MCP or SaaS at runtime, and no LLM reachable only through an API (Claude/OpenAI/etc. only for writing code). The model runs locally (Ollama).
+- No external APIs, MCP or SaaS in the delivered solution, and no LLM reachable only through an API. The deliverable runs the model locally (Ollama); Eden AI (open-weight models only) is for development, testing and speed during the hackathon.
 - Dependencies: open source, NOT copyleft (no GPL/AGPL; e.g. PyMuPDF is banned). Note the license next to each new dependency in `api/pyproject.toml`.
 - Uploaded files only in memory or a temp dir. No database, no file storage.
 - Docker: official base images, pinned tags (never `latest`), non-root user, secrets only via env at runtime.
@@ -26,7 +30,7 @@ The hackathon task, forms and reference materials live in `materialy/` (repo roo
 ## Rules
 - Output format: match the reference JSON files in `materialy/1.*` and `materialy/5.*` (same keys, techNames, query shape). Tests in `api/tests/test_compiler.py` compare against them; keep them green.
 - Every compiler change: add or update a test. Lint must report zero errors on our output.
-- Secrets (`FORMGEN_JWT_SECRET`) are runtime env only: never in code, images, `NEXT_PUBLIC_*` or client components.
+- Secrets (`FORMGEN_JWT_SECRET`, `EDENAI_API_KEY`) are runtime env only: never in code, images, `NEXT_PUBLIC_*` or client components.
 - Env vars: add to `.env.example` and `api/src/formgen/config.py` (prefix `FORMGEN_`).
 - Forms UI: build only from `src/components/form` (fields, sections, `FormShell`) and the tokens in `globals.css`; follow docs/design-system.md. No ad-hoc colors.
 - Animations: `motion/react`. Icons: `lucide-react`.
