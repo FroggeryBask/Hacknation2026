@@ -16,7 +16,7 @@ import { type ReactNode, useEffect, useRef, useState } from "react";
 import { AiIcon } from "@/components/form/ai-icon";
 import { CoiFormView } from "@/components/form/coi-form";
 import { FieldError, InfoSection } from "@/components/form/fields";
-import { FormSection, type Step, Stepper } from "@/components/form/layout";
+import { FormSection, Stepper } from "@/components/form/layout";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,13 +36,10 @@ const FORMATS = ["pdf", "doc", "docx", "ods", "xlsx", "jpg", "jpeg", "png"];
 // Formats a browser can show in a tab; the others would only download.
 const PREVIEWABLE = ["pdf", "jpg", "jpeg", "png"];
 
-const STEPS: Step[] = [
+const STEPS = [
   "Dodaj plik formularza",
   "Tworzymy formularz",
-  {
-    label: "Sprawdź formularz utworzony przez AI",
-    icon: <AiIcon className="size-4" />,
-  },
+  "Sprawdź formularz utworzony przez AI",
 ];
 
 type Issue = {
@@ -248,10 +245,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
   const result = state.step === "done" ? state.result : undefined;
   const errors = result?.issues.filter((i) => i.level === "error") ?? [];
   const warnings = result?.issues.filter((i) => i.level === "warning") ?? [];
-  const stepLabel = (i: number) => {
-    const s = STEPS[i];
-    return `Krok ${i + 1}: ${typeof s === "string" ? s : s.label}`;
-  };
+  const stepLabel = (i: number) => `Krok ${i + 1}: ${STEPS[i]}`;
 
   return (
     <MotionConfig reducedMotion="user">

@@ -117,28 +117,22 @@ export function RepeatingSection({
 /* Stepper (page navigation)                                           */
 /* ------------------------------------------------------------------ */
 
-export type Step = string | { label: string; icon: ReactNode };
-
 export function Stepper({
   steps,
   current,
   label = "Kroki formularza",
 }: {
-  steps: Step[];
+  steps: string[];
   current: number;
   label?: string;
 }) {
-  const items = steps.map((s) =>
-    typeof s === "string" ? { label: s, icon: undefined } : s,
-  );
   return (
     <nav aria-label={label}>
-      <p className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">
-        Krok {current + 1} z {items.length}: {items[current].label}
-        {items[current].icon}
+      <p className="mb-2 text-sm text-muted-foreground sm:hidden">
+        Krok {current + 1} z {steps.length}: {steps[current]}
       </p>
       <ol className="flex gap-1.5 sm:gap-2">
-        {items.map(({ label: s, icon }, i) => {
+        {steps.map((s, i) => {
           const done = i < current;
           const active = i === current;
           return (
@@ -171,7 +165,6 @@ export function Stepper({
                 )}
                 {/* Wrap, don't truncate: cut-off step names hide information. */}
                 <span className="min-w-0 break-words">{s}</span>
-                {icon}
                 {done && <span className="sr-only">(ukończony)</span>}
               </span>
             </li>
