@@ -2,6 +2,9 @@
 
 Next.js 16 (App Router, `src/`) · TypeScript · Supabase (Postgres + Auth) · Drizzle ORM · shadcn/ui + Tailwind · lucide-react · Motion · Python (uv) for check scripts · Vercel.
 
+## Task materials (MANDATORY)
+The hackathon task, forms and reference materials live in `materialy/` (repo root). This is the source of truth: read the relevant files there before planning or building anything, and stick to them strictly (fields, wording, requirements). Don't invent requirements that aren't in `materialy/`; if something is unclear or missing, ask instead of guessing.
+
 ## Commands
 - `npm run dev`: start the dev server
 - `npm run check`: everything (biome, tsc, ruff, Supabase RLS audit). Add `-- --build` for a full build. Must pass before commit.
