@@ -1,0 +1,63 @@
+{
+  "source": "materialy/6. Wniosek o wydanie zezwolenia na zajęcie pasa drogowego w celu prowadzenia robót - formularze do cyfryzacji/Wniosek o wydanie zezwolenia na zajęcie pasa drogowego.docx",
+  "sourceFormat": "docx",
+  "model": "zapisany FormSpec",
+  "errors": 0,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Kod pocztowy"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Ulica"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer budynku"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer lokalu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Numer telefonu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
+    }
+  ],
+  "notes": [
+    "Sekcja „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
+  ],
+  "coverage": {
+    "blocks": 49,
+    "referenced": 48,
+    "unreferenced": [
+      "b20"
+    ],
+    "candidates": 20,
+    "candidatesWithoutField": [],
+    "unknownRefs": []
+  },
+  "edenUsage": {
+    "calls": 0,
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "costUsd": 0
+  }
+}

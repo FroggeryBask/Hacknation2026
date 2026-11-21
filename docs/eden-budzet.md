@@ -13,3 +13,4 @@
 | 2026-11-21 | Ewelina | wyniki formularz 2: zapętlenie modelu, Eden przerwał po 400 s (504), koszt nieznany (do ~0,01) | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | ~0.0100 |
 | 2026-11-21 | Ewelina | diagnoza zapętlenia (`max_tokens=6000`) | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0042 |
 | 2026-11-21 | Ewelina | wyniki formularz 2 po poprawce zapętlenia | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0022 |
+| 2026-11-21 | Ewelina | wyniki formularze 3,4,6,7 (ok) oraz 8,9 (ucięte na limicie 8000 tokenów) | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 6 | 0.0199 |

@@ -1,0 +1,66 @@
+{
+  "source": "materialy/2. Wniosek o zwrot opłaty skarbowej - formularze do cyfryzacji/Wniosek o zwrot opłaty skarbowej.docx",
+  "sourceFormat": "docx",
+  "model": "zapisany FormSpec",
+  "errors": 0,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Kod pocztowy"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Ulica"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer budynku"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer lokalu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Numer telefonu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
+    }
+  ],
+  "notes": [
+    "Strona „Dane wnioskodawcy” jest w części standardowej formularza (pominięta).",
+    "Formularz pyta o NIP wnioskodawcy: wnioskodawcą może być firma lub instytucja."
+  ],
+  "coverage": {
+    "blocks": 63,
+    "referenced": 60,
+    "unreferenced": [
+      "b1",
+      "b2",
+      "b3"
+    ],
+    "candidates": 0,
+    "candidatesWithoutField": [],
+    "unknownRefs": []
+  },
+  "edenUsage": {
+    "calls": 0,
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "costUsd": 0
+  }
+}
