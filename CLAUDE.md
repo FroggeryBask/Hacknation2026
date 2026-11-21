@@ -5,6 +5,9 @@ Next.js 16 (App Router, `src/`) · TypeScript · Supabase (Postgres + Auth) · D
 ## Task materials (MANDATORY)
 The hackathon task, forms and reference materials live in `materialy/` (repo root). This is the source of truth: read the relevant files there before planning or building anything, and stick to them strictly (fields, wording, requirements). Don't invent requirements that aren't in `materialy/`; if something is unclear or missing, ask instead of guessing.
 
+## AI access (MANDATORY)
+Organizers provide LLM/OCR via Eden AI (OpenAI-compatible `https://api.edenai.run/v3/chat/completions`, plus upload and OCR endpoints). Full mail with endpoints, model naming and examples: `materialy/Dostęp do AI (Eden AI) - mail od organizatorów.md`. Key: `EDENAI_API_KEY` (server-only secret). Use it only for the "Cyfryzacja formularzy" task. This is the ONLY allowed AI provider: no Anthropic API (`ANTHROPIC_API_KEY`), no other direct provider keys or SDKs.
+
 ## Commands
 - `npm run dev`: start the dev server
 - `npm run check`: everything (biome, tsc, ruff, Supabase RLS audit). Add `-- --build` for a full build. Must pass before commit.
@@ -15,7 +18,7 @@ The hackathon task, forms and reference materials live in `materialy/` (repo roo
 ## Rules
 - Data access: user-facing reads/writes go through the Supabase client (`src/lib/supabase/{server,client}.ts`) so RLS applies. `src/db` (Drizzle) connects as `postgres` and BYPASSES RLS: server-only, check permissions yourself.
 - Every new table: RLS policies in `src/db/schema.ts` (see `notes` example), one per operation, `to authenticated`. Never authorize from `user_metadata`.
-- Secrets (`DATABASE_URL`, `ANTHROPIC_API_KEY`) are server-only: never `NEXT_PUBLIC_`, never imported in `"use client"` files.
+- Secrets (`DATABASE_URL`, `EDENAI_API_KEY`) are server-only: never `NEXT_PUBLIC_`, never imported in `"use client"` files.
 - Env vars: add to `.env.example` and `src/lib/env.ts`.
 - Forms UI: build only from `src/components/form` (fields, sections, `FormShell`) and the tokens in `globals.css`; follow docs/design-system.md. No ad-hoc colors.
 - Animations: `motion/react`. Icons: `lucide-react`.

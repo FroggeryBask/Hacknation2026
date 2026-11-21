@@ -12,3 +12,4 @@
 - [git] No AI attribution in commits/PRs (team rule): disabled in .claude/settings.json, blocked by lefthook commit-msg hook
 - [ui] Design system for forms in `src/components/form` (fields 1:1 with JSON `field.type`), gov.pl-like tokens + Lato; see docs/design-system.md
 - [ui] Biome linter off for `src/components/ui/**` (generated shadcn code, kept as upstream); still formatted
+- [ai] Eden AI (organizer-provided) is the only AI provider; Anthropic API is not allowed by the task rules
