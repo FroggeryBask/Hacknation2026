@@ -53,9 +53,9 @@ działać w imieniu innej osoby (domyślnie tak dla osób fizycznych).
 Bloki: treść formularza dostajesz jako bloki z identyfikatorami, np. `[b12] Imię i nazwisko: ____`.
 - Odwołuj się do bloków po ID, nie przepisuj ich treści.
 - W polu i sekcji wpisz w `blocks` ID bloków, z których pochodzą (etykieta, opcje).
-- W `block_roles` podaj rolę każdego pozostałego bloku: HEADING (tytuł), INSTRUCTION (pouczenie),
-  LEGAL_BASIS (podstawa prawna), STATEMENT (oświadczenie), GDPR (RODO), SKIP (tylko na papierze: podpis,
-  pieczątka, „wypełnia urząd”, miejscowość i data). Dla pól i opcji użyj FIELD_LABEL i OPTION.
+- W `block_roles` podaj rolę TYLKO dla bloków z tekstem do przeniesienia lub pominięcia: INSTRUCTION
+  (pouczenie), LEGAL_BASIS (podstawa prawna), STATEMENT (oświadczenie), GDPR (RODO), SKIP (tylko na papierze:
+  podpis, pieczątka, „wypełnia urząd”, miejscowość i data). Nie podawaj ról dla etykiet pól, opcji ani tytułów.
 - Używaj wyłącznie ID z listy bloków.
 """
 

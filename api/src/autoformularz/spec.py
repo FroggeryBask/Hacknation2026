@@ -163,8 +163,9 @@ class FormSpec(BaseModel):
     signed: bool = True
     block_roles: list[BlockRole] = Field(
         default_factory=list,
-        description="Role of every source block that is not a field label or option: headings, "
-        "instructions, legal basis, statements, GDPR, and SKIP for paper-only text.",
+        # Only text the compiler copies or drops: listing every block overflows the context on big forms.
+        description="Only blocks with instructions, legal basis, statements, GDPR text, and SKIP for "
+        "paper-only text. Not for field labels, options or headings (blocks without a role are allowed).",
     )
 
     def referenced_blocks(self) -> set[str]:
