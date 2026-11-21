@@ -51,8 +51,11 @@ class Document:
         }
 
 
+# Box glyphs used as tick fields: ☐ (DOCX Wingdings mapped in extract.py), □ (form 9), ❑ (form 7 PDF).
+_BOX = "☐□❑❒▢◻⬜"
+
 _CANDIDATES: list[tuple[CandidateKind, re.Pattern[str]]] = [
-    ("checkbox", re.compile(r"[☐□]\s*[^☐□|]*")),
+    ("checkbox", re.compile(rf"[{_BOX}]\s*[^{_BOX}|]*")),
     ("blank", re.compile(r"[^_|]{0,60}_{3,}")),
     ("dots", re.compile(r"[^.…|]{0,60}(?:\.{4,}|…{2,})")),
     ("colon", re.compile(r"[^:|]{2,60}:\s*(?=\||$)")),

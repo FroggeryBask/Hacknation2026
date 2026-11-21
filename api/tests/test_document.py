@@ -25,6 +25,7 @@ def test_candidates():
     assert kinds("Imię i nazwisko: ________") == ["blank"]
     assert kinds("Adres .............") == ["dots"]
     assert kinds("☐ tak ☐ nie") == ["checkbox", "checkbox"]
+    assert kinds("Płeć: ❑ pies ❑ suka") == ["checkbox", "checkbox"]  # form 7 PDF
     assert kinds("| Numer PESEL: | |") == ["colon"]
     assert kinds("Wniosek o wydanie zaświadczenia") == []
 
