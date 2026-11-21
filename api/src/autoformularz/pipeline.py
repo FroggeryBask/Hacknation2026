@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from autoformularz import llm as llm_module
+from autoformularz import presort as presort_step
 from autoformularz.check import (
     Coverage,
     coverage,
@@ -46,11 +48,22 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     )
 
 
+def ask_model(document: Document, settings: Settings, llm=None) -> FormSpec:
+    """The model's FormSpec. With presort on, blocks the code recognised (GDPR clause, paper-only lines,
+    the template's applicant data) are left out of the prompt and their roles are added afterwards.
+    `llm` defaults to `llm_module.generate_spec`, looked up at call time (tests replace it)."""
+    call = llm or llm_module.generate_spec
+    if not settings.presort:
+        return call(document, settings)
+    pre = presort_step.presort(document)
+    return presort_step.apply(call(pre.model_doc, settings), pre)
+
+
 def from_file(name: str | None, data: bytes, settings: Settings, llm=generate_spec) -> Result:
     kind = validate_upload(name, data, int(settings.max_upload_mb * 1_048_576))
     ocr = ocr_from(settings.ocr_bin, settings.ocr_lang, settings.tessdata_dir)
     document = extract(kind, data, soffice=settings.soffice_bin, max_pages=settings.max_pdf_pages, ocr=ocr)
-    spec = llm(document, settings)
+    spec = ask_model(document, settings, llm)
     result = from_spec(spec, document if settings.copy_source_text else None)
     result.notes = document.notes + result.notes
     result.source_format = kind.value

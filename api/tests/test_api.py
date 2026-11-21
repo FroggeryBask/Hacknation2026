@@ -92,10 +92,10 @@ def test_pipeline_passes_document_to_compiler(nadplata_spec):
     path = material("5. */*nadpłaty podatku.docx")
     seen = {}
 
-    def fake_llm(doc, _):
+    def fake_llm(doc, _):  # the first block the model sees (presort already took the paper-only ones)
         seen["first"] = doc.blocks[0]
         return nadplata_spec.model_copy(
-            update={"block_roles": [BlockRole(block="b1", role=Role.LEGAL_BASIS)]}
+            update={"block_roles": [BlockRole(block=doc.blocks[0].id, role=Role.LEGAL_BASIS)]}
         )
 
     settings = Settings(_env_file=None, copy_source_text=True)

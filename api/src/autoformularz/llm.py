@@ -109,6 +109,8 @@ def build_user_prompt(ex: Document) -> str:
         parts.append(
             "Bloki formularza (kolejność jak w dokumencie, wiersze tabel jako | komórka |):\n\n" + listing
         )
+    if ex.hint:  # blocks the code already handled (presort): the model does not look for them
+        parts.append(ex.hint)
     if ex.images:
         parts.append(f"Formularz jest też na załączonych obrazach ({len(ex.images)}).")
     return "\n\n".join(parts)

@@ -35,6 +35,7 @@ class Document:
     candidates: list[FieldCandidate] = field(default_factory=list)
     images: list[bytes] = field(default_factory=list)  # PNG bytes, already downscaled (scans)
     notes: list[str] = field(default_factory=list)
+    hint: str = ""  # one line for the model about blocks the code already handled (presort), not in the API
 
     @property
     def text(self) -> str:

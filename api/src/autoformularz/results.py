@@ -72,7 +72,7 @@ def run(n: int, settings: Settings, *, compile_only: bool, force: bool) -> str:
     else:
         start = len(llm.EDEN_USAGE)
         try:
-            spec = llm.generate_spec(document, settings)
+            spec = pipeline.ask_model(document, settings)
         except llm.LLMError as e:
             if e.partial:  # paid for: keep it to see where the model got stuck (not committed)
                 (OUT / f"{n:02d}.truncated.txt").write_text(e.partial, encoding="utf-8", newline="\n")

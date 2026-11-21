@@ -37,7 +37,8 @@ def coverage(spec: FormSpec, doc: Document) -> Coverage:
     known = set(ids)
     refs = spec.referenced_blocks()
     in_fields = {r for p in spec.pages for s in p.sections for f in s.fields for r in f.blocks}
-    skipped = {block for block, role in spec.roles().items() if role is Role.SKIP}
+    # SKIP: paper-only. FIELD_LABEL: the template's applicant data (presort), filled in the standard part.
+    skipped = {block for block, role in spec.roles().items() if role in (Role.SKIP, Role.FIELD_LABEL)}
     handled = in_fields | skipped
     without_field = list(dict.fromkeys(c.block for c in doc.candidates if c.block not in handled))
     return Coverage(
