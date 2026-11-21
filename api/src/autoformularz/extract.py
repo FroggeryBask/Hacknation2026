@@ -3,8 +3,8 @@
 Text formats keep reading order (paragraphs and table rows), so the model sees the paper layout.
 Scans (JPG/PNG, PDF without a text layer) are cut into pages, read with OCR into the same blocks
 (with page numbers) and also passed as pictures to the vision model (OCR does not see empty tick boxes).
-Legacy .doc/.ods are converted with LibreOffice (headless, separate process). Everything happens in
-memory or a temp dir.
+.ods is read directly from its XML; only legacy binary .doc is converted with LibreOffice (headless,
+separate process). Everything happens in memory or a temp dir.
 
 For now one block = one line of the text below (a paragraph or a whole table row); finer blocks
 (cells, options) come later without changing the Document shape."""
@@ -14,9 +14,11 @@ import re
 import shutil
 import subprocess
 import tempfile
+import zipfile
 from collections.abc import Iterator
 from itertools import pairwise
 from pathlib import Path
+from xml.etree import ElementTree
 
 import docx
 from openpyxl import load_workbook
@@ -49,7 +51,7 @@ def extract(
         case Kind.XLSX:
             return build(_lines(xlsx_text(data)))
         case Kind.ODS:
-            return build(_lines(xlsx_text(convert(data, "ods", "xlsx", soffice))))
+            return build(_lines(ods_text(data)))
         case Kind.PDF:
             return pdf(data, max_pages, ocr)
         case Kind.JPEG | Kind.PNG:
@@ -204,6 +206,56 @@ def _dedupe(lines: list[str]) -> list[str]:
         if not out or out[-1] != line:
             out.append(line)
     return out
+
+
+ODS_TABLE = "{urn:oasis:names:tc:opendocument:xmlns:table:1.0}"
+ODS_TEXT = "{urn:oasis:names:tc:opendocument:xmlns:text:1.0}"
+ODS_OFFICE = "{urn:oasis:names:tc:opendocument:xmlns:office:1.0}"
+
+
+def ods_text(data: bytes) -> str:
+    """Reads an OpenDocument spreadsheet directly from its XML (a ZIP like .xlsx), in the same shape as
+    `xlsx_text`: no LibreOffice needed. Covered cells (merged areas) are empty; repeated empty
+    rows/columns (an ODS sheet declares ~1M of them) are never expanded."""
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            root = ElementTree.fromstring(z.read("content.xml"))
+    except (zipfile.BadZipFile, KeyError, ElementTree.ParseError) as e:
+        raise UploadError("CONVERSION_FAILED", "Nie udało się odczytać pliku .ods.", 422) from e
+    tables = root.findall(f"{ODS_OFFICE}body/{ODS_OFFICE}spreadsheet/{ODS_TABLE}table")
+    lines: list[str] = []
+    for table in tables:
+        if len(tables) > 1:
+            lines.append(f"## Arkusz: {table.get(f'{ODS_TABLE}name', '')}")
+        for row in table.iter(f"{ODS_TABLE}table-row"):
+            cells = [t for cell in row if cell.tag == f"{ODS_TABLE}table-cell" if (t := _ods_cell(cell))]
+            if cells:
+                lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
+def _ods_cell(cell) -> str:
+    """Cell text as displayed: paragraphs joined with spaces, <text:s c="n"/> = n spaces, whitespace
+    collapsed (like DOCX and XLSX)."""
+    parts: list[str] = []
+
+    def walk(el) -> None:
+        if el.text:
+            parts.append(el.text)
+        for child in el:
+            if child.tag == f"{ODS_TEXT}s":
+                parts.append(" " * int(child.get(f"{ODS_TEXT}c", "1")))
+            elif child.tag in (f"{ODS_TEXT}tab", f"{ODS_TEXT}line-break"):
+                parts.append(" ")
+            else:
+                walk(child)
+            if child.tail:
+                parts.append(child.tail)
+
+    for p in cell.iter(f"{ODS_TEXT}p"):
+        walk(p)
+        parts.append(" ")
+    return " ".join("".join(parts).split())
 
 
 def xlsx_text(data: bytes) -> str:

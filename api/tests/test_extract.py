@@ -1,10 +1,20 @@
 import io
+import zipfile
 
 import pytest
 from conftest import material
 from PIL import Image, ImageDraw
 
-from autoformularz.extract import MAX_IMAGE_SIDE, docx_text, extract, split_pages, xlsx_text
+from autoformularz.extract import (
+    MAX_IMAGE_SIDE,
+    convert,
+    docx_text,
+    extract,
+    find_soffice,
+    ods_text,
+    split_pages,
+    xlsx_text,
+)
 from autoformularz.upload import Kind, UploadError
 
 
@@ -77,3 +87,58 @@ def test_scan_page_limit_adds_note():
         "OCR niedostępny: skan przekazano modelowi tylko jako obraz.",
         "Modelowi przekazano obrazy pierwszych 2 stron z 6.",
     ]
+
+
+ODS_HEAD = (
+    '<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+    'xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" '
+    'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"><office:body><office:spreadsheet>'
+)
+
+
+def ods(tables: str) -> bytes:
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as z:
+        z.writestr("mimetype", "application/vnd.oasis.opendocument.spreadsheet")
+        z.writestr(
+            "content.xml", ODS_HEAD + tables + "</office:spreadsheet></office:body></office:document-content>"
+        )
+    return buf.getvalue()
+
+
+def test_ods_cells_spaces_merges_and_repeats():
+    data = ods(
+        '<table:table table:name="A">'
+        '<table:table-row><table:table-cell table:number-columns-spanned="2"><text:p>Imię<text:s text:c="3"/>i'
+        "</text:p><text:p>nazwisko</text:p></table:table-cell><table:covered-table-cell/>"
+        "<table:table-cell><text:p>……</text:p></table:table-cell>"
+        '<table:table-cell table:number-columns-repeated="16380"/></table:table-row>'
+        '<table:table-row table:number-rows-repeated="1048570"><table:table-cell/></table:table-row>'
+        "</table:table>"
+    )
+    assert ods_text(data) == "| Imię i nazwisko | …… |"
+
+
+def test_ods_sheets_get_headings():
+    sheet = '<table:table table:name="{}"><table:table-row><table:table-cell><text:p>x</text:p></table:table-cell></table:table-row></table:table>'
+    assert ods_text(ods(sheet.format("A") + sheet.format("B"))) == "## Arkusz: A\n| x |\n## Arkusz: B\n| x |"
+
+
+def test_broken_ods_is_a_clean_error():
+    with pytest.raises(UploadError) as e:
+        ods_text(b"PK\x03\x04 not a zip")
+    assert e.value.code == "CONVERSION_FAILED"
+
+
+def test_ods_material_reads_without_libreoffice():
+    doc = extract(Kind.ODS, material("3. */*.ods").read_bytes(), soffice="no-such-binary")
+    assert doc.blocks[0].text == "| Młynary, dnia……………………. |"
+
+
+@pytest.mark.parametrize("n", [3, 9])  # simplest and largest; all 9 matched when written
+def test_ods_matches_libreoffice_conversion(n):
+    """Native reader gives exactly what the old LibreOffice path (ods -> xlsx -> xlsx_text) gave."""
+    if not find_soffice("soffice"):
+        pytest.skip("brak LibreOffice")
+    data = material(f"{n}. */*.[oO][dD][sS]").read_bytes()
+    assert ods_text(data) == xlsx_text(convert(data, "ods", "xlsx", "soffice"))
