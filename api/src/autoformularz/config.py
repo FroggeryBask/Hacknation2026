@@ -45,6 +45,12 @@ class Settings(BaseSettings):
     # LibreOffice binary for legacy formats (.doc, .ods)
     soffice_bin: str = "soffice"
 
+    # OCR for scans (Tesseract, Apache-2.0). Found on PATH or in Program Files on Windows; without it
+    # scans go to the model only as images. `tessdata_dir`: folder with pol.traineddata if not the default.
+    ocr_bin: str = "tesseract"
+    ocr_lang: str = "pol"
+    tessdata_dir: str | None = None
+
     # Frontend origins allowed by CORS (comma-separated)
     cors_origins: str = "http://localhost:3000"
 

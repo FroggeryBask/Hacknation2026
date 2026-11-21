@@ -72,4 +72,8 @@ def test_broken_image_is_a_clean_error():
 
 def test_scan_page_limit_adds_note():
     out = extract(Kind.PNG, material("8. */*.png").read_bytes(), max_pages=2)
-    assert len(out.images) == 2 and out.notes == ["Przeanalizowano pierwsze 2 stron z 6."]
+    assert len(out.images) == 2
+    assert out.notes == [
+        "OCR niedostępny: skan przekazano modelowi tylko jako obraz.",
+        "Modelowi przekazano obrazy pierwszych 2 stron z 6.",
+    ]
