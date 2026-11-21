@@ -24,7 +24,6 @@ import {
   type FieldState,
   fieldOptions,
   fieldValidators,
-  initialValues,
   isRequired,
   orderedTabs,
   sortQuestions,
@@ -202,15 +201,13 @@ function Field({ field: f, prefix }: { field: CoiField; prefix?: string }) {
   }
 }
 
-/** Fillable e-form built from COI JSON: tabs in flow order, FINISH last. */
-export function CoiFormView({
-  form,
-  abortHref,
-}: {
-  form: CoiForm;
-  abortHref?: string;
-}) {
-  const values = useMemo(() => initialValues(form), [form]);
+/**
+ * E-form built from COI JSON: tabs in flow order, FINISH last. A preview of the
+ * structure only: no field is prefilled (defaultValue and EXTERNAL_SYSTEM data
+ * come from the e-service platform, not from us), and every tab can be opened
+ * without filling the required fields.
+ */
+export function CoiFormView({ form }: { form: CoiForm }) {
   const pages = useMemo(
     () =>
       orderedTabs(form).map((tab) => ({
@@ -220,12 +217,5 @@ export function CoiFormView({
       })),
     [form],
   );
-  return (
-    <FormShell
-      title={form.title}
-      pages={pages}
-      initialValues={values}
-      abortHref={abortHref}
-    />
-  );
+  return <FormShell title={form.title} pages={pages} freeNavigation />;
 }

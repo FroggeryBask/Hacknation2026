@@ -10,7 +10,7 @@ Urzędnik przesyła jeden plik z formularzem papierowym (PDF, DOC, DOCX, ODS, XL
 REST zwraca JSON konfiguracji e-formularza w formacie importu COI (jak wzorce w `materialy/1.*` i `materialy/5.*`),
 zgodny ze standardem projektowania formularzy i regułami technicznymi.
 
-Całość działa lokalnie: model językowy jest uruchamiany w kontenerze (Ollama), bez zewnętrznych API, MCP i SaaS.
+Model językowy to domyślnie model open-weight na Eden AI (organizatorzy, decyzja zespołu z 2026-11-21); w trybie offline działa w kontenerze (Ollama). Poza Eden: bez zewnętrznych API, MCP i SaaS.
 
 ## 2. Komponenty
 
@@ -24,7 +24,7 @@ flowchart LR
     O --- V
     A -.->|binarny .doc| L[LibreOffice<br/>osobny proces]
     A -.->|skany| T[Tesseract OCR<br/>osobny proces]
-    A -.->|tryb demo| E[Eden AI<br/>model open-weight]
+    A -->|domyślnie| E[Eden AI<br/>model open-weight]
 ```
 
 | Usługa (`docker-compose.yml`) | Obraz | Rola | Port |
@@ -34,7 +34,7 @@ flowchart LR
 | `model` | `ollama/ollama:0.40.17` | jednorazowe pobranie modelu do wolumenu, potem kończy pracę | brak |
 | `web` | `node:22.23.5-alpine3.24` + Next.js | opcjonalny frontend: upload i podgląd JSON | 3000 |
 
-Tryb demo (uzgodniony z mentorami COI): nakładka `docker-compose.eden.yml` wyłącza `ollama` i `model`, a `api` woła
+Domyślnie (`docker compose up`) `ollama` i `model` się nie uruchamiają (profil `ollama`), a `api` woła
 model open-weight na Eden AI (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, odpowiednik lokalnego `qwen3-vl:30b`).
 Koszt każdej odpowiedzi Eden trafia do `llm.EDEN_USAGE`, a suma od startu kontenera jest w `GET /health` (`usage`);
 budżet zespołu: [eden-budzet.md](eden-budzet.md).
@@ -95,7 +95,7 @@ schemat pod `GET /api/v1/spec/schema`) i odpowiedź `?details=true` dla frontend
 | Przechowywanie | plik tylko w pamięci (OCR dostaje obraz przez stdin), a binarny .doc w katalogu tymczasowym usuwanym po żądaniu; brak bazy danych i zapisu plików |
 | Sekrety | wyłącznie w runtime (`.env` czytany przez Compose); `.env*` w `.gitignore` i `.dockerignore`, nie trafiają do obrazów |
 | Kontenery | oficjalne obrazy z przypiętą wersją, bez `latest`; `api` i `web` na użytkowniku bez uprawnień; na zewnątrz tylko porty 8000 i 3000 |
-| Brak zewnętrznych usług | domyślnie model działa w kontenerze `ollama`, a `docker-compose.yml` wymusza `AUTOFORMULARZ_LLM_PROVIDER=ollama` i pusty klucz; Eden AI (modele open-weight) tylko tymczasowo, przez jawną nakładkę `docker-compose.eden.yml`, z kluczem wyłącznie w `api` |
+| Brak zewnętrznych usług | jedyna usługa zewnętrzna to Eden AI organizatorów (modele open-weight, decyzja zespołu z 2026-11-21), z kluczem wyłącznie w `api`; tryb offline: model w kontenerze `ollama` (`--profile ollama`) |
 | Frontend | token JWT nigdy nie trafia do przeglądarki: `web` woła API po stronie serwera |
 
 Obraz `ollama/ollama` (dostawca zewnętrzny) działa jako root w swoim kontenerze. Nie wystawia portu na zewnątrz
@@ -118,8 +118,8 @@ linii LF (`.gitattributes`), więc checkout na Windows nie zmienia tego, co traf
 ### Koszt
 
 - **Licencje**: zero. Wszystkie komponenty są open source, nic nie wymaga zakupu licencji komercyjnej.
-- **Usługi zewnętrzne**: zero w wersji docelowej (Ollama). Tryb demo z Eden AI kosztuje ok. 0,005 USD za
-  formularz (model `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, [eden-budzet.md](eden-budzet.md)).
+- **Usługi zewnętrzne**: Eden AI (domyślnie) kosztuje ok. 0,005 USD za formularz; tryb offline (Ollama): zero.
+  Model: `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, budżet: [eden-budzet.md](eden-budzet.md).
 - **Sprzęt**: jeden serwer z Dockerem. Model 8B działa na CPU (wolniej) albo na GPU z co najmniej 8 GB VRAM
   (szybciej). Mniejszy model (np. `qwen3-vl:4b`, `qwen3-vl:2b`) to zmiana jednej zmiennej
   `AUTOFORMULARZ_LLM_MODEL`, bez zmian w kodzie, kosztem jakości.

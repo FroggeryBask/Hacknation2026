@@ -43,8 +43,7 @@
   ],
   "notes": [
     "Z sekcji „Dane identyfikacyjne składającego deklarację” pominięto pola z części standardowej: Nazwisko, imię / Nazwa pełna, PESEL, NIP/REGON.",
-    "Z sekcji „Adres zamieszkania / siedziby” pominięto pola z części standardowej: Kraj, Województwo, Gmina, Miejscowość, Ulica, Numer nieruchomości/domu, Numer lokalu, Kod pocztowy.",
-    "Z sekcji „Kontakt” pominięto pola z części standardowej: Nr tel./fax, Adres e-mail.",
+    "Formularz pyta o NIP, REGON wnioskodawcy: wnioskodawcą może być firma lub instytucja.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (38 zł): informacja, nie pole.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (69 zł): informacja, nie pole.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (81 zł): informacja, nie pole.",
@@ -54,22 +53,36 @@
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (59 zł): informacja, nie pole.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (71 zł): informacja, nie pole.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (91 zł): informacja, nie pole.",
-    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole.",
-    "„Adres do korespondencji”: warunek na nieistniejącym polu „Adres do korespondencji” usunięty, pola nieobowiązkowe."
+    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole."
   ],
   "coverage": {
     "blocks": 318,
-    "referenced": 313,
+    "referenced": 300,
     "unreferenced": [
-      "b1",
       "b2",
       "b3",
-      "b29",
-      "b318"
+      "b12",
+      "b13",
+      "b14",
+      "b15",
+      "b16",
+      "b17",
+      "b37",
+      "b82",
+      "b136",
+      "b137",
+      "b138",
+      "b188",
+      "b189",
+      "b199",
+      "b200",
+      "b206"
     ],
     "candidates": 15,
     "candidatesWithoutField": [
       "b22",
+      "b47",
+      "b55",
       "b212",
       "b227",
       "b261",

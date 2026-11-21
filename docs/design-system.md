@@ -43,7 +43,7 @@ Walidatory (`src/lib/form/validators.ts`) mają nazwy z reguł technicznych: `PE
 - Dane z rejestru (MLPZ/PESEL) pokazuj jako `readOnly` (szare tło, bez ramki).
 - Pokazuj tylko potrzebne pola: warunek SHOW = renderowanie warunkowe (`useWatch`). Ukryte pole nie jest walidowane.
 - Błąd pojawia się pod polem: ikona i czerwony tekst, krótko, w stronie czynnej („Uzupełnij to pole.”). Fokus przechodzi na pierwsze błędne pole.
-- Przyciski: jedna akcja `primary` na ekran („Dalej”, „Wyślij wniosek”), `outline` dla akcji wtórnych („Wstecz”, „Dodaj plik”), `link` do wyjścia („Przerwij wypełnianie”).
+- Przyciski: jedna akcja `primary` na ekran („Dalej”, „Wyślij wniosek”), `outline` dla akcji wtórnych („Wstecz”, „Dodaj plik”).
 - Linki zewnętrzne: `ExternalLinkText` (ikona, bez kropki na końcu).
 - Język: bez form zależnych od płci, krótkie zdania („Znam warunki…”, a nie „Zapoznałem/am się…”).
 - WCAG 2.1 AA: kontrast tokenów jest sprawdzony, każde pole ma etykietę, a grupy wyboru mają `fieldset` i `legend`.
@@ -54,7 +54,7 @@ Walidatory (`src/lib/form/validators.ts`) mają nazwy z reguł technicznych: `PE
 
 - `states` (`SHOW`, `READ_ONLY`): JSONata na kopii JSON-a z `__userAnswer` (`src/lib/form/coi.ts`), liczone po każdej zmianie odpowiedzi. Ukryte pole nie jest renderowane ani walidowane, ale jego odpowiedź zostaje.
 - `validation`: `REQUIRED` + walidatory z reguł technicznych (`PESEL`, `NIP`, `REGON`, `ZIP_CODE`, `EMAIL`, `EPUAP`, `ADE`, `SERIAL_NUMBER_ID_CARD`). Toleruje `{}` zamiast `[]` (wzór 1).
-- `defaultValue` + `EXTERNAL_SYSTEM` (`MLPZ.*`, `PESEL.*`): dane demo `MLPZ_DEMO`.
+- Podgląd struktury: pola nie są wypełniane (`defaultValue` i `EXTERNAL_SYSTEM` uzupełnia platforma e-usług), a każdą zakładkę można otworzyć ze steppera lub przyciskiem „Dalej” bez wypełniania pól wymaganych (`freeNavigation`).
 - `dictionaryName`: `Kraje`, `TERYT_*` (na razie lista województw, bez powiatu i gminy).
 
 ## Nowy formularz (ręcznie)

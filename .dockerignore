@@ -2,7 +2,9 @@ node_modules
 .next
 .git
 api
-materialy
+materialy/**
+!materialy/1.*/*.json
+!materialy/5.*/*.json
 scripts
 docs
 .env*

@@ -204,58 +204,6 @@ export function fieldOptions(f: CoiField): string[] {
 }
 
 /* ------------------------------------------------------------------ */
-/* Initial values: defaultValue and EXTERNAL_SYSTEM (MLPZ) data        */
-/* ------------------------------------------------------------------ */
-
-/** Demo stand-in for the logged-in user's registry data (materialy/ "Dane inicjalne"). */
-export const MLPZ_DEMO: Record<string, string> = {
-  name: "JAN",
-  secondName: "",
-  surname: "KOWALSKI",
-  pesel: "44051401359",
-  email: "jan.kowalski@example.pl",
-  phoneNumber: "+48600100200",
-  country: "Polska",
-  voivodeship: "mazowieckie",
-  district: "warszawski zachodni",
-  community: "Łomianki",
-  place: "Łomianki",
-  street: "Warszawska",
-  building: "12",
-  apartment: "4",
-  postCode: "05-092",
-};
-
-export function fieldDefault(f: CoiField): FieldValue {
-  const d = f.defaultValue;
-  if (d === undefined || d === null) return undefined;
-  if (f.defaultValueType === "EXTERNAL_SYSTEM" && typeof d === "string") {
-    // "MLPZ.surname", "PESEL.surname": source system + key.
-    return MLPZ_DEMO[d.replace(/^[A-Z]+\./, "")] || undefined;
-  }
-  if (Array.isArray(d)) {
-    if (!d.length) return undefined;
-    return f.type === "CHECKBOX" ? d : d[0];
-  }
-  return d;
-}
-
-/** Initial values for the whole form (repeating sections are filled per item). */
-export function initialValues(form: CoiForm): Values {
-  const out: Values = {};
-  const walk = (qs: CoiQuestion[]) => {
-    for (const { field } of qs) {
-      if (field.type === "REPEATING_SECTION") continue;
-      const v = fieldDefault(field);
-      if (v !== undefined) out[field.techName] = v;
-      walk(field.repeatingSectionGrid ?? []);
-    }
-  };
-  for (const t of form.tabs) walk(t.questions);
-  return out;
-}
-
-/* ------------------------------------------------------------------ */
 /* Dynamic states (SHOW / READ_ONLY): real JSONata on the form JSON     */
 /* with __userAnswer injected, as in "Reguły techniczne"               */
 /* ------------------------------------------------------------------ */

@@ -334,3 +334,259 @@ def test_saved_results_keep_their_case_fields(n):
     spec = pipeline.from_spec(FormSpec.model_validate(json.loads(spec_path.read_text(encoding="utf-8")))).spec
     used = {bid for page in spec.pages for s in page.sections for f in s.fields for bid in f.blocks}
     assert not used & removed
+
+
+# ---------------------------------------------------------------- clause shapes, spreadsheets, form 8
+
+
+def test_gdpr_hole_inside_one_clause_is_filled():
+    """Form 8: legal bases and ePUAP lines without clause words between two parts of the clause."""
+    r = roles(
+        "Informacja o przetwarzaniu danych osobowych",
+        "3. Będziemy przetwarzać Pani/Pana dane osobowe na podstawie art. 6 ust. 1 lit. c RODO w",
+        "związku z przepisami ustawy z dnia 13 września 1996r. o utrzymaniu czystości i porządku w gminach,",
+        "ustawy z dnia 8 marca 1990r. o samorządzie gminnym oraz uchwały nr XIV/478/19 Rady Miasta",
+        "komunalnymi ze zmianami.",
+        "W przypadku przekazania niniejszej deklaracji za pomocą środków komunikacji elektronicznej (ePUAP)",
+        "usług drogą elektroniczną oraz przepisami ustawy z dnia 18 listopada 2020 r. o doręczeniach",
+        "elektronicznych.",
+        "kontaktu na podstawie Pani/Pana zgody (art. 6 ust. 1 lit. a RODO).",
+        "4. Odbiorcami Pana/Pani danych osobowych mogą być:",
+    )
+    assert len(r) == 10 and set(r.values()) == {"GDPR"}
+
+
+def test_gdpr_hole_with_a_case_question_stays():
+    r = roles(
+        "Klauzula informacyjna",
+        "Administratorem danych osobowych jest Wójt.",
+        "Wyrażam zgodę na kontakt telefoniczny.",
+        "Telefon ………",
+        "Administrator powołał inspektora ochrony danych.",
+    )
+    assert "Wyrażam zgodę na kontakt telefoniczny." not in r and "Telefon ………" not in r
+
+
+def test_numbered_clause_section_ends_at_next_section():
+    """Form 9: "4. Klauzula informacyjna" with points a), b) without clause words, then "5. Zgody"."""
+    r = roles(
+        "4. Klauzula informacyjna",
+        "Informacje na temat ochrony danych osobowych stosowanych przez administratora danych:",
+        "a) klub sportowy – znajdują się na jego stronie internetowej;",
+        "b) Prezydent Miasta – znajdują się na stronie podmiotowej BIP.",
+        "5. Zgody",
+        "5.1. Zgoda kandydata pełnoletniego do stypendium",
+    )
+    assert len(r) == 4 and "5. Zgody" not in r
+
+
+def test_spreadsheet_rows_read_like_docx():
+    """ODS/XLSX: one-cell rows "| 2. Dane wnioskodawcy |" and a "-" separator cell."""
+    r = roles(
+        "| Wniosek o zwrot opłaty skarbowej |",
+        "| 2. Dane wnioskodawcy |",
+        "| 2.1. Dane identyfikacyjne |",
+        "| Nazwa /Imię i nazwisko |",
+        "| NIP |",
+        "| Nr domu | Nr lokalu | Kod pocztowy | - |",
+        "| 2.3. Dane kontaktowe wnioskodawcy (dane kontaktowe nie są obowiązkowe, ale ułatwią kontakt w sprawie wniosku) |",
+        "| Numer telefonu |",
+        "| 3. Informacje o opłacie skarbowej |",
+        "| Wysokość opłaty |",
+    )
+    assert r["| 2. Dane wnioskodawcy |"] == "HEADING" and r["| Numer telefonu |"] == "FIELD_LABEL"
+    assert "| 3. Informacje o opłacie skarbowej |" not in r and "| Wysokość opłaty |" not in r
+
+
+def test_address_and_contact_subsections_of_form_8():
+    r = roles(
+        "B.2 DANE IDENTYFIKACYJNE WSPÓŁMAŁŻONKA (wypełnić tylko w przypadku zaznaczenia kratki)",
+        "6 . Adres zamieszkania",
+        "B.3 ADRES ZAMIESZKANIA / SIEDZIBY",
+        "8. Kraj 9. Województwo 10. Gmina",
+        "13. Numer",
+        "nieruchomości/domu",  # a label broken over two lines
+        "14. Numer lokalu 15. Kod pocztowy",
+        "16. Numer/y działki/działek (wypełnić jeżeli nieruchomość nie ma urzędowo nadanego adresu)",
+        "B.4 ADRES DO KORESPONDENCJI (wypełnić tylko w przypadku kiedy jest inny niż w poz. B.3)",
+        "17. Kraj 18. Województwo 19. Gmina",
+        "F. DANE DO KONTAKTU (pola nieobowiązkowe)",
+        "70. Nr tel./fax 71. Adres e-mail",
+        "72. Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej",
+    )
+    assert r == {
+        "B.3 ADRES ZAMIESZKANIA / SIEDZIBY": "HEADING",
+        "8. Kraj 9. Województwo 10. Gmina": "FIELD_LABEL",
+        "13. Numer": "FIELD_LABEL",
+        "nieruchomości/domu": "FIELD_LABEL",
+        "14. Numer lokalu 15. Kod pocztowy": "FIELD_LABEL",
+        "F. DANE DO KONTAKTU (pola nieobowiązkowe)": "HEADING",
+        "70. Nr tel./fax 71. Adres e-mail": "FIELD_LABEL",
+    }  # spouse, plot number, correspondence address and the e-mail consent stay with the model
+
+
+def test_case_address_heading_stays():
+    assert roles("Adres nieruchomości", "Miejscowość", "Ulica") == {}
+    assert roles("Osoba do kontaktu w sprawie najmu", "Telefon") == {}
+
+
+def test_prompt_shortens_lines_to_fill_in():
+    d = doc("Imię " + "…" * 300, "Kwota ____________ zł", "Uwagi: . . . . . . . .", "Kwota 1.50 zł")
+    prompt = build_user_prompt(d)
+    assert "[b1] Imię ……" in prompt and "[b2] Kwota …… zł" in prompt and "[b3] Uwagi: ……" in prompt
+    assert "Kwota 1.50 zł" in prompt and len(prompt) < 300
+    assert d.blocks[0].text.endswith("…" * 300)  # the Document keeps the source text
+
+
+@pytest.mark.parametrize("ext", ["docx", "pdf"])  # the spreadsheet has no dotted lines
+def test_form_9_prompt_shrinks(ext):
+    path = material(f"9. */*.{ext}")
+    data = path.read_bytes()
+    d = extract(validate_upload(path.name, data, 50 << 20), data)
+    raw = "\n".join(f"[{b.id}] {b.text}" for b in d.blocks)
+    assert len(build_user_prompt(presort(d).model_doc)) < 0.7 * len(raw)
+
+
+def test_apply_keeps_model_range_around_code_blocks(nadplata_spec):
+    """The model saw b1, b2, b5 (b3-b4 taken by the code) and wrote one range b1..b5."""
+    from autoformularz.spec import BlockRole
+
+    d = doc(
+        "Pouczenie",
+        "Należy dołączyć dowód wpłaty.",
+        "Klauzula informacyjna",
+        "Administratorem danych osobowych jest Wójt.",
+        "Termin rozpatrzenia: 30 dni.",
+    )
+    p = presort(d)
+    assert [b.id for b in p.model_doc.blocks] == ["b1", "b2", "b5"]
+    model = nadplata_spec.model_copy(
+        update={"block_roles": [BlockRole(block="b1", to="b5", role=Role.INSTRUCTION)]}
+    )
+    out = apply(model, p)
+    assert out.roles() == {
+        "b1": Role.INSTRUCTION,
+        "b2": Role.INSTRUCTION,
+        "b3": Role.GDPR,
+        "b4": Role.GDPR,
+        "b5": Role.INSTRUCTION,
+    }
+
+
+# ---------------------------------------------------------------- repeated versions (form 9)
+
+
+VERSION = [
+    "1. Wnioskodawca",
+    "Klub sportowy",
+    "Imię ………………",
+    "Nazwisko ………………",
+    "Nazwa klubu sportowego ………",
+    "Do wniosku należy dołączyć odpis z KRS.",
+    "2. Dane kandydata",
+]
+
+
+def test_repeated_version_is_shortened_to_a_note():
+    d = doc(
+        "Wniosek o przyznanie stypendium",
+        *VERSION,
+        "Data urodzenia ………",
+        "Wniosek o przyznanie nagrody",
+        *VERSION,
+    )
+    p = presort(d)
+    texts = [b.text for b in p.model_doc.blocks]
+    assert texts[-1].startswith("1. Wnioskodawca (dalej bloki b12–b17 takie same jak b3–b8, pominięte)")
+    assert len(texts) == 11 and "Wniosek o przyznanie nagrody" in texts
+    assert "takie same jak" in build_user_prompt(p.model_doc) and "opisz ją raz" in build_user_prompt(
+        p.model_doc
+    )
+    assert d.blocks[10].text == "1. Wnioskodawca"  # the Document keeps the source text
+
+
+def test_short_repeats_and_dotted_lines_stay():
+    """Form 8: 2-4 lines repeated between rate tables E.1 and E.2 are separate fields."""
+    rows = ["lokale mieszkalne o powierzchni użytkowej", "do 50 m2", "38 zł"]
+    d = doc("E.1 Stawki", *rows, "E.2 Stawki ze zwolnieniem", *rows)
+    assert len(presort(d).model_doc.blocks) == 8
+    dots = ["……………………"] * 7
+    d = doc("Opis osiągnięć", *dots, "Uwagi", *dots)
+    assert len(presort(d).model_doc.blocks) == 16
+
+
+def test_form_9_repeats_collapse_form_8_does_not():
+    for n, shrinks in ((9, True), (8, False)):
+        path = material(f"{n}. */*.docx")
+        data = path.read_bytes()
+        p = presort(extract(validate_upload(path.name, data, 50 << 20), data))
+        assert bool(p.counts.get("REPEAT")) is shrinks
+
+
+def test_presort_stays_fast_on_big_unknown_documents():
+    """A page of empty table rows or the same label 3000 times: every row equals every other one."""
+    import time
+
+    for lines in (["| | | |", "……………………"] * 1500, ["Imię ……"] * 3000):
+        start = time.perf_counter()
+        presort(doc(*lines))
+        assert time.perf_counter() - start < 2
+
+
+def test_clause_written_in_capitals_is_not_cut_at_every_line():
+    """Some forms are all in capitals: a clause line is not a section heading."""
+    lines = [
+        "INFORMACJA O PRZETWARZANIU DANYCH OSOBOWYCH",
+        "3. BĘDZIEMY PRZETWARZAĆ PANI/PANA DANE OSOBOWE NA PODSTAWIE ART. 6 UST. 1 LIT. C RODO W",
+        "ZWIĄZKU Z PRZEPISAMI USTAWY Z DNIA 13 WRZEŚNIA 1996R. O UTRZYMANIU CZYSTOŚCI I PORZĄDKU W GMINACH,",
+        "KOMUNALNYMI ZE ZMIANAMI.",
+        "W PRZYPADKU PRZEKAZANIA DEKLARACJI ZA POMOCĄ ŚRODKÓW KOMUNIKACJI ELEKTRONICZNEJ (EPUAP)",
+        "KONTAKTU NA PODSTAWIE PANI/PANA ZGODY (ART. 6 UST. 1 LIT. A RODO).",
+        "G. INFORMACJA O ZAŁĄCZNIKACH",
+    ]
+    r = roles(*lines)
+    assert len(r) == 6 and "G. INFORMACJA O ZAŁĄCZNIKACH" not in r
+
+
+def test_section_of_a_repeated_part_is_shown_for_every_version(nadplata_spec):
+    """Form 9: the club's data is in all three versions; the model saw it once (the other copies were
+    shortened) and showed it only for the scholarship."""
+    from autoformularz.spec import Condition, FieldSpec, Kind, PageSpec, SectionSpec
+
+    kinds = ["Wniosek o przyznanie stypendium", "Wniosek o przyznanie nagrody"]
+    d = doc(
+        "Rodzaje wniosków:",
+        *kinds,
+        kinds[0],
+        *VERSION,
+        "Data urodzenia ………",
+        kinds[1],
+        *VERSION,
+        "Kwota nagrody ………",
+    )
+    p = presort(d)
+    assert p.repeats  # the second VERSION was shortened
+    choice = FieldSpec(label="Rodzaj wniosku", kind=Kind.SINGLE_CHOICE, options=kinds)
+    club = SectionSpec(
+        title="Dane klubu",
+        fields=[FieldSpec(label="Nazwa klubu", kind=Kind.TEXT, blocks=["b9"])],
+        show_if=Condition(field="Rodzaj wniosku", equals=kinds[0]),
+    )
+    prize = SectionSpec(
+        title="Nagroda",
+        fields=[FieldSpec(label="Kwota", kind=Kind.NUMBER, blocks=["b21"])],
+        show_if=Condition(field="Rodzaj wniosku", equals=kinds[1]),
+    )
+    spec = nadplata_spec.model_copy(
+        update={
+            "pages": [
+                PageSpec(
+                    title="Wniosek", sections=[SectionSpec(title="Rodzaj", fields=[choice]), club, prize]
+                )
+            ]
+        }
+    )
+    out = apply(spec, p)
+    sections = {s.title: s for s in out.pages[0].sections}
+    assert sections["Dane klubu"].show_if is None  # in both versions: always shown
+    assert sections["Nagroda"].show_if == prize.show_if  # only in the second version: unchanged

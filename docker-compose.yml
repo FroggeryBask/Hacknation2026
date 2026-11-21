@@ -1,11 +1,14 @@
-# Whole solution offline: local model (Ollama) + API + frontend.
-#   cp .env.example .env   # set AUTOFORMULARZ_JWT_SECRET
+# Whole solution: API + frontend, the model on Eden AI (default, team decision 2026-11-21).
+#   cp .env.example .env   # set AUTOFORMULARZ_JWT_SECRET and EDENAI_API_KEY
 #   docker compose up --build
+# Offline, local model instead (Ollama + qwen3-vl:8b, ~6 GB download):
+#   AUTOFORMULARZ_LLM_PROVIDER=ollama docker compose --profile ollama up --build
 # GPU (NVIDIA): uncomment the `deploy` block under `ollama`.
 
 services:
   ollama:
     image: ollama/ollama:0.40.17
+    profiles: ["ollama"]
     volumes:
       - ollama:/root/.ollama
     # Ready = the server answers; the model download waits for this instead of guessing with sleep.
@@ -22,6 +25,7 @@ services:
   # One-shot: downloads the model into the shared volume, then exits.
   model:
     image: ollama/ollama:0.40.17
+    profiles: ["ollama"]
     environment:
       OLLAMA_HOST: http://ollama:11434
     entrypoint: ["ollama", "pull", "${AUTOFORMULARZ_LLM_MODEL:-qwen3-vl:8b}"]
@@ -35,18 +39,22 @@ services:
     image: autoformularz-api:0.1.0  # explicit version instead of the default `latest` tag
     env_file: .env
     environment:
+      AUTOFORMULARZ_LLM_PROVIDER: ${AUTOFORMULARZ_LLM_PROVIDER:-eden}
+      AUTOFORMULARZ_EDEN_MODEL: ${AUTOFORMULARZ_EDEN_MODEL:-deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct}
       AUTOFORMULARZ_OLLAMA_URL: http://ollama:11434
-      # Default: the local model. The demo overlay docker-compose.eden.yml switches the API to Eden AI.
-      AUTOFORMULARZ_LLM_PROVIDER: ollama
-      EDENAI_API_KEY: ""
+      # The key reaches only the API (from .env at runtime), never the image or the frontend.
+      EDENAI_API_KEY: ${EDENAI_API_KEY:-}
     ports:
       - "8000:8000"
-    # Starts once the model is in the volume, so the first request does not fail with "model not found".
+    # With the ollama profile: starts once the model is in the volume (no "model not found" on the first
+    # request). Without it (Eden) these services do not exist and the API starts at once.
     depends_on:
       ollama:
         condition: service_healthy
+        required: false
       model:
         condition: service_completed_successfully
+        required: false
 
   web:
     build:

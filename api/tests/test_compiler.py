@@ -269,3 +269,31 @@ def test_condition_on_missing_option_is_dropped_with_warning():
     assert children(sections(form, "Sprawa")["sprawa"])["inna_dyscyplina"]["states"] == []
     assert warnings and "Inna dyscyplina" in warnings[0]
     assert not [i for i in lint(form) if i.level == "error"]
+
+
+def test_contact_consent_is_optional_and_loses_paper_numbering():
+    """Form 8, poz. 72: an e-mail consent next to optional contact data cannot block sending."""
+    spec = FormSpec(
+        title="Deklaracja testowa",
+        authority_name="Urząd",
+        pages=[
+            PageSpec(
+                title="Nieruchomość",
+                sections=[SectionSpec(title="Adres", fields=[FieldSpec(label="Ulica", kind=Kind.TEXT)])],
+            )
+        ],
+        consents=[
+            "Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej "
+            "wskazanego w poz. 71",
+            "Wyrażam zgodę na kontakt telefoniczny w sprawie wniosku.",
+            "Wyrażam zgodę na przetwarzanie moich danych osobowych w celu rozpatrzenia wniosku.",
+            "Dane w formularzu są zgodne z prawdą",
+        ],
+    )
+    form, _ = compile_form(spec)
+    consent = children(sections(form, "Kontakt i zgody")["zgoda_wyrazenie"])["zgoda"]
+    items = consent["consentSectionConfig"]["consents"]
+    assert [c["required"] for c in items] == [False, False, True, True, True]  # last: GDPR clause
+    assert "poz. 71" not in items[0]["description"]
+    assert "adresu poczty elektronicznej</p>" in items[0]["description"]
+    assert [i for i in lint(form) if i.level == "error"] == []

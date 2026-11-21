@@ -97,7 +97,6 @@ export default function DesignSystemPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Button>Dalej</Button>
             <Button variant="outline">Wstecz</Button>
-            <Button variant="link">Przerwij wypełnianie</Button>
             <Button disabled>Niedostępny</Button>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -121,9 +120,6 @@ export default function DesignSystemPage() {
             </li>
             <li>
               <strong>outline</strong>: akcje wtórne („Wstecz”, „Dodaj plik”).
-            </li>
-            <li>
-              <strong>link</strong>: wyjście z procesu („Przerwij wypełnianie”).
             </li>
           </ul>
         </div>
