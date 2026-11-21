@@ -48,7 +48,16 @@ Walidatory (`src/lib/form/validators.ts`) mają nazwy z reguł technicznych: `PE
 - Język: bez form zależnych od płci, krótkie zdania („Znam warunki…”, a nie „Zapoznałem/am się…”).
 - WCAG 2.1 AA: kontrast tokenów jest sprawdzony, każde pole ma etykietę, a grupy wyboru mają `fieldset` i `legend`.
 
-## Nowy formularz
+## Renderer z COI JSON
+
+`<CoiFormView form={json} />` (`src/components/form/coi-form.tsx`) renderuje dowolny JSON w formacie importu COI: zakładki w kolejności `flow`, pola przez mapowanie z tabeli wyżej. Podgląd: `/podglad` (wzory 1 i 5 z `materialy/` + wczytanie własnego pliku, także odpowiedzi `?details=true`).
+
+- `states` (`SHOW`, `READ_ONLY`): JSONata na kopii JSON-a z `__userAnswer` (`src/lib/form/coi.ts`), liczone po każdej zmianie odpowiedzi. Ukryte pole nie jest renderowane ani walidowane, ale jego odpowiedź zostaje.
+- `validation`: `REQUIRED` + walidatory z reguł technicznych (`PESEL`, `NIP`, `REGON`, `ZIP_CODE`, `EMAIL`, `EPUAP`, `ADE`, `SERIAL_NUMBER_ID_CARD`). Toleruje `{}` zamiast `[]` (wzór 1).
+- `defaultValue` + `EXTERNAL_SYSTEM` (`MLPZ.*`, `PESEL.*`): dane demo `MLPZ_DEMO`.
+- `dictionaryName`: `Kraje`, `TERYT_*` (na razie lista województw, bez powiatu i gminy).
+
+## Nowy formularz (ręcznie)
 
 ```tsx
 <FormShell title="Wniosek o …" initialValues={daneZRejestru} pages={[
