@@ -380,6 +380,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
                     return r, None, answer
                 return r, _read_sse(r, answer), answer
         except httpx.HTTPError as e:
+            log.warning("Eden AI call failed: %s: %s", type(e).__name__, e)
             raise LLMError("LLM_UNAVAILABLE", "Model językowy jest niedostępny (Eden AI).", 503) from e
 
     r, body, answer = post()
