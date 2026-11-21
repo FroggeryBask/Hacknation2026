@@ -95,6 +95,10 @@ Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Z
 - `FieldSpec.blocks`, `SectionSpec.blocks`: ID bloków, z których pochodzi element (etykieta, opcje).
 - `FormSpec.block_roles`: `{block, role}`, rola = `FIELD_LABEL`, `OPTION`, `HEADING`, `INSTRUCTION`
   (pouczenie), `LEGAL_BASIS` (podstawa prawna), `STATEMENT` (oświadczenie), `GDPR` (RODO), `SKIP` (tylko na papierze).
+  Model podaje role **tylko** dla `INSTRUCTION`, `LEGAL_BASIS`, `STATEMENT`, `GDPR` i `SKIP`. Role dla wszystkich
+  bloków nie mieszczą się w oknie modelu: formularz 8 (DOCX) ma 631 bloków, czyli ok. 8 tys. tokenów samych ról
+  przy `num_ctx=16384`. Pozostałe role są dozwolone, ale nie wymagane. Bloki bez roli to nie błąd: trafiają do
+  `coverage.unreferenced`, a krok check zamieni je później na `TEXT_BLOCK` z ostrzeżeniem.
 
 **`?details=true`** dostaje dwa klucze (`null` dla `/compile`, bo nie ma pliku źródłowego):
 ```json
@@ -103,7 +107,7 @@ Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Z
 "coverage": {"blocks": 63, "referenced": 58, "unreferenced": ["b4"], "candidates": 12,
              "candidatesWithoutField": ["b31"], "unknownRefs": []}
 ```
-- `unreferenced`: bloki bez pola, sekcji ani roli (tekst może zniknąć).
+- `unreferenced`: bloki bez pola, sekcji ani roli (tytuły i zwykły tekst; do sprawdzenia, czy nic nie znika).
 - `candidatesWithoutField`: bloki z kandydatem na pole bez pola i bez `SKIP`.
 - `unknownRefs`: ID z FormSpec, których nie ma w dokumencie (halucynacje).
 
