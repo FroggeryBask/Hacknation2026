@@ -90,19 +90,59 @@ def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
     return spec.model_copy(update={"pages": pages}), notes
 
 
-# Section titles of the predefined part that the compiler always adds from the design standard (applicant,
-# proxy, contact). A model sometimes copies them from the paper form anyway; they would appear twice.
-STANDARD_SECTION = re.compile(
-    r"wnioskodawc|pełnomocni|dane kontaktowe|dane do kontaktu|podpis", re.IGNORECASE
+# The predefined part (applicant, proxy, contact) is always added by the compiler from the design standard.
+# A model sometimes copies it from the paper form anyway; it would then appear twice. A section is such a
+# copy only when BOTH its title (or its page title) is about the applicant/proxy/contact AND its fields are
+# personal, address or contact data or paper-only items. "Oświadczenia wnioskodawcy" (statements) or
+# "Miejsce utrzymywania psa" (subject data) stay. A contact section counts only under a generic title:
+# "Osoba do kontaktu w sprawie najmu" is subject data, not the applicant's contact.
+STANDARD_TITLE = re.compile(
+    r"wnioskodawc|pełnomocni|^\s*(dane kontaktowe|dane do kontaktu|kontakt)\s*$", re.IGNORECASE
 )
+STANDARD_LABEL = re.compile(
+    r"^(imię|imiona|nazwisko|imię i nazwisko|nazwa|nazwa firmy|pesel|nip|regon|krs|numer krs|"
+    r"seria i numer dowodu.*|numer dowodu.*|obywatelstwo|"
+    r"adres|adres zamieszkania|adres siedziby|adres do korespondencji|"
+    r"miejscowość|ulica|nr domu|numer domu|nr lokalu|numer lokalu|kod pocztowy|poczta|gmina|powiat|"
+    r"województwo|kraj|telefon|nr telefonu|numer telefonu|telefon kontaktowy|e-mail|adres e-mail|email|"
+    r"adres poczty elektronicznej|adres skrzynki epuap|podpis|data|miejscowość i data|data i podpis)$"
+)
+STANDARD_SHARE = 0.8
+
+
+def _norm(label: str) -> str:
+    """Lowercase, brackets and punctuation removed, spaces collapsed."""
+    text = re.sub(r"[()\[\]:;.,*]", " ", label.lower())
+    return " ".join(text.split())
+
+
+def is_standard_label(label: str) -> bool:
+    """Personal, address or contact data, or a paper-only item. Alternatives count when every part is
+    standard: "Imię i nazwisko lub nazwa firmy", "Adres zamieszkania/siedziby"."""
+    parts = [p.strip() for p in re.split(r"/| lub | albo ", _norm(label)) if p.strip()]
+    # A short alternative borrows the first word: "adres zamieszkania/siedziby" -> "adres siedziby".
+    expanded: list[str] = []
+    for part in parts:
+        short = expanded and not STANDARD_LABEL.match(part)
+        expanded.append(f"{expanded[0].split()[0]} {part}" if short else part)
+    return bool(parts) and all(STANDARD_LABEL.match(p) for p in expanded)
+
+
+def _is_standard(section, page_title: str) -> bool:
+    if not (STANDARD_TITLE.search(section.title) or STANDARD_TITLE.search(page_title)):
+        return False
+    if not section.fields:
+        return False
+    standard = sum(is_standard_label(f.label) for f in section.fields)
+    return standard / len(section.fields) >= STANDARD_SHARE
 
 
 ENTITY_ID = re.compile(r"\b(NIP|REGON|KRS)\b")
 
 
 def drop_standard_sections(spec: FormSpec) -> tuple[FormSpec, list[str]]:
-    """Canon, second rule: sections about the applicant, proxy or contact data are left to the compiler's
-    predefined sections. Deterministic (by page and section title); a page left empty is dropped too.
+    """Canon, second rule: copies of the predefined applicant/proxy/contact part are left to the compiler
+    (see `_is_standard`). Deterministic; a page left empty is dropped too.
 
     What they asked for still matters: NIP/REGON/KRS among the applicant's fields means the applicant may be
     a company or institution, so `applicant.entity` is set (and `entity_nip_only` when only NIP is asked,
@@ -111,13 +151,9 @@ def drop_standard_sections(spec: FormSpec) -> tuple[FormSpec, list[str]]:
     pages = []
     dropped_labels: list[str] = []
     for page in spec.pages:
-        if STANDARD_SECTION.search(page.title):
-            notes.append(f"Strona „{page.title}” jest w części standardowej formularza (pominięta).")
-            dropped_labels += [f.label for s in page.sections for f in s.fields]
-            continue
         sections = []
         for section in page.sections:
-            if STANDARD_SECTION.search(section.title):
+            if _is_standard(section, page.title):
                 notes.append(f"Sekcja „{section.title}” jest w części standardowej formularza (pominięta).")
                 dropped_labels += [f.label for f in section.fields]
             else:
