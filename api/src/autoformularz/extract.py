@@ -1,17 +1,21 @@
 """Turns an uploaded file into a Document: text blocks with IDs in reading order and/or page images.
 
 Text formats keep reading order (paragraphs and table rows), so the model sees the paper layout.
-Images and scanned PDFs are passed as pictures to the vision model. Legacy .doc/.ods are converted
-with LibreOffice (headless, separate process). Everything happens in memory or a temp dir.
+Scans (JPG/PNG, PDF without a text layer) are cut into pages, read with OCR into the same blocks
+(with page numbers) and also passed as pictures to the vision model (OCR does not see empty tick boxes).
+Legacy .doc/.ods are converted with LibreOffice (headless, separate process). Everything happens in
+memory or a temp dir.
 
 For now one block = one line of the text below (a paragraph or a whole table row); finer blocks
-(cells, options) and scan transcription come later without changing the Document shape."""
+(cells, options) come later without changing the Document shape."""
 
 import io
 import re
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Iterator
+from itertools import pairwise
 from pathlib import Path
 
 import docx
@@ -19,10 +23,13 @@ from openpyxl import load_workbook
 from PIL import Image
 
 from autoformularz.document import Document, build
+from autoformularz.ocr import Ocr, OcrError, page_lines
 from autoformularz.upload import Kind, UploadError
 
 MAX_IMAGE_SIDE = 1600
 SCANNED_CHARS_PER_PAGE = 80
+MAX_OCR_PAGES = 30  # ~1 s per page; the longest material (form 9) has 16 pages
+PDF_RENDER_SCALE = 3  # 216 dpi: enough detail for OCR (images for the model are downscaled anyway)
 WINDOWS_SOFFICE = Path("C:/Program Files/LibreOffice/program/soffice.exe")
 
 
@@ -30,7 +37,10 @@ def _lines(text: str, page: int | None = None) -> list[tuple[str, int | None]]:
     return [(line, page) for line in text.splitlines()]
 
 
-def extract(kind: Kind, data: bytes, *, soffice: str = "soffice", max_pages: int = 6) -> Document:
+def extract(
+    kind: Kind, data: bytes, *, soffice: str = "soffice", max_pages: int = 6, ocr: Ocr | None = None
+) -> Document:
+    """`max_pages`: page images passed to the model. `ocr`: None = scans go only as images."""
     match kind:
         case Kind.DOCX:
             return build(_lines(docx_text(data)))
@@ -41,10 +51,77 @@ def extract(kind: Kind, data: bytes, *, soffice: str = "soffice", max_pages: int
         case Kind.ODS:
             return build(_lines(xlsx_text(convert(data, "ods", "xlsx", soffice))))
         case Kind.PDF:
-            return pdf(data, max_pages)
+            return pdf(data, max_pages, ocr)
         case Kind.JPEG | Kind.PNG:
-            return Document(images=[downscale(data)])
+            return scan(data, max_pages, ocr)
     raise UploadError("UNSUPPORTED_FORMAT", f"Nieobsługiwany format: {kind}.", 415)
+
+
+A4_RATIO = 2**0.5  # page height / width
+CUT_WINDOW = 0.05  # search a blank row within ±5% of a page height around the expected boundary
+
+
+def scan(data: bytes, max_pages: int, ocr: Ocr | None = None) -> Document:
+    """Image scan -> one image per page. Multi-page forms often come as ONE tall image with the pages
+    stacked (materials 1, 2, 6-9: up to 16 pages, 1654x37424 px); downscaled as a whole it would be an
+    unreadable strip, so it is cut into pages first."""
+    try:
+        img = Image.open(io.BytesIO(data))
+        img.load()  # Pillow refuses decompression bombs (> MAX_IMAGE_PIXELS) here
+    except (OSError, Image.DecompressionBombError) as e:  # UnidentifiedImageError is an OSError
+        raise UploadError("UNREADABLE_IMAGE", "Nie udało się odczytać obrazu.", 422) from e
+    pages = split_pages(img.convert("L"))  # grayscale: 1/3 of the memory, OCR reads gray anyway
+    return scanned_pages(iter(pages), len(pages), max_pages, ocr)
+
+
+def scanned_pages(pages: Iterator[Image.Image], total: int, max_pages: int, ocr: Ocr | None) -> Document:
+    """Page images -> Document: OCR blocks for the first MAX_OCR_PAGES pages + the first `max_pages`
+    images for the vision model. Pages are consumed one at a time, so a long PDF is never held in
+    memory at full resolution."""
+    lines: list[tuple[str, int | None]] = []
+    images: list[bytes] = []
+    notes: list[str] = []
+    ocr_ok = ocr is not None
+    if ocr is None:
+        notes.append("OCR niedostępny: skan przekazano modelowi tylko jako obraz.")
+    needed = max(max_pages, MAX_OCR_PAGES if ocr else 0)
+    for n, page in enumerate(pages, 1):
+        if n > needed:
+            break
+        if n <= max_pages:
+            images.append(_png(page))
+        if ocr is not None and ocr_ok and n <= MAX_OCR_PAGES:
+            try:
+                lines += [(line, n) for line in page_lines(page, ocr)]
+            except OcrError:
+                ocr_ok, lines = False, []
+                notes.append("OCR nie powiódł się: skan przekazano modelowi tylko jako obraz.")
+    if ocr_ok and total > MAX_OCR_PAGES:
+        notes.append(f"OCR objął pierwsze {MAX_OCR_PAGES} stron z {total}.")
+    if total > max_pages:
+        notes.append(f"Modelowi przekazano obrazy pierwszych {max_pages} stron z {total}.")
+    return build(lines, images=images, notes=notes)
+
+
+def split_pages(img: Image.Image) -> list[Image.Image]:
+    """Cuts a tall image of stacked A4 pages at the blankest row near each expected page boundary.
+    Deterministic: depends only on pixel values. A single page (or landscape) is returned as is."""
+    w, h = img.size
+    n = round(h / (w * A4_RATIO))
+    if n <= 1:
+        return [img]
+    # One brightness value per row (box filter = exact row mean), no extra dependencies.
+    rows = img.convert("L").resize((1, h), Image.Resampling.BOX).tobytes()
+    page_h = h / n
+    window = max(1, round(page_h * CUT_WINDOW))
+    cuts = [0]
+    for i in range(1, n):
+        target = round(i * page_h)
+        lo, hi = max(cuts[-1] + 1, target - window), min(h - 1, target + window)
+        # brightest row; ties -> closest to the expected boundary, then the upper one
+        cuts.append(max(range(lo, hi + 1), key=lambda y: (rows[y], -abs(y - target), -y)))
+    cuts.append(h)
+    return [img.crop((0, top, w, bottom)) for top, bottom in pairwise(cuts)]
 
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
@@ -143,35 +220,25 @@ def xlsx_text(data: bytes) -> str:
     return "\n".join(lines)
 
 
-def pdf(data: bytes, max_pages: int) -> Document:
+def pdf(data: bytes, max_pages: int, ocr: Ocr | None = None) -> Document:
     from pypdf import PdfReader
 
     reader = PdfReader(io.BytesIO(data))
     texts = [(p.extract_text() or "").strip() for p in reader.pages]
-    out = build([line for page, t in enumerate(texts, 1) for line in _lines(t, page)])
-    if sum(len(t) for t in texts) < SCANNED_CHARS_PER_PAGE * max(1, len(texts)):
-        out.images = render_pdf(data, max_pages)
-        out.notes.append("PDF bez warstwy tekstowej: przekazano obrazy stron.")
-    if len(reader.pages) > max_pages and out.images:
-        out.notes.append(f"Przeanalizowano pierwsze {max_pages} stron z {len(reader.pages)}.")
+    if sum(len(t) for t in texts) >= SCANNED_CHARS_PER_PAGE * max(1, len(texts)):
+        return build([line for page, t in enumerate(texts, 1) for line in _lines(t, page)])
+    # Scanned PDF: same path as image scans, rendered lazily page by page.
+    out = scanned_pages(render_pdf(data), len(reader.pages), max_pages, ocr)
+    out.notes.insert(0, "PDF bez warstwy tekstowej (skan).")
     return out
 
 
-def render_pdf(data: bytes, max_pages: int) -> list[bytes]:
+def render_pdf(data: bytes) -> Iterator[Image.Image]:
     import pypdfium2 as pdfium
 
     doc = pdfium.PdfDocument(data)
-    images = []
-    for i in range(min(len(doc), max_pages)):
-        pil = doc[i].render(scale=2).to_pil()
-        images.append(_png(pil))
-    return images
-
-
-def downscale(data: bytes) -> bytes:
-    img = Image.open(io.BytesIO(data))
-    img.load()
-    return _png(img)
+    for page in doc:
+        yield page.render(scale=PDF_RENDER_SCALE, grayscale=True).to_pil()
 
 
 def _png(img: Image.Image) -> bytes:

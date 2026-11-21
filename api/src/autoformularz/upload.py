@@ -40,6 +40,10 @@ EXTENSIONS = {
     "png": Kind.PNG,
 }
 
+# The task lists Word as one format "DOC (.doc .docx)", and offices often save a .docx under a .doc name
+# (materials 5 and 7). Within that group the real content decides how the file is read.
+SAME_FORMAT = {Kind.DOC: {Kind.DOC, Kind.DOCX}, Kind.DOCX: {Kind.DOC, Kind.DOCX}}
+
 FORBIDDEN_CHARS = set(";:><\\/|'*%$")
 MAX_NAME_LENGTH = 250
 
@@ -113,7 +117,7 @@ def validate_upload(name: str | None, data: bytes, max_bytes: int) -> Kind:
     actual = sniff(data)
     if actual is None:
         raise UploadError("UNSUPPORTED_CONTENT", "Nie rozpoznano zawartości pliku.", status=415)
-    if actual != declared:
+    if actual not in SAME_FORMAT.get(declared, {declared}):
         raise UploadError(
             "MIME_MISMATCH",
             f"Zawartość pliku ({MIME[actual]}) nie pasuje do rozszerzenia ({MIME[declared]}).",

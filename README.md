@@ -56,8 +56,10 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_LLM_PROVIDER` | `ollama` | `eden` włącza Eden AI, tylko lokalnie (patrz [Model językowy](#model-językowy-ollama-domyślnie-albo-eden-ai-opcjonalnie)) |
 | `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | brak | Model i klucz Eden AI, potrzebne tylko przy `eden` |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `600` | Limit czasu odpowiedzi modelu |
-| `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron zeskanowanego PDF przekazać modelowi |
+| `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron skanu (PDF lub obraz) przekazać modelowi jako obrazy; OCR czyta wszystkie strony (do 30) |
 | `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc i .ods) |
+| `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |
+| `AUTOFORMULARZ_TESSDATA_DIR` | brak | Katalog z `pol.traineddata`, jeśli nie ma go w domyślnym `tessdata` (np. instalator na Windows) |
 | `AUTOFORMULARZ_CORS_ORIGINS` | `http://localhost:3000` | Dozwolone adresy frontendu |
 
 ## REST API
@@ -93,7 +95,7 @@ Błędy mają postać `{"error": {"code": "...", "message": "..."}}`:
 
 ## Development
 
-Wymagane: Node.js 22+, [uv](https://docs.astral.sh/uv/) i LibreOffice (do plików .doc i .ods). [Ollama](https://ollama.com) jest potrzebna tylko wtedy, gdy nie używasz Eden AI.
+Wymagane: Node.js 22+, [uv](https://docs.astral.sh/uv/), LibreOffice (do plików .doc i .ods) i Tesseract z językiem polskim (OCR skanów; Windows: `winget install UB-Mannheim.TesseractOCR`, potem `pol.traineddata` z [tessdata_fast](https://github.com/tesseract-ocr/tessdata_fast) do katalogu z `AUTOFORMULARZ_TESSDATA_DIR`). [Ollama](https://ollama.com) jest potrzebna tylko wtedy, gdy nie używasz Eden AI.
 
 #### Pliki konfiguracyjne
 

@@ -10,6 +10,7 @@ from autoformularz.document import Document
 from autoformularz.extract import extract
 from autoformularz.lint import Issue, lint
 from autoformularz.llm import generate_spec
+from autoformularz.ocr import ocr_from
 from autoformularz.spec import FormSpec
 from autoformularz.upload import validate_upload
 
@@ -32,7 +33,8 @@ def from_spec(spec: FormSpec) -> Result:
 
 def from_file(name: str | None, data: bytes, settings: Settings, llm=generate_spec) -> Result:
     kind = validate_upload(name, data, int(settings.max_upload_mb * 1_048_576))
-    document = extract(kind, data, soffice=settings.soffice_bin, max_pages=settings.max_pdf_pages)
+    ocr = ocr_from(settings.ocr_bin, settings.ocr_lang, settings.tessdata_dir)
+    document = extract(kind, data, soffice=settings.soffice_bin, max_pages=settings.max_pdf_pages, ocr=ocr)
     spec = llm(document, settings)
     result = from_spec(spec)
     result.notes = document.notes + result.notes

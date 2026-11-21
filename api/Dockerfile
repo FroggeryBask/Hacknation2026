@@ -11,9 +11,13 @@ COPY src ./src
 RUN uv sync --frozen --no-dev --no-editable
 
 FROM python:3.14.10-slim-trixie
+# Tesseract + Polish model (Apache-2.0): OCR for scans.
 # LibreOffice reads legacy .doc and .ods. Build with --build-arg WITH_LIBREOFFICE=0 for a smaller image.
 ARG WITH_LIBREOFFICE=1
-RUN if [ "$WITH_LIBREOFFICE" = "1" ]; then \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-pol \
+    && rm -rf /var/lib/apt/lists/* \
+    && if [ "$WITH_LIBREOFFICE" = "1" ]; then \
       apt-get update \
       && apt-get install -y --no-install-recommends libreoffice-writer-nogui libreoffice-calc-nogui \
       && rm -rf /var/lib/apt/lists/*; \
