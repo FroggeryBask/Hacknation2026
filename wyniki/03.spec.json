@@ -1,0 +1,245 @@
+{
+  "title": "Wniosek o wydanie zaświadczenia",
+  "authority_kind": "urząd",
+  "authority_name": "Urząd Miasta i Gminy Młynary",
+  "applicant": {
+    "other_person": true,
+    "entity": false,
+    "entity_nip_only": false
+  },
+  "pages": [
+    {
+      "title": "Informacje o wnioskodawcy",
+      "sections": [
+        {
+          "title": "Dane wnioskodawcy",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię i nazwisko",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b3"
+              ]
+            },
+            {
+              "label": "PESEL",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "PESEL"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b10"
+              ]
+            },
+            {
+              "label": "Adres",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b8"
+              ]
+            },
+            {
+              "label": "Numer telefonu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "EPUAP"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b12"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Zaświadczenie o użytkach rolnych",
+      "sections": [
+        {
+          "title": "Typ zaświadczenia",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Proszę o wydanie zaświadczenia o",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "ilości posiadanych użytków rolnych w hektarach fizycznych i przeliczeniowych",
+                "ilości dzierżawionych użytków rolnych w hektarach fizycznych i przeliczeniowych",
+                "okresie posiadania gospodarstwa rolnego",
+                "nieposiadaniu użytków rolnych / gospodarstwa rolnego na terenie Gminy Młynary",
+                "inne"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b14",
+                "b15",
+                "b16",
+                "b17",
+                "b18",
+                "b19"
+              ]
+            },
+            {
+              "label": "Inne",
+              "kind": "LONG_TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Proszę o wydanie zaświadczenia o",
+                "equals": "inne",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b20"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Cel zaświadczenia",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Zaświadczenie potrzebne jest celem przedłożenia w",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21",
+                "b22"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    }
+  ],
+  "consents": [
+    "Znam warunki i sposób wydania zaświadczenia.",
+    "Dane w formularzu są zgodne z prawdą."
+  ],
+  "summary": "Zaświadczenie zostanie wydane po uiszczeniu opłaty skarbowej w wysokości 17 zł.",
+  "signed": true,
+  "block_roles": [
+    {
+      "block": "b1",
+      "role": "SKIP"
+    },
+    {
+      "block": "b2",
+      "role": "SKIP"
+    },
+    {
+      "block": "b4",
+      "role": "SKIP"
+    },
+    {
+      "block": "b5",
+      "role": "SKIP"
+    },
+    {
+      "block": "b6",
+      "role": "SKIP"
+    },
+    {
+      "block": "b7",
+      "role": "SKIP"
+    },
+    {
+      "block": "b9",
+      "role": "SKIP"
+    },
+    {
+      "block": "b11",
+      "role": "SKIP"
+    },
+    {
+      "block": "b13",
+      "role": "SKIP"
+    },
+    {
+      "block": "b23",
+      "role": "SKIP"
+    },
+    {
+      "block": "b24",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b25",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b26",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b27",
+      "role": "LEGAL_BASIS"
+    }
+  ]
+}

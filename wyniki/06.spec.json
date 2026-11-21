@@ -1,0 +1,723 @@
+{
+  "title": "Wniosek o wydanie zezwolenia na zajęcie pasa drogowego",
+  "authority_kind": "organ",
+  "authority_name": "Urząd Miasta i Gminy Miasteczko",
+  "applicant": {
+    "other_person": true,
+    "entity": false,
+    "entity_nip_only": false
+  },
+  "pages": [
+    {
+      "title": "Informacje o wniosku",
+      "sections": [
+        {
+          "title": "Dane wnioskodawcy",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię i nazwisko lub nazwa firmy",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b4",
+                "b5"
+              ]
+            },
+            {
+              "label": "Adres zamieszkania/siedziby",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b6",
+                "b7"
+              ]
+            },
+            {
+              "label": "Numer telefonu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b8"
+              ]
+            },
+            {
+              "label": "Adres e-mail",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b8"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Informacje o miejscu i celu zajęcia pasa drogowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Nazwa drogi oraz jej nr",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b15"
+              ]
+            },
+            {
+              "label": "Miejscowość",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Działka nr ewidencyjny",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Rodzaj robót i sposób wykonania",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b18",
+                "b19"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Powierzchnia zajęcia pasa drogowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Długość jezdnia (do 20% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21",
+                "b22"
+              ]
+            },
+            {
+              "label": "Szerokość jezdnia (do 20% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21",
+                "b22"
+              ]
+            },
+            {
+              "label": "Razem m2 jezdnia (do 20% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21",
+                "b22"
+              ]
+            },
+            {
+              "label": "Długość jezdnia (powyżej 20% do 50% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b23",
+                "b24"
+              ]
+            },
+            {
+              "label": "Szerokość jezdnia (powyżej 20% do 50% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b23",
+                "b24"
+              ]
+            },
+            {
+              "label": "Razem m2 jezdnia (powyżej 20% do 50% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b23",
+                "b24"
+              ]
+            },
+            {
+              "label": "Długość jezdnia (powyżej 50% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b25",
+                "b26"
+              ]
+            },
+            {
+              "label": "Szerokość jezdnia (powyżej 50% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b25",
+                "b26"
+              ]
+            },
+            {
+              "label": "Razem m2 jezdnia (powyżej 50% szerokości)",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b25",
+                "b26"
+              ]
+            },
+            {
+              "label": "Długość chodnik",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b27",
+                "b28"
+              ]
+            },
+            {
+              "label": "Szerokość chodnik",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b27",
+                "b28"
+              ]
+            },
+            {
+              "label": "Razem m2 chodnik",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b27",
+                "b28"
+              ]
+            },
+            {
+              "label": "Całkowita powierzchnia zajęcia",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b29"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Termin realizacji robót",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Od dnia",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b30"
+              ]
+            },
+            {
+              "label": "Do dnia",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b30"
+              ]
+            },
+            {
+              "label": "Liczba dni",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b31"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Wykonawca robót",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Nazwa przedsiębiorstwa lub osoby fizycznej",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b33"
+              ]
+            },
+            {
+              "label": "Osoba odpowiedzialna za wykonanie robót",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b34"
+              ]
+            },
+            {
+              "label": "Zamówienie",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b34"
+              ]
+            },
+            {
+              "label": "Numer telefonu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b35"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Załączniki",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Ogólny plan orientacyjny w skali 1:10 000 lub 1:25 000",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b37"
+              ]
+            },
+            {
+              "label": "Szczegółowy plan sytuacyjny w skali 1:1000 lub 1:500",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b38"
+              ]
+            },
+            {
+              "label": "Szczegółowy harmonogram robót",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b39"
+              ]
+            },
+            {
+              "label": "Zatwierdzony projekt organizacji ruchu",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b40"
+              ]
+            },
+            {
+              "label": "Informacja o sposobie zabezpieczenia robót",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b41"
+              ]
+            },
+            {
+              "label": "Oryginał lub poświadczony odpis pełnomocnictwa",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b42"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    }
+  ],
+  "consents": [
+    "Znam warunki przetwarzania danych osobowych przez Urząd Miasta i Gminy w Daleszycach.",
+    "Dane w formularzu są zgodne z prawdą.",
+    "Wyrażam zgodę na przetwarzanie moich danych osobowych przez Urząd Miasta i Gminy w Daleszycach."
+  ],
+  "summary": "Po przesłaniu wniosku, Urząd Miasta i Gminy w Daleszycach rozpatrzy jego treść i podejmie decyzję o wydaniu zezwolenia na zajęcie pasa drogowego.",
+  "signed": true,
+  "block_roles": [
+    {
+      "block": "b1",
+      "role": "SKIP"
+    },
+    {
+      "block": "b2",
+      "role": "SKIP"
+    },
+    {
+      "block": "b3",
+      "role": "SKIP"
+    },
+    {
+      "block": "b9",
+      "role": "SKIP"
+    },
+    {
+      "block": "b10",
+      "role": "SKIP"
+    },
+    {
+      "block": "b11",
+      "role": "SKIP"
+    },
+    {
+      "block": "b12",
+      "role": "SKIP"
+    },
+    {
+      "block": "b13",
+      "role": "SKIP"
+    },
+    {
+      "block": "b14",
+      "role": "SKIP"
+    },
+    {
+      "block": "b17",
+      "role": "SKIP"
+    },
+    {
+      "block": "b32",
+      "role": "SKIP"
+    },
+    {
+      "block": "b35",
+      "role": "SKIP"
+    },
+    {
+      "block": "b36",
+      "role": "SKIP"
+    },
+    {
+      "block": "b42",
+      "role": "SKIP"
+    },
+    {
+      "block": "b43",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b44",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b45",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b46",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b47",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b48",
+      "role": "SKIP"
+    },
+    {
+      "block": "b49",
+      "role": "SKIP"
+    }
+  ]
+}

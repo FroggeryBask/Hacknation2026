@@ -95,6 +95,7 @@ class BlockRole(BaseModel):
 def _blocks():
     return Field(
         default_factory=list,
+        max_length=MAX_REFS,
         description="IDs of the source blocks this element comes from (label, options), e.g. ['b12', 'b13'].",
     )
 
@@ -107,12 +108,19 @@ class Condition(BaseModel):
     negate: bool = Field(default=False, description="True = show when the option is NOT selected.")
 
 
+# Upper bounds in the JSON Schema (maxItems). Generous for real forms (the largest material, form 9, merges
+# three applications), but they stop a model stuck in a repetition loop when the provider enforces the schema.
+MAX_PAGES, MAX_SECTIONS, MAX_FIELDS, MAX_OPTIONS, MAX_REFS = 10, 15, 40, 40, 30
+
+
 class FieldSpec(BaseModel):
     label: str
     kind: Kind
     required: bool = True
     description: str | None = Field(default=None, description="Short hint under the field, plain language.")
-    options: list[str] = Field(default_factory=list, description="Options for choice fields.")
+    options: list[str] = Field(
+        default_factory=list, max_length=MAX_OPTIONS, description="Options for choice fields."
+    )
     dictionary: Dictionary | None = None
     prefill: Prefill | None = Field(default=None, description="Registry value shown read-only.")
     validators: list[Validator] = Field(default_factory=list)
@@ -126,14 +134,14 @@ class SectionSpec(BaseModel):
     title: str
     repeating: bool = Field(default=False, description="True for repeated items (people, vehicles, plots).")
     description: str | None = None
-    fields: list[FieldSpec]
+    fields: list[FieldSpec] = Field(max_length=MAX_FIELDS)
     show_if: Condition | None = None
     blocks: list[str] = _blocks()
 
 
 class PageSpec(BaseModel):
     title: str = Field(description="Short page title describing its topic, e.g. 'Informacje o budynku'.")
-    sections: list[SectionSpec]
+    sections: list[SectionSpec] = Field(max_length=MAX_SECTIONS)
 
 
 class ApplicantSpec(BaseModel):
@@ -155,7 +163,10 @@ class FormSpec(BaseModel):
     )
     authority_name: str = Field(description="Office or authority with its unit, e.g. 'Urząd Gminy X'.")
     applicant: ApplicantSpec = Field(default_factory=ApplicantSpec)
-    pages: list[PageSpec] = Field(description="Case-specific pages only (subject of the application).")
+    pages: list[PageSpec] = Field(
+        max_length=MAX_PAGES,
+        description="Case-specific pages only (subject of the application), each page once.",
+    )
     consents: list[str] = Field(
         default_factory=list, description="Statements the applicant confirms (besides the GDPR consent)."
     )

@@ -1,0 +1,73 @@
+{
+  "source": "materialy/4. Wniosek o wynajęcie lub użyczenie świetlicy wiejskiej - formularze do cyfryzacji/Wniosek o wynajęcie świetlicy.docx",
+  "sourceFormat": "docx",
+  "model": "zapisany FormSpec",
+  "errors": 0,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Kod pocztowy"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Ulica"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer budynku"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer lokalu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Numer telefonu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
+    }
+  ],
+  "notes": [
+    "Sekcja „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
+  ],
+  "coverage": {
+    "blocks": 29,
+    "referenced": 23,
+    "unreferenced": [
+      "b4",
+      "b6",
+      "b8",
+      "b10",
+      "b11",
+      "b12"
+    ],
+    "candidates": 13,
+    "candidatesWithoutField": [
+      "b2",
+      "b4",
+      "b6",
+      "b8"
+    ],
+    "unknownRefs": []
+  },
+  "edenUsage": {
+    "calls": 0,
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "costUsd": 0
+  }
+}

@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     llm_model: str = "qwen3-vl:8b"
     llm_timeout_s: float = 600.0
     llm_num_ctx: int = 16384
+    # Cap on the model's answer. A FormSpec of the largest material fits easily; a model stuck in a
+    # repetition loop is cut here instead of running until the provider's limit (Eden: 400 s, ~16k tokens).
+    llm_max_tokens: int = 8000
     max_pdf_pages: int = 6
 
     # LLM provider. "eden" (Eden AI, open-weight models only) is for local development and tests only;

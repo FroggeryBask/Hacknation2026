@@ -58,8 +58,26 @@ _CANDIDATES: list[tuple[CandidateKind, re.Pattern[str]]] = [
     ("checkbox", re.compile(rf"[{_BOX}]\s*[^{_BOX}|]*")),
     ("blank", re.compile(r"[^_|]{0,60}_{3,}")),
     ("dots", re.compile(r"[^.…|]{0,60}(?:\.{4,}|…{2,})")),
-    ("colon", re.compile(r"[^:|]{2,60}:\s*(?=\||$)")),
 ]
+
+
+def _colon_labels(text: str) -> list[str]:
+    """`Label:` with nothing after it, per table cell. A cell may hold several labels in a row
+    ("Miejscowość: Kod pocztowy:"): when the cell ends with a colon, every part before a colon is a label.
+    A cell with a value after its last colon ("Płeć: ❑ pies", "godz. 10:30") gives none."""
+    labels = []
+    for cell in text.split("|"):
+        cell = cell.strip()
+        if not cell.endswith(":"):
+            continue
+        labels += [
+            f"{p.strip()}:" for p in cell[:-1].split(":") if 2 <= len(p.strip()) <= 60 and _has_letter(p)
+        ]
+    return labels
+
+
+def _has_letter(text: str) -> bool:
+    return any(ch.isalpha() for ch in text)
 
 
 def find_candidates(block: Block) -> list[FieldCandidate]:
@@ -71,6 +89,7 @@ def find_candidates(block: Block) -> list[FieldCandidate]:
             for m in pattern.finditer(block.text)
             if m.group(0).strip()
         ]
+    out += [FieldCandidate(block.id, "colon", label) for label in _colon_labels(block.text)]
     return out
 
 

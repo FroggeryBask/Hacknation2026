@@ -56,6 +56,7 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_LLM_PROVIDER` | `ollama` | `eden` włącza Eden AI, tylko lokalnie (patrz [Model językowy](#model-językowy-ollama-domyślnie-albo-eden-ai-opcjonalnie)) |
 | `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | brak | Model i klucz Eden AI, potrzebne tylko przy `eden` |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `600` | Limit czasu odpowiedzi modelu |
+| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `8000` | Maksymalna długość odpowiedzi modelu; dłuższa (zwykle zapętlenie) kończy się błędem `LLM_TRUNCATED` bez ponawiania |
 | `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron skanu (PDF lub obraz) przekazać modelowi jako obrazy; OCR czyta wszystkie strony (do 30) |
 | `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc; .ods jest czytany bez niego) |
 | `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |

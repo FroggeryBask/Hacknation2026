@@ -1,0 +1,313 @@
+{
+  "title": "Wniosek o wynajęcie/użyczenie świetlicy wiejskiej",
+  "authority_kind": "organ",
+  "authority_name": "Wójt Gminy Płoskinia",
+  "applicant": {
+    "other_person": true,
+    "entity": false,
+    "entity_nip_only": false
+  },
+  "pages": [
+    {
+      "title": "Informacje o wynajęciu świetlicy",
+      "sections": [
+        {
+          "title": "Dane wnioskodawcy",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię i nazwisko",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b5"
+              ]
+            },
+            {
+              "label": "Adres zamieszkania",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b7"
+              ]
+            },
+            {
+              "label": "Numer telefonu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b9"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Informacje o wynajęciu",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Lokalizacja świetlicy",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Okres wynajęcia od",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Okres wynajęcia do",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Cel wynajęcia",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b17"
+              ]
+            },
+            {
+              "label": "Rodzaj uroczystości",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b18"
+              ]
+            },
+            {
+              "label": "Przewidywana ilość uczestników",
+              "kind": "NUMBER",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b19"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Osoba odpowiedzialna",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię i nazwisko osoby odpowiedzialnej",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21"
+              ]
+            },
+            {
+              "label": "Zgoda osoby odpowiedzialnej",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "Tak",
+                "Nie"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b22"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    }
+  ],
+  "consents": [
+    "Zapoznałem/am się z warunkami wynajmu świetlicy wiejskiej",
+    "W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym do świetlicy",
+    "Zachowuję się zgodnie z przepisami sanitarnymi, BHP i p.poż. w czasie trwania przedsięwzięcia",
+    "Na okres wynajmu ponoszę pełną odpowiedzialność za powierzone mienie"
+  ],
+  "summary": null,
+  "signed": true,
+  "block_roles": [
+    {
+      "block": "b3",
+      "role": "SKIP"
+    },
+    {
+      "block": "b23",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b24",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b25",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b26",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b27",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b28",
+      "role": "SKIP"
+    },
+    {
+      "block": "b29",
+      "role": "SKIP"
+    },
+    {
+      "block": "b1",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b2",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b13",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b14",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b15",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b16",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b17",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b18",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b19",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b20",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b21",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b22",
+      "role": "INSTRUCTION"
+    }
+  ]
+}
