@@ -57,13 +57,13 @@ Przynależność pola do formularza sprawdzamy kotwicą w źródle, nie słownik
 
 ### 6. Compiler (kod)
 - Sekcje predefiniowane z szablonów (te same techNames i zapytania co w referencji).
-- **Tekst prawny wklejany dosłownie** z bloków (pouczenia, RODO, podstawa prawna, oświadczenia) do `TEXT_BLOCK` lub opisu sekcji.
+- **Tekst wklejany dosłownie** z bloków: pouczenia (`INSTRUCTION`) i podstawa prawna (`LEGAL_BASIS`) jako `TEXT_BLOCK` na stronie końcowej (sekcje „Pouczenie” i „Podstawa prawna”, przed podglądem). Według standardu **nie** kopiujemy oświadczeń (mają być krótkie i neutralne płciowo, więc pisze je model w `consents`) ani klauzuli RODO (tylko odnośnik, „zasadą jest niezamieszczanie takich treści na formularzu”).
 - Warunki → `states` z zapytaniem jsonata w kształcie z referencji (`{"type": "SHOW", "query": "(\"…\" in tabs[…].questions[…].field.__userAnswer)"}`). Model nigdy nie pisze jsonaty.
 - Strony i flow.
 
 ### 7. Lint (kod)
 Obecne reguły z „Reguł technicznych”, a do tego:
-- warunek wskazuje istniejące pole i opcję, pole sterujące jest wcześniej, brak cykli;
+- warunek wskazuje istniejące pole i opcję (`STATE_UNKNOWN_OPTION`), brak cykli (`STATE_CYCLE`), pole sterujące jest wyżej na ekranie (`STATE_FORWARD_REF`, ostrzeżenie; kolejność z `y`/`x` siatki, nie z tablicy JSON);
 - liczniki pokrycia tekstu i pól w odpowiedzi `?details=true`.
 
 ### 8. UI

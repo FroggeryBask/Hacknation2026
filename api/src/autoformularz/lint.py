@@ -50,6 +50,12 @@ SELECT_ONLY_DICTS = {
 
 TECH_REF = re.compile(r"'([^']+)' in (?:field\.techName|fieldTechName)")
 TAB_REF = re.compile(r"tabs\['((?:[^'\\]|\\.)+)' in title\]")
+# ("Option" in …['controlling_tech' in field.techName].field.__userAnswer) and the same-repeating-section form
+# (…['controlling_tech' in fieldTechName].answers): the lazy middle part stops at the controlling field.
+VALUE_REF = re.compile(
+    r'"((?:[^"\\]|\\.)*)" in [^"]*?\[\'([^\']+)\' in (?:field\.techName|fieldTechName)\]'
+    r"\.(?:field\.__userAnswer|answers)"
+)
 
 
 @dataclass
@@ -90,7 +96,9 @@ def lint(form: Json) -> list[Issue]:
     ids: set[str] = set()
     tech_names: dict[str, int] = {}
     tab_titles = {t.get("title") for t in tabs}
-    queries: list[tuple[str, str]] = []
+    queries: list[tuple[str, str, str]] = []  # (path, techName of the element with the state, query)
+    order: dict[str, int] = {}  # techName -> position in the form (first occurrence)
+    options: dict[str, set[str]] = {}  # choice field techName -> option names (fields without a dictionary)
 
     def check_field(f: Json, path: str, tab_type: str) -> None:
         fid = f.get("id")
@@ -104,7 +112,10 @@ def lint(form: Json) -> list[Issue]:
             err("TECHNAME_MISSING", "Element nie ma nazwy technicznej (techName).", path)
         else:
             tech_names[tech] = tech_names.get(tech, 0) + 1
+            order.setdefault(tech, len(order))
         typ = f.get("type")
+        if tech and typ in CHOICE_TYPES and not f.get("dictionaryName") and f.get("options"):
+            options[tech] = {o.get("name") if isinstance(o, dict) else str(o) for o in f["options"]}
         validation = f.get("validation")
         if typ in FIELD_TYPES:
             if not isinstance(validation, list):
@@ -115,8 +126,6 @@ def lint(form: Json) -> list[Issue]:
                         err("VALIDATOR_UNKNOWN", f"Nieznany walidator: {v}.", path)
         if tab_type == "FINISH" and typ in INPUT_TYPES:
             err("FINISH_HAS_INPUT", "Na stronie końcowej nie może być pól do wprowadzania danych.", path)
-        if tab_type == "FINISH" and typ == "TEXT_BLOCK":
-            warn("FINISH_TEXT_BLOCK", "Reguły dopuszczają na stronie końcowej tylko INFO_SECTION.", path)
         if typ == "INFO_SECTION" and not f.get("description"):
             err("INFO_NO_DESCRIPTION", "Sekcja informacyjna musi mieć opis.", path)
         dictionary = f.get("dictionaryName")
@@ -139,14 +148,14 @@ def lint(form: Json) -> list[Issue]:
             if not s.get("query"):
                 err("STATE_QUERY", "Stan musi mieć warunek (query).", path)
             else:
-                queries.append((path, s["query"]))
+                queries.append((path, tech or "", s["query"]))
 
     for t in tabs:
         ttype = t.get("type", "")
         tpath = t.get("title", "")
         ids.add(t.get("id", ""))
         fields_on_tab = 0
-        for qn in t.get("questions") or []:
+        for qn in _on_screen(t.get("questions")):
             sec = qn.get("field") or {}
             spath = f"{tpath} › {sec.get('title') or sec.get('techName')}"
             if sec.get("type") not in SECTION_TYPES:
@@ -157,7 +166,7 @@ def lint(form: Json) -> list[Issue]:
                 )
                 continue
             check_field(sec, spath, ttype)
-            for child in sec.get("repeatingSectionGrid") or []:
+            for child in _on_screen(sec.get("repeatingSectionGrid")):
                 f = child.get("field") or {}
                 fpath = f"{spath} › {f.get('title') or f.get('techName')}"
                 if f.get("type") in SECTION_TYPES:
@@ -174,7 +183,25 @@ def lint(form: Json) -> list[Issue]:
         if n > 1:
             warn("TECHNAME_DUPLICATE", f"Nazwa techniczna {name} występuje {n} razy.")
 
-    for path, query in queries:
+    depends: dict[str, set[str]] = {}  # element techName -> techNames its states read
+    for path, owner, query in queries:
+        controls = set(TECH_REF.findall(query))
+        depends.setdefault(owner, set()).update(controls)
+        for value, tech in VALUE_REF.findall(query):
+            value = value.replace('\\"', '"')
+            if tech in options and value not in options[tech]:
+                err(
+                    "STATE_UNKNOWN_OPTION",
+                    f"Warunek sprawdza opcję „{value}”, której nie ma w polu {tech}.",
+                    path,
+                )
+        for tech in controls & order.keys():
+            if owner in order and tech != owner and order[tech] > order[owner]:
+                warn(
+                    "STATE_FORWARD_REF",
+                    f"Pole sterujące {tech} jest dalej w formularzu niż pole zależne.",
+                    path,
+                )
         for tech in TECH_REF.findall(query):
             if tech not in tech_names:
                 err("STATE_UNKNOWN_FIELD", f"Warunek odwołuje się do nieistniejącego pola {tech}.", path)
@@ -183,6 +210,9 @@ def lint(form: Json) -> list[Issue]:
                 err("STATE_UNKNOWN_TAB", f"Warunek odwołuje się do nieistniejącej strony {tab}.", path)
         if query.count("(") != query.count(")"):
             err("STATE_PARENS", "Niezbalansowane nawiasy w warunku.", path)
+
+    for tech in _cycle(depends):
+        err("STATE_CYCLE", f"Element {tech} zależy (pośrednio) od samego siebie.", tech)
 
     tab_ids = [t.get("id") for t in tabs]
     links = (form.get("flow") or {}).get("links") or []
@@ -196,6 +226,27 @@ def lint(form: Json) -> list[Issue]:
         if (a, b) not in pairs and not any(tgt == b for _, tgt in pairs):
             err("FLOW_UNREACHABLE", "Do strony nie prowadzi żadne przejście.", str(b))
     return issues
+
+
+def _on_screen(items: list[Json] | None) -> list[Json]:
+    """Grid items in display order: the JSON array order is not the layout, `y` then `x` is."""
+    return sorted(items or [], key=lambda i: (i.get("y", 0), i.get("x", 0)))
+
+
+def _cycle(depends: dict[str, set[str]]) -> list[str]:
+    """Elements on a dependency cycle (A shown when B, B shown when A; also A shown when A)."""
+    on_cycle: list[str] = []
+    for start in depends:
+        stack, seen = list(depends[start]), set()
+        while stack:
+            node = stack.pop()
+            if node == start:
+                on_cycle.append(start)
+                break
+            if node not in seen:
+                seen.add(node)
+                stack.extend(depends.get(node, ()))
+    return on_cycle
 
 
 def as_dicts(issues: list[Issue]) -> list[Json]:

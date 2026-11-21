@@ -10,7 +10,9 @@
 - [ai] LLM fills a small FormSpec (constrained by JSON Schema); a deterministic compiler builds the COI JSON (long JSON with UUIDs/jsonata from a small model is unreliable; code is testable and repeatable)
 - [ai] Predefined sections (office, applicant, address, proxy, stamp duty, contact, consent, preview) come from compiler templates, not the model (standard says use them; same techNames and queries as reference JSON)
 - [format] Follow the reference JSON where it differs from the written schema: `repeatingSectionGrid` (not `repetingSectionGrid`), also for plain SECTION; address/contact prefilled from MLPZ but editable
-- [format] FINISH page uses INFO_SECTION (written rule), reference uses TEXT_BLOCK: lint gives only a warning for that
+- [format] FINISH page may hold INFO_SECTION and TEXT_BLOCK (agreed with COI mentors; reference 5 uses TEXT_BLOCK), no warning
+- [format] Verbatim source text only for instructions and legal basis (TEXT_BLOCK sections on the FINISH page); statements stay short and gender-neutral from the model, the GDPR clause is only linked (design standard, "Oświadczenie")
+- [lint] Field order for condition checks comes from grid `y`/`x`, not the JSON array order (reference files store fields out of display order)
 - [format] Element ids are UUIDv5 from form title + path (same input gives the same JSON, readable diffs)
 - [format] `validation` lists REQUIRED + validators (PESEL, NIP, REGON, ZIP_CODE, EMAIL...); validators also inferred from labels (reference leaves it empty; validation is an extra-points item)
 - [extract] DOCX read from XML incl. text boxes (forms 2 and 8 are built from text boxes); .doc/.ods via LibreOffice headless (MPL-2.0 external process, not linked; confirm with COI mentors); scanned PDF pages rendered with pypdfium2 (PyMuPDF is AGPL)

@@ -25,18 +25,17 @@ class Result:
     coverage: Coverage | None = None
 
 
-def from_spec(spec: FormSpec) -> Result:
-    form, warnings = compile_form(spec)
-    return Result(form=form, spec=spec, issues=lint(form), notes=warnings)
+def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
+    form, warnings = compile_form(spec, document)
+    return Result(form=form, spec=spec, issues=lint(form), notes=warnings, document=document)
 
 
 def from_file(name: str | None, data: bytes, settings: Settings, llm=generate_spec) -> Result:
     kind = validate_upload(name, data, int(settings.max_upload_mb * 1_048_576))
     document = extract(kind, data, soffice=settings.soffice_bin, max_pages=settings.max_pdf_pages)
     spec = llm(document, settings)
-    result = from_spec(spec)
+    result = from_spec(spec, document)
     result.notes = document.notes + result.notes
     result.source_format = kind.value
-    result.document = document
     result.coverage = coverage(spec, document)
     return result
