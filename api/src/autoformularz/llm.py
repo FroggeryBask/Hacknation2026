@@ -1,9 +1,8 @@
 """LLM step: extracted form content -> FormSpec.
 
-Default: local Ollama with the FormSpec JSON Schema as `format`, so decoding is constrained to valid JSON of
-the right shape (task rule: no models available only through external APIs). For local development and the
-hackathon demo, AUTOFORMULARZ_LLM_PROVIDER=eden sends the same prompt to an open-weight model on Eden AI (OpenAI
-Chat Completions); docker-compose.yml alone forces Ollama, only the docker-compose.eden.yml overlay enables Eden."""
+Default: an open-weight model on Eden AI (organizer-provided, OpenAI Chat Completions, team decision 2026-11-21).
+AUTOFORMULARZ_LLM_PROVIDER=ollama runs the model locally instead (offline option), with the FormSpec JSON Schema
+as `format`, so decoding is constrained to valid JSON of the right shape."""
 
 import base64
 import contextlib
@@ -17,7 +16,7 @@ import httpx
 from pydantic import ValidationError
 
 from autoformularz.config import Settings
-from autoformularz.document import Document
+from autoformularz.document import FILL_LINE, Document
 from autoformularz.spec import FormSpec, model_schema
 
 SYSTEM_PROMPT = """\
@@ -95,8 +94,8 @@ log = logging.getLogger("autoformularz.llm")
 EDEN_USAGE: list[dict] = []
 
 DEV_WARNING = (
-    "LLM przez Eden AI: tryb demo i deweloperski (uzgodniony z mentorami COI); każde zapytanie kosztuje. "
-    "Domyślnie rozwiązanie używa lokalnej Ollamy."
+    "LLM przez Eden AI: każde zapytanie kosztuje (wspólny budżet, docs/eden-budzet.md). "
+    "Tryb offline: AUTOFORMULARZ_LLM_PROVIDER=ollama."
 )
 
 
@@ -161,7 +160,7 @@ class LLMError(Exception):
 def build_user_prompt(ex: Document) -> str:
     parts = ["Przeanalizuj formularz i zwróć FormSpec."]
     if ex.blocks:
-        listing = "\n".join(f"[{b.id}] {b.text}" for b in ex.blocks)
+        listing = "\n".join(f"[{b.id}] {FILL_LINE.sub('……', b.text)}" for b in ex.blocks)
         parts.append(
             "Bloki formularza (kolejność jak w dokumencie, wiersze tabel jako | komórka |):\n\n" + listing
         )
@@ -192,27 +191,59 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
         "model": settings.llm_model,
         "messages": msgs,
         "format": model_schema(),
-        "stream": False,
+        # Streamed so a looping answer can be stopped as soon as it repeats a section (see below).
+        "stream": True,
         "think": False,
+        "keep_alive": settings.llm_keep_alive,
         "options": {
             "temperature": 0,
             "num_ctx": settings.llm_num_ctx,
             "num_predict": settings.llm_max_tokens,
         },
     }
+    parts: list[str] = []
+    size = checked = 0
+    done_reason = None
     try:
-        r = httpx.post(f"{settings.ollama_url}/api/chat", json=payload, timeout=settings.llm_timeout_s)
+        with httpx.stream(
+            "POST", f"{settings.ollama_url}/api/chat", json=payload, timeout=settings.llm_timeout_s
+        ) as r:
+            if r.status_code != 200:
+                r.read()
+                raise LLMError("LLM_ERROR", f"Model językowy zwrócił błąd {r.status_code}: {r.text[:300]}")
+            for line in r.iter_lines():
+                try:
+                    chunk = json.loads(line)
+                except ValueError:
+                    continue
+                piece = (chunk.get("message") or {}).get("content", "")
+                parts.append(piece)
+                size += len(piece)
+                done_reason = chunk.get("done_reason") or done_reason
+                if chunk.get("done"):
+                    break
+                # The model began writing the form again (form 9: once per version of the request): stop
+                # now instead of at llm_max_tokens. Leaving the block closes the connection and Ollama stops
+                # generating; the complete part is used (generate_spec -> salvage). On form 9 this halves
+                # the answer; a healthy answer never repeats a whole section, so it is never cut.
+                if size - checked >= REPEAT_CHECK_CHARS:
+                    checked = size
+                    text = "".join(parts)
+                    found = _complete_pages(text)
+                    if found and first_repeat(found[1]):
+                        log.warning("Model started repeating sections: stopped after %d characters.", size)
+                        raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
     except httpx.HTTPError as e:
         raise LLMError(
             "LLM_UNAVAILABLE", f"Model językowy jest niedostępny ({settings.ollama_url}).", 503
         ) from e
-    if r.status_code != 200:
-        raise LLMError("LLM_ERROR", f"Model językowy zwrócił błąd {r.status_code}: {r.text[:300]}")
-    body = r.json()
-    content = body.get("message", {}).get("content", "")
-    if body.get("done_reason") == "length":
+    content = "".join(parts)
+    if done_reason == "length":
         raise truncated(settings, content)
     return content
+
+
+REPEAT_CHECK_CHARS = 400  # how often a streamed answer is checked for a repeated section (~100 tokens)
 
 
 def truncated(settings: Settings, partial: str = "") -> LLMError:
@@ -304,6 +335,102 @@ def parse_spec(content: str) -> FormSpec:
     return FormSpec.model_validate(json.loads(text))
 
 
+# ---------------------------------------------------------------- a cut or looping answer
+
+_DECODER = json.JSONDecoder()
+_PAGES = re.compile(r'"pages"\s*:\s*\[')
+_SECTIONS = re.compile(r'"sections"\s*:\s*\[')
+_TITLE = re.compile(r'"title"\s*:\s*("(?:[^"\\]|\\.)*")')
+
+
+def _items(text: str, pos: int) -> tuple[list, int, bool]:
+    """Complete JSON values of an array from `pos` (after its "["): (values, end, array closed)."""
+    out: list = []
+    while True:
+        while pos < len(text) and text[pos] in " \n\r\t,":
+            pos += 1
+        if pos >= len(text) or text[pos] == "]":
+            return out, pos, pos < len(text)
+        try:
+            value, pos = _DECODER.raw_decode(text, pos)
+        except json.JSONDecodeError:
+            return out, pos, False
+        out.append(value)
+
+
+def _complete_pages(text: str) -> tuple[int, list[dict]] | None:
+    """Where `pages` starts and its complete content so far: whole pages, plus the whole sections of a
+    page still being written (models put a whole form on one page too)."""
+    m = _PAGES.search(text)
+    if not m:
+        return None
+    pages, pos, closed = _items(text, m.end())
+    if not closed:
+        s, t = _SECTIONS.search(text, pos), _TITLE.search(text, pos)
+        if s and t and t.start() < s.start():
+            sections, _, _ = _items(text, s.end())
+            if sections:
+                pages.append({"title": json.loads(t.group(1)), "sections": sections})
+    return m.start(), [p for p in pages if isinstance(p, dict) and isinstance(p.get("sections"), list)]
+
+
+def _section_key(section: dict) -> tuple:
+    """How the canon (check.dedupe) tells a repeated section: same title and field labels."""
+    fields = section.get("fields") if isinstance(section.get("fields"), list) else []
+    return section.get("title"), tuple(f.get("label") for f in fields if isinstance(f, dict))
+
+
+# A loop writes several sections it already wrote one after another. A single repeated section is normal:
+# form 9's good answer has "Opinia macierzystego klubu sportowego" on the athlete's and the coach's page
+# (the canon keeps one). The looping answer repeated 4 in a row.
+LOOP_SECTIONS = 2
+
+
+def first_repeat(pages: list[dict]) -> tuple[int, int] | None:
+    """(page, section) where the model began writing the form again: the first of LOOP_SECTIONS
+    consecutive sections it already wrote (same title and fields)."""
+    seen: set[tuple] = set()
+    run: list[tuple[int, int]] = []
+    for pi, page in enumerate(pages):
+        for si, section in enumerate(page["sections"]):
+            if not isinstance(section, dict):
+                continue
+            key = _section_key(section)
+            run = [*run, (pi, si)] if key in seen else []
+            if len(run) >= LOOP_SECTIONS:
+                return run[0]
+            seen.add(key)
+    return None
+
+
+def salvage(partial: str) -> FormSpec | None:
+    """A FormSpec from an answer cut at the limit: everything before `pages`, then the complete pages and
+    sections up to the first repeated section. None when too little is left (no pages, invalid head).
+    On the materials the model wrote form 9 well once, then began it again per version of the request."""
+    found = _complete_pages(partial)
+    if not found:
+        return None
+    start, pages = found
+    if cut := first_repeat(pages):
+        pi, si = cut
+        pages = [*pages[:pi], {**pages[pi], "sections": pages[pi]["sections"][:si]}]
+    pages = [p for p in pages if p["sections"]]
+    if not pages:
+        return None
+    head = partial[:start].rstrip().rstrip(",")
+    text = (
+        head
+        + (", " if head.strip() != "{" else "")
+        + '"pages": '
+        + json.dumps(pages, ensure_ascii=False)
+        + "}"
+    )
+    try:
+        return FormSpec.model_validate(json.loads(text))
+    except json.JSONDecodeError, ValidationError:
+        return None
+
+
 def generate_spec(ex: Document, settings: Settings) -> FormSpec:
     eden = settings.llm_provider == "eden"
     call = _call_eden if eden else _call_ollama
@@ -311,7 +438,17 @@ def generate_spec(ex: Document, settings: Settings) -> FormSpec:
     if eden:  # json_schema may be dropped by the provider, so the schema also goes in the prompt
         system += "\nSchemat JSON (FormSpec):\n" + json.dumps(model_schema(), ensure_ascii=False)
     messages = [{"role": "system", "content": system}, {"role": "user", "content": build_user_prompt(ex)}]
-    content = call(messages, ex.images, settings)
+    try:
+        content = call(messages, ex.images, settings)
+    except LLMError as e:
+        if e.code != "LLM_TRUNCATED" or not (spec := salvage(e.partial)):
+            raise
+        log.warning("Model answer cut at the limit (repetition); kept its complete part.")
+        ex.notes.append(  # same list as the source Document's notes: shown with the result
+            "Model powtarzał sekcje i przekroczył limit odpowiedzi: użyto kompletnej części odpowiedzi "
+            "sprzed powtórzeń. Sprawdź, czy formularz ma wszystkie sekcje."
+        )
+        return spec
     try:
         return parse_spec(content)
     except (json.JSONDecodeError, ValidationError) as e:

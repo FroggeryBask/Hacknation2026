@@ -9,6 +9,11 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 BlockKind = Literal["paragraph", "table_row", "heading"]
+
+# A hand-written line ("……………", "_____", ". . . . .") is only a place to fill in: its length says nothing
+# to the model. Form 9 has lines of 300-600 dots, a third of its prompt. The prompt shortens them to "……"
+# (llm.build_user_prompt); blocks keep the source text (presort, coverage and `?details=true` see it).
+FILL_LINE = re.compile(r"[.…_](?: ?[.…_]){3,}")
 CandidateKind = Literal["blank", "dots", "checkbox", "colon"]
 
 

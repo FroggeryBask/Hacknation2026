@@ -1,5 +1,6 @@
 """LLM transport (Ollama / Eden AI dev provider). httpx.post is monkeypatched: no network."""
 
+import contextlib
 import copy
 import json
 
@@ -48,22 +49,31 @@ class Recorder:
         self.calls.append({"url": url, "json": copy.deepcopy(json), "headers": headers or {}})
         return self.responses.pop(0)
 
+    @contextlib.contextmanager
+    def stream(self, method, url, *, json=None, headers=None, timeout=None):
+        """httpx.stream (Ollama): the same queued responses, read line by line."""
+        yield self(url, json=json, headers=headers, timeout=timeout)
+
 
 @pytest.fixture
 def post(monkeypatch):
     def install(*responses: httpx.Response) -> Recorder:
         rec = Recorder(*responses)
         monkeypatch.setattr(llm.httpx, "post", rec)
+        monkeypatch.setattr(llm.httpx, "stream", rec.stream)
         return rec
 
     return install
 
 
-def test_default_provider_is_ollama(monkeypatch):
-    monkeypatch.delenv("AUTOFORMULARZ_LLM_PROVIDER", raising=False)
+def test_default_provider_is_eden(monkeypatch):
+    """Team decision 2026-11-21: Eden AI by default (also delivered), Ollama as the offline option."""
+    for name in ("AUTOFORMULARZ_LLM_PROVIDER", "AUTOFORMULARZ_EDEN_MODEL", "AUTOFORMULARZ_LLM_MAX_TOKENS"):
+        monkeypatch.delenv(name, raising=False)
     s = Settings(_env_file=None)
-    assert s.llm_provider == "ollama"
-    assert s.eden_model is None
+    assert s.llm_provider == "eden"
+    assert s.eden_model == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"  # open-weight, the team's model
+    assert s.llm_max_tokens == 12000
 
 
 def test_eden_key_read_from_unprefixed_env(monkeypatch):
@@ -187,12 +197,12 @@ def test_status_eden_does_not_call_ollama(monkeypatch):
 
 def test_status_ollama_has_provider(monkeypatch):
     monkeypatch.setattr(llm.httpx, "get", lambda *a, **k: httpx.Response(200, json={"models": []}))
-    assert llm_status(Settings(_env_file=None))["provider"] == "ollama"
+    assert llm_status(Settings(_env_file=None, llm_provider="ollama"))["provider"] == "ollama"
 
 
 def test_dev_provider_warning(caplog):
     llm.warn_if_dev_provider(eden())
-    assert "Eden AI" in caplog.text and "lokalnej Ollamy" in caplog.text
+    assert "Eden AI" in caplog.text and "kosztuje" in caplog.text
     caplog.clear()
     llm.warn_if_dev_provider(Settings(_env_file=None, llm_provider="ollama"))
     assert caplog.text == ""
@@ -220,6 +230,7 @@ def test_answer_length_is_capped(post, nadplata_spec):
         Settings(_env_file=None, llm_provider="ollama", llm_max_tokens=99),
     )
     assert rec.calls[0]["json"]["options"]["num_predict"] == 99
+    assert rec.calls[0]["json"]["keep_alive"] == "30m"  # the model stays loaded for the next form
 
 
 def test_eden_truncated_answer_fails_without_retry(post, monkeypatch):
@@ -319,3 +330,94 @@ def test_ollama_does_not_report_usage(post, hooks, nadplata_spec):
     post(httpx.Response(200, json={"message": {"content": spec_json(nadplata_spec)}}))
     generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama"))
     assert seen == []
+
+
+# ---------------------------------------------------------------- a cut or looping answer
+
+
+def looping_answer(times: int = 3) -> str:
+    """Form 9 shape: the whole form on one page, then the same sections again, cut mid-field."""
+    sections = [
+        {
+            "title": "Dane wnioskodawcy",
+            "fields": [{"label": "Nazwa klubu", "kind": "TEXT", "required": True}],
+        },
+        {
+            "title": "Zgody",
+            "fields": [{"label": "Zgoda", "kind": "SINGLE_CHOICE", "required": True, "options": ["Tak"]}],
+        },
+    ]
+    body = ", ".join(json.dumps(s, ensure_ascii=False) for s in sections * times)
+    head = '{"title": "Wniosek o stypendium", "authority_name": "Prezydent Miasta", "block_roles": [], '
+    return head + '"pages": [{"title": "Wniosek", "sections": [' + body + ', {"title": "Dane wnioskod'
+
+
+def test_salvage_keeps_the_form_up_to_the_first_repeat():
+    spec = llm.salvage(looping_answer())
+    assert [s.title for s in spec.pages[0].sections] == ["Dane wnioskodawcy", "Zgody"]
+    assert spec.title == "Wniosek o stypendium"
+
+
+@pytest.mark.parametrize("partial", ["", "{", '{"title": "Wniosek", "pages": [{"title": "A", "sec'])
+def test_salvage_gives_up_without_a_complete_section(partial):
+    assert llm.salvage(partial) is None
+
+
+def test_eden_cut_answer_is_salvaged_with_a_note(post, monkeypatch):
+    monkeypatch.setattr(llm, "EDEN_USAGE", [])
+    body = {"choices": [{"message": {"content": looping_answer()}, "finish_reason": "length"}]}
+    rec = post(httpx.Response(200, json=body))
+    d = doc(text="x")
+    spec = generate_spec(d, eden())
+    assert len(spec.pages[0].sections) == 2 and len(rec.calls) == 1  # no second paid call
+    assert any("powtarzał sekcje" in n for n in d.notes)
+
+
+def test_ollama_stops_streaming_when_sections_repeat(post, monkeypatch):
+    """Ollama streams the answer: generation stops at the first repeated section, not at the limit."""
+    monkeypatch.setattr(llm, "REPEAT_CHECK_CHARS", 50)
+    text = looping_answer(times=40)
+    pieces = [text[i : i + 40] for i in range(0, len(text), 40)]
+    sent: list[str] = []
+
+    def ollama():  # what the model streams; counts how much the client asked for
+        for p in pieces:
+            sent.append(p)
+            yield (json.dumps({"message": {"content": p}, "done": False}) + "\n").encode()
+
+    post(httpx.Response(200, content=ollama()))
+    d = doc(text="x")
+    spec = generate_spec(d, Settings(_env_file=None, llm_provider="ollama"))
+    assert [s.title for s in spec.pages[0].sections] == ["Dane wnioskodawcy", "Zgody"]
+    assert len(sent) < len(pieces) // 5  # stopped soon after the first repeat, not at the end
+    assert any("powtarzał sekcje" in n for n in d.notes)
+
+
+def test_ollama_streamed_answer_is_joined(post, nadplata_spec):
+    text = spec_json(nadplata_spec)
+    lines = [
+        json.dumps({"message": {"content": text[i : i + 30]}, "done": False}) for i in range(0, len(text), 30)
+    ]
+    lines.append(json.dumps({"message": {"content": ""}, "done": True, "done_reason": "stop"}))
+    post(httpx.Response(200, content="\n".join(lines).encode()))
+    assert generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama")) == nadplata_spec
+
+
+def test_one_repeated_section_is_not_a_loop():
+    """Form 9's good answer: the same "Opinia" section on the athlete's and the coach's page."""
+    opinion = {
+        "title": "Opinia klubu",
+        "fields": [{"label": "Opinia", "kind": "LONG_TEXT", "required": True}],
+    }
+    pages = [
+        {"title": "Sportowiec", "sections": [{"title": "Dane", "fields": []}, opinion]},
+        {
+            "title": "Trener",
+            "sections": [{"title": "Dane trenera", "fields": []}, opinion, {"title": "Uwagi", "fields": []}],
+        },
+    ]
+    assert llm.first_repeat(pages) is None
+    pages[1]["sections"].append({"title": "Uwagi", "fields": []})  # two in a row: the model began again
+    assert llm.first_repeat(pages) is None  # "Uwagi" after "Uwagi" alone is still one repeat
+    pages[1]["sections"].append({"title": "Dane", "fields": []})
+    assert llm.first_repeat(pages) == (1, 3)

@@ -51,6 +51,22 @@ def slug(text: str, max_len: int = 60) -> str:
     return (text[:max_len].rstrip("_")) or "pole"
 
 
+# A consent to be contacted by e-mail, phone or electronic delivery is voluntary: the contact data it
+# refers to are optional (design standard, "Dane do kontaktu"), so ticking it cannot block sending.
+# Form 8, poz. 72: "Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej".
+OPTIONAL_CONSENT = re.compile(
+    r"zgod\w*.*\b(korespondencj\w*|kontakt\w*|powiadomie\w*|informacj\w* (sms|e-mail))\b.*"
+    r"\b(e-mail\w*|mail\w*|poczt\w* elektroniczn\w*|telefon\w*|sms|elektroniczn\w*)\b|"
+    r"zgod\w*.*\b(e-mail\w*|telefon\w*|sms)\b.*\b(kontakt\w*|korespondencj\w*)\b",
+    re.IGNORECASE,
+)
+# "wskazanego w poz. 71", "podanego w pkt 3.2": numbering of the paper form, absent in the e-form.
+PAPER_REF = re.compile(
+    r"\s*,?\s*\b(wskazan|podan|okreslon|określon)\w*\s+w\s+(poz|pkt|punkcie|pozycji)\.?\s*[\w.]*\d[\w.]*",
+    re.IGNORECASE,
+)
+
+
 def html(text: str | None) -> str:
     if not text:
         return ""
@@ -573,7 +589,10 @@ class Standard:
             "skontaktować się z Tobą w przypadku pytań lub wątpliwości.\n\n"
             "Jeśli widzisz uzupełnione dane, sprawdź, czy są poprawne. Możesz je zmienić lub usunąć.",
         )
-        consents = [{"description": html(text), "required": True} for text in self.spec.consents]
+        consents = [
+            {"description": html(PAPER_REF.sub("", text)), "required": not OPTIONAL_CONSENT.search(text)}
+            for text in self.spec.consents
+        ]
         consents.append(
             {
                 "description": "<html><head></head><body><p>Wyrażam zgodę na przetwarzanie moich danych osobowych "

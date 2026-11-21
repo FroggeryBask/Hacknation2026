@@ -9,23 +9,23 @@ The hackathon task, forms and reference materials live in `materialy/` (repo roo
 
 ## AI access (MANDATORY)
 Organizers provide LLM/OCR via Eden AI (OpenAI-compatible `https://api.edenai.run/v3/chat/completions`, plus upload and OCR endpoints). Full mail with endpoints, model naming and examples: `materialy/Dostęp do AI (Eden AI) - mail od organizatorów.md`. Key: `EDENAI_API_KEY` (server-only secret). Use it only for the "Cyfryzacja formularzy" task. Eden AI is the ONLY external AI provider: no Anthropic API (`ANTHROPIC_API_KEY`), no other direct provider keys or SDKs.
-The task also bans LLMs available only through an API, so through Eden use ONLY open-weight models that can run locally too (e.g. `google/gemma-*`, `mistral/mistral-small-*`, Qwen, Llama), never closed ones (GPT, Gemini, Claude). The same model must work via local Ollama for the final Docker setup.
+Through Eden use ONLY open-weight models that can run locally too (e.g. `google/gemma-*`, `mistral/mistral-small-*`, Qwen, Llama), never closed ones (GPT, Gemini, Claude). Team decision 2026-11-21: Eden AI may be used in the delivered solution too, not only during development; local Ollama stays supported (offline option, same model family).
 
 ## Hard constraints from the task (never break)
-- No external APIs, MCP or SaaS in the delivered solution, and no LLM reachable only through an API. The deliverable runs the model locally (Ollama); Eden AI (open-weight models only) is for development, testing and speed during the hackathon.
+- No external APIs, MCP or SaaS in the delivered solution, except Eden AI (organizer-provided, open-weight models only), which may be used in the delivered solution too (team decision 2026-11-21). The deliverable can also run the model locally (Ollama).
 - Dependencies: open source, NOT copyleft (no GPL/AGPL; e.g. PyMuPDF is banned). Note the license next to each new dependency in `api/pyproject.toml`.
 - Uploaded files only in memory or a temp dir. No database, no file storage.
 - Docker: official base images, pinned tags (never `latest`), non-root user, secrets only via env at runtime.
 
 ## Architecture (api/src/autoformularz)
-`upload.py` (name/size/MIME checks) → `extract.py` (`Document`: text blocks with IDs in reading order + field candidates, or page images) → `llm.py` (Ollama; Eden AI in local dev and the Docker demo overlay; output constrained to the `FormSpec` JSON Schema, refers to block IDs) → `check.py` (coverage: FormSpec vs Document) → `compiler.py` (deterministic FormSpec → COI JSON: predefined sections from the design standard, techNames, jsonata `states`, flow) → `lint.py` (rules from "Reguły techniczne"). The LLM only fills the small `spec.py` model; anything rule-based belongs in the compiler or linter, not in the prompt.
+`upload.py` (name/size/MIME checks) → `extract.py` (`Document`: text blocks with IDs in reading order + field candidates, or page images) → `llm.py` (Eden AI by default, Ollama offline; output constrained to the `FormSpec` JSON Schema, refers to block IDs) → `check.py` (coverage: FormSpec vs Document) → `compiler.py` (deterministic FormSpec → COI JSON: predefined sections from the design standard, techNames, jsonata `states`, flow) → `lint.py` (rules from "Reguły techniczne"). The LLM only fills the small `spec.py` model; anything rule-based belongs in the compiler or linter, not in the prompt.
 
 ## Commands
 - `npm run check`: everything (biome, tsc, ruff + pytest for api and scripts). Add `-- --build` for a full Next build. Must pass before commit.
 - `cd api && uv run uvicorn autoformularz.main:app --reload`: API on :8000 (docs at /docs). `uv run pytest`: API tests.
 - `npm run dev`: frontend on :3000. `npm run smoke [url]`: hit key routes.
-- `docker compose up --build`: whole stack (ollama + model pull + api + web).
-- `docker compose -f docker-compose.yml -f docker-compose.eden.yml up --build`: demo stack on Eden AI (api + web, no local model; needs `EDENAI_API_KEY` in `.env`, every call costs).
+- `docker compose up --build`: whole stack on Eden AI (api + web; needs `EDENAI_API_KEY` in `.env`, every call costs).
+- `AUTOFORMULARZ_LLM_PROVIDER=ollama docker compose --profile ollama up --build`: offline stack (ollama + model pull + api + web).
 - `npx shadcn@latest add <component>`: add UI components (never hand-write what shadcn has).
 
 ## Rules

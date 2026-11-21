@@ -27,18 +27,22 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_audience: str | None = None
 
-    # Local LLM served by Ollama (no external APIs allowed by the task rules)
+    # Local LLM served by Ollama: the offline option (default provider is Eden AI, see llm_provider)
     ollama_url: str = "http://localhost:11434"
     llm_model: str = "qwen3-vl:8b"
     # CPU without GPU: the 8B model writes a few tokens/s, a large form (up to llm_max_tokens) takes 15-25 min.
     # Eden AI ends a request itself after ~400 s, so the long limit only matters for Ollama.
     llm_timeout_s: float = 1800.0
-    # Prompt + answer. Form 8 (largest): ~9-10k prompt tokens + up to llm_max_tokens (8000) answer > 16384.
+    # Prompt + answer. Largest material after presort: ~7k prompt tokens + up to llm_max_tokens (12000).
     # 24576 with qwen3-vl:8b: 9.4 GB in memory (ollama ps); docs/tasks/docker-docs.md.
     llm_num_ctx: int = 24576
     # Cap on the model's answer. A FormSpec of the largest material fits easily; a model stuck in a
     # repetition loop is cut here instead of running until the provider's limit (Eden: 400 s, ~16k tokens).
-    llm_max_tokens: int = 8000
+    # 12000 (was 8000): form 9 (three requests in one) needed ~7.6k tokens and hit 8000 on some runs.
+    llm_max_tokens: int = 12000
+    # Ollama keeps the model loaded this long after a request (its default is 5m): the next form skips
+    # loading the model and reuses the cached system prompt. Ollama duration format ("30m", "1h", "-1").
+    llm_keep_alive: str = "30m"
     max_pdf_pages: int = 6
     # Copy INSTRUCTION / LEGAL_BASIS blocks verbatim to the finish page. Off until the model's block roles
     # are reliable: on saved results it copied paper instructions and the GDPR clause (docs/decisions.md).
@@ -47,13 +51,15 @@ class Settings(BaseSettings):
     # data before the model, so they are left out of the prompt and the answer (presort.py).
     presort: bool = True
 
-    # LLM provider. "eden" (Eden AI, open-weight models only) is for local development, tests and the demo;
-    # docker-compose.yml alone forces "ollama" (delivered solution), docker-compose.eden.yml enables Eden.
-    llm_provider: Literal["ollama", "eden"] = "ollama"
+    # LLM provider. Default "eden": Eden AI (organizer-provided, open-weight models only), also in the delivered
+    # solution (team decision 2026-11-21, docs/decisions.md). "ollama": local model, offline option
+    # (docker compose --profile ollama).
+    llm_provider: Literal["ollama", "eden"] = "eden"
     eden_base_url: str = "https://api.edenai.run/v3"
     # Read from EDENAI_API_KEY (no prefix: the organizers' name, already in .env.local)
     eden_api_key: SecretStr | None = Field(default=None, validation_alias="EDENAI_API_KEY")
-    eden_model: str | None = None
+    # The team's model on Eden (docs/eden-budzet.md: ~0.005 USD per form); its local pair is qwen3-vl.
+    eden_model: str | None = "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
 
     # LibreOffice binary for legacy formats (.doc, .ods)
     soffice_bin: str = "soffice"
