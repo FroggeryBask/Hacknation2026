@@ -18,13 +18,14 @@ The task also bans LLMs available only through an API, so through Eden use ONLY 
 - Docker: official base images, pinned tags (never `latest`), non-root user, secrets only via env at runtime.
 
 ## Architecture (api/src/autoformularz)
-`upload.py` (name/size/MIME checks) → `extract.py` (`Document`: text blocks with IDs in reading order + field candidates, or page images) → `llm.py` (Ollama; Eden AI only in local dev; output constrained to the `FormSpec` JSON Schema, refers to block IDs) → `check.py` (coverage: FormSpec vs Document) → `compiler.py` (deterministic FormSpec → COI JSON: predefined sections from the design standard, techNames, jsonata `states`, flow) → `lint.py` (rules from "Reguły techniczne"). The LLM only fills the small `spec.py` model; anything rule-based belongs in the compiler or linter, not in the prompt.
+`upload.py` (name/size/MIME checks) → `extract.py` (`Document`: text blocks with IDs in reading order + field candidates, or page images) → `llm.py` (Ollama; Eden AI in local dev and the Docker demo overlay; output constrained to the `FormSpec` JSON Schema, refers to block IDs) → `check.py` (coverage: FormSpec vs Document) → `compiler.py` (deterministic FormSpec → COI JSON: predefined sections from the design standard, techNames, jsonata `states`, flow) → `lint.py` (rules from "Reguły techniczne"). The LLM only fills the small `spec.py` model; anything rule-based belongs in the compiler or linter, not in the prompt.
 
 ## Commands
 - `npm run check`: everything (biome, tsc, ruff + pytest for api and scripts). Add `-- --build` for a full Next build. Must pass before commit.
 - `cd api && uv run uvicorn autoformularz.main:app --reload`: API on :8000 (docs at /docs). `uv run pytest`: API tests.
 - `npm run dev`: frontend on :3000. `npm run smoke [url]`: hit key routes.
 - `docker compose up --build`: whole stack (ollama + model pull + api + web).
+- `docker compose -f docker-compose.yml -f docker-compose.eden.yml up --build`: demo stack on Eden AI (api + web, no local model; needs `EDENAI_API_KEY` in `.env`, every call costs).
 - `npx shadcn@latest add <component>`: add UI components (never hand-write what shadcn has).
 
 ## Rules

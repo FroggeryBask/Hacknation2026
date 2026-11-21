@@ -168,7 +168,12 @@ def test_key_never_in_errors(post, monkeypatch):
 def test_status_eden_does_not_call_ollama(monkeypatch):
     monkeypatch.setattr(llm.httpx, "get", lambda *a, **k: pytest.fail("Ollama called"))
     status = llm_status(eden())
-    assert status == {"provider": "eden", "model": eden().eden_model, "configured": True}
+    assert status == {
+        "provider": "eden",
+        "model": eden().eden_model,
+        "configured": True,
+        "usage": llm.eden_usage_total(),
+    }
     assert llm_status(eden(eden_api_key=None))["configured"] is False
     assert KEY not in json.dumps(status)
 
@@ -180,7 +185,7 @@ def test_status_ollama_has_provider(monkeypatch):
 
 def test_dev_provider_warning(caplog):
     llm.warn_if_dev_provider(eden())
-    assert "nie do oddania" in caplog.text
+    assert "Eden AI" in caplog.text and "lokalnej Ollamy" in caplog.text
     caplog.clear()
     llm.warn_if_dev_provider(Settings(_env_file=None, llm_provider="ollama"))
     assert caplog.text == ""
@@ -228,3 +233,10 @@ def test_ollama_truncated_answer_fails_without_retry(post):
     with pytest.raises(LLMError) as e:
         generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama"))
     assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1 and e.value.partial == "{"
+
+
+def test_health_shows_eden_cost_since_start(monkeypatch):
+    monkeypatch.setattr(
+        llm, "EDEN_USAGE", [{"promptTokens": 10, "completionTokens": 5, "cost": 0.0021}, {"cost": 0.003}]
+    )
+    assert llm_status(eden())["usage"] == {"calls": 2, "costUsd": 0.0051}

@@ -91,7 +91,10 @@ log = logging.getLogger("autoformularz.llm")
 # shared budget can be tracked (docs/eden-budzet.md). Ollama calls are free and not recorded.
 EDEN_USAGE: list[dict] = []
 
-DEV_WARNING = "LLM przez Eden AI: tryb deweloperski, nie do oddania (oddawane rozwiązanie używa Ollamy)."
+DEV_WARNING = (
+    "LLM przez Eden AI: tryb demo i deweloperski (uzgodniony z mentorami COI); każde zapytanie kosztuje. "
+    "Domyślnie rozwiązanie używa lokalnej Ollamy."
+)
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
 
 
@@ -273,12 +276,21 @@ def warn_if_dev_provider(settings: Settings) -> None:
         log.warning(DEV_WARNING)
 
 
+def eden_usage_total() -> dict:
+    """Eden AI calls and cost since this process started (shared budget, docs/eden-budzet.md)."""
+    return {
+        "calls": len(EDEN_USAGE),
+        "costUsd": round(sum(float(c.get("cost") or 0) for c in EDEN_USAGE), 6),
+    }
+
+
 def llm_status(settings: Settings) -> dict:
     if settings.llm_provider == "eden":
         return {
             "provider": "eden",
             "model": settings.eden_model,
             "configured": bool(_key(settings) and settings.eden_model),
+            "usage": eden_usage_total(),
         }
     try:
         r = httpx.get(f"{settings.ollama_url}/api/tags", timeout=3)
