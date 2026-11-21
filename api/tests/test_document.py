@@ -223,3 +223,117 @@ def test_applicant_ids_mean_a_company_may_apply():
     assert (clean.applicant.entity, clean.applicant.entity_nip_only) == (True, False)
     clean, _ = drop_standard_sections(spec_with("Imię i nazwisko", "PESEL"))
     assert clean.applicant.entity is False
+
+
+def test_table_rows_with_the_same_label_are_not_repetitions():
+    """Material 8: "Wysokość miesięcznej opłaty" once per flat size, each from its own row of the table."""
+    from autoformularz.check import dedupe
+
+    f = lambda label, *blocks: FieldSpec(label=label, kind=Kind.NUMBER, blocks=list(blocks))  # noqa: E731
+    rows = [f("Liczba do 45 m²", "b1"), f("Wysokość opłaty", "b2"), f("Liczba ponad 45 m²", "b3")]
+    rows += [f("Wysokość opłaty", "b4"), f("Wysokość opłaty", "b4")]  # the last one is a real repetition
+    spec = FormSpec(
+        title="Deklaracja",
+        authority_name="Urząd",
+        pages=[PageSpec(title="Opłata", sections=[SectionSpec(title="Obliczenie", fields=rows)])],
+    )
+    clean, notes = dedupe(spec)
+    assert [x.blocks for x in clean.pages[0].sections[0].fields] == [["b1"], ["b2"], ["b3"], ["b4"]]
+    assert len(notes) == 1
+
+
+def test_applicant_section_keeps_its_other_questions():
+    """Material 8: who files the declaration (owner, tenant, …) stays; name, PESEL, NIP/REGON go to the
+    predefined part. An applicant address with a plot number keeps only the plot number."""
+    from autoformularz.check import drop_standard_sections
+
+    f = lambda label, kind=Kind.TEXT: FieldSpec(label=label, kind=kind)  # noqa: E731
+    who = SectionSpec(
+        title="Dane identyfikacyjne składającego deklarację",
+        fields=[
+            f("Składający deklarację", Kind.SINGLE_CHOICE),
+            f("Nazwisko, imię / Nazwa pełna"),
+            f("PESEL"),
+            f("NIP/REGON"),
+        ],
+    )
+    address = SectionSpec(
+        title="Adres zamieszkania / siedziby",
+        fields=[
+            f("Kraj"),
+            f("Miejscowość"),
+            f("Ulica"),
+            f("Numer nieruchomości/domu"),
+            f("Kod pocztowy"),
+            f("Numer/y działki/działek"),
+        ],
+    )
+    proxy = SectionSpec(  # one standard field among proxy data: stays whole
+        title="Dane pełnomocnika klubu",
+        fields=[f("Imię pełnomocnika"), f("Nazwisko pełnomocnika"), f("Seria i numer dowodu osobistego")],
+    )
+    spec = FormSpec(
+        title="Deklaracja",
+        authority_name="Urząd",
+        pages=[PageSpec(title="Dane", sections=[who, address, proxy])],
+    )
+    clean, notes = drop_standard_sections(spec)
+    kept = {s.title: [x.label for x in s.fields] for s in clean.pages[0].sections}
+    assert kept == {
+        "Dane identyfikacyjne składającego deklarację": ["Składający deklarację"],
+        "Adres zamieszkania / siedziby": ["Numer/y działki/działek"],
+        "Dane pełnomocnika klubu": [
+            "Imię pełnomocnika",
+            "Nazwisko pełnomocnika",
+            "Seria i numer dowodu osobistego",
+        ],
+    }
+    assert clean.applicant.entity  # NIP/REGON was asked
+    assert len(notes) == 3
+
+
+def test_broken_conditions_are_removed_and_fields_become_optional():
+    from autoformularz.check import drop_broken_conditions
+    from autoformularz.spec import Condition
+
+    choice = FieldSpec(label="Dyscyplina", kind=Kind.SINGLE_CHOICE, options=["hokej", "Inna"])
+    ok = FieldSpec(label="Jaka", kind=Kind.TEXT, show_if=Condition(field="dyscyplina", equals="INNA"))
+    bad_option = FieldSpec(label="Opis", kind=Kind.TEXT, show_if=Condition(field="Dyscyplina", equals="Brak"))
+    guarded = SectionSpec(
+        title="Adres do korespondencji",
+        show_if=Condition(field="Nie ma takiego pola", equals="TAK"),
+        fields=[FieldSpec(label="Ulica", kind=Kind.TEXT)],
+    )
+    spec = FormSpec(
+        title="Wniosek",
+        authority_name="Urząd",
+        pages=[
+            PageSpec(title="S", sections=[SectionSpec(title="A", fields=[choice, ok, bad_option]), guarded])
+        ],
+    )
+    clean, notes = drop_broken_conditions(spec)
+    a, b = clean.pages[0].sections
+    assert a.fields[1] == ok  # a working condition (case ignored, like the compiler) is kept
+    assert a.fields[2].show_if is None and a.fields[2].required is False
+    assert b.show_if is None and b.fields[0].required is False
+    assert len(notes) == 2
+    assert drop_broken_conditions(clean) == (clean, [])
+
+
+def test_printed_amounts_become_info():
+    from autoformularz.check import printed_amounts_as_info
+
+    rate = FieldSpec(label="Stawka opłaty", kind=Kind.TEXT, description="38 zł")
+    relief = FieldSpec(label="Stawka zwolnienia", kind=Kind.TEXT, description="- 15 zł 00 gr")
+    count = FieldSpec(label="Liczba gospodarstw", kind=Kind.NUMBER, description="Wpisz liczbę")
+    spec = FormSpec(
+        title="Deklaracja",
+        authority_name="Urząd",
+        pages=[PageSpec(title="Opłata", sections=[SectionSpec(title="E.1", fields=[count, rate, relief])])],
+    )
+    clean, notes = printed_amounts_as_info(spec)
+    out = clean.pages[0].sections[0].fields
+    assert out[0] == count
+    assert (out[1].kind, out[1].description) == (Kind.INFO, "Stawka opłaty: 38 zł")
+    assert (out[2].kind, out[2].description) == (Kind.INFO, "Stawka zwolnienia: - 15 zł 00 gr")
+    assert len(notes) == 2

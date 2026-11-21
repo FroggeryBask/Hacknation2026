@@ -3,7 +3,14 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from autoformularz.check import Coverage, coverage, dedupe, drop_standard_sections
+from autoformularz.check import (
+    Coverage,
+    coverage,
+    dedupe,
+    drop_broken_conditions,
+    drop_standard_sections,
+    printed_amounts_as_info,
+)
 from autoformularz.compiler import compile_form
 from autoformularz.config import Settings
 from autoformularz.document import Document
@@ -31,8 +38,12 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     # Canon: a model's repetitions and copies of the predefined part never reach the form.
     spec, repeated = dedupe(spec)
     spec, standard = drop_standard_sections(spec)
+    spec, amounts = printed_amounts_as_info(spec)
+    spec, conditions = drop_broken_conditions(spec)  # last: the rules above may drop a controlling field
     form, warnings = compile_form(spec, document)
-    return Result(form=form, spec=spec, issues=lint(form), notes=repeated + standard + warnings)
+    return Result(
+        form=form, spec=spec, issues=lint(form), notes=repeated + standard + amounts + conditions + warnings
+    )
 
 
 def from_file(name: str | None, data: bytes, settings: Settings, llm=generate_spec) -> Result:

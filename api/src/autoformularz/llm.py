@@ -15,7 +15,7 @@ from pydantic import ValidationError
 
 from autoformularz.config import Settings
 from autoformularz.document import Document
-from autoformularz.spec import FormSpec
+from autoformularz.spec import FormSpec, model_schema
 
 SYSTEM_PROMPT = """\
 Jesteś analitykiem, który zamienia papierowe formularze urzędowe na opis formularza elektronicznego (e-usługi).
@@ -36,17 +36,32 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
 
 `pages` to strony dotyczące przedmiotu sprawy. Zasady:
 - Grupuj pola tematycznie w sekcje. Strona ma krótki tytuł opisujący temat (np. „Informacje o budynku”).
-- Każdą stronę, sekcję i pole wpisz tylko raz. Nie powtarzaj stron ani sekcji. Gdy opiszesz wszystkie bloki
-  formularza, zakończ JSON.
+- Każdą stronę, sekcję i pole wpisz tylko raz. Nie powtarzaj stron ani sekcji. Gdy opiszesz wszystkie pola
+  formularza, zakończ JSON. Nie każdy blok musi trafić do `pages`: pouczenia, objaśnienia, podstawa prawna i
+  klauzula RODO idą tylko do `block_roles`, nigdy jako sekcje ani pola INFO.
 - Zachowaj zakres danych z formularza. Nie wymyślaj pól, których nie ma w dokumencie.
 - Typ pola: TEXT krótki tekst; LONG_TEXT opis lub uzasadnienie; NUMBER tylko liczby (kwoty, liczby osób);
   DATE daty; SINGLE_CHOICE jedna z kilku opcji (kratki do zaznaczenia jednej odpowiedzi); MULTI_CHOICE wiele
   opcji; SELECT jedna z wielu (>5) opcji; FILE załączniki wymienione w formularzu; INFO stała informacja.
 - Etykiety pisz prostym językiem, bez form zależnych od płci, bez dwukropków i wielokropków.
-- `required`: false tylko dla danych opcjonalnych (np. „jeśli posiada”, „nr lokalu”, „uwagi”).
+- `required` wpisz w KAŻDYM polu: false dla danych opcjonalnych (np. „jeśli posiada”, „nr lokalu”, „uwagi”) i dla wszystkiego,
+  co druk opisuje jako nieobowiązkowe lub do wypełnienia tylko w pewnym przypadku („pola nieobowiązkowe”,
+  „wypełnić tylko w przypadku…”, „jeżeli…”, „dotyczy tylko…”), chyba że ten przypadek opisuje `show_if`.
+- Stałe kwoty i stawki wydrukowane na druku (np. „38 zł”) nie są polami: wpisz je w `description` pola,
+  którego dotyczą.
+- Gdy na druku zaznacza się jedną z kilku sytuacji i dla niej podaje datę lub inne dane: pole SINGLE_CHOICE
+  z sytuacjami, a dane dla każdej sytuacji jako pola z `show_if` na tej opcji.
+- Oświadczenie, które można zaznaczyć albo nie, i które zmienia sprawę (np. ulga, zwolnienie), to pole
+  SINGLE_CHOICE z opcjami TAK/NIE, nie `consents`.
 - Pola pokazywane warunkowo (np. „jeśli zaznaczono TAK, podaj…”) opisz przez `show_if` z etykietą pola wyboru
   i wartością opcji.
 - Gdy dane się powtarzają (kilka osób, pojazdów, działek, zawodów), użyj sekcji z `repeating: true`.
+- Gdy dokument zawiera kilka wersji tego samego wniosku (np. kilka rodzajów wniosku z tymi samymi częściami),
+  zrób JEDEN formularz: na pierwszej stronie pole SINGLE_CHOICE „Rodzaj wniosku” z opcjami = rodzaje.
+  Część wspólną opisz raz. Porównaj wersje: KAŻDA sekcja, której nie ma we wszystkich wersjach, musi mieć
+  `show_if`. Sekcja tylko dla jednego rodzaju: `show_if` z tą opcją; dla wszystkich rodzajów oprócz jednego:
+  `show_if` z tą jedną opcją i `negate: true`. W `blocks` podaj ID z
+  pierwszej wersji; bloków kolejnych wersji nie powtarzaj w polach ani w `block_roles`.
 - Kraj wybieraj słownikiem `Kraje`. Walidatory: PESEL, NIP, REGON, ZIP_CODE (kod pocztowy), EMAIL.
 - Załączniki z listy „do wniosku należy dołączyć” zamień na pola FILE w osobnej sekcji „Załączniki”.
 - Oświadczenia, które wnioskodawca potwierdza (np. „oświadczam, że…”), wpisz do `consents` w krótkiej formie
@@ -60,9 +75,12 @@ działać w imieniu innej osoby (domyślnie tak dla osób fizycznych).
 Bloki: treść formularza dostajesz jako bloki z identyfikatorami, np. `[b12] Imię i nazwisko: ____`.
 - Odwołuj się do bloków po ID, nie przepisuj ich treści.
 - W polu i sekcji wpisz w `blocks` ID bloków, z których pochodzą (etykieta, opcje).
-- W `block_roles` podaj rolę TYLKO dla bloków z tekstem do przeniesienia lub pominięcia: INSTRUCTION
-  (pouczenie), LEGAL_BASIS (podstawa prawna), STATEMENT (oświadczenie), GDPR (RODO), SKIP (tylko na papierze:
-  podpis, pieczątka, „wypełnia urząd”, miejscowość i data). Nie podawaj ról dla etykiet pól, opcji ani tytułów.
+- `block_roles` wypełnij PRZED `pages`. Podaj rolę TYLKO dla bloków z tekstem do przeniesienia lub pominięcia:
+  INSTRUCTION (pouczenie, objaśnienia), LEGAL_BASIS (podstawa prawna), STATEMENT (oświadczenie), GDPR (RODO),
+  SKIP (tylko na papierze: podpis, pieczątka, „wypełnia urząd”, miejscowość i data). Nie podawaj ról dla
+  etykiet pól, opcji ani tytułów.
+- Ciąg kolejnych bloków o tej samej roli podaj JEDNYM wpisem z zakresem: `{"block": "b200", "to": "b260",
+  "role": "GDPR"}` (np. cała klauzula RODO albo wszystkie objaśnienia).
 - Używaj wyłącznie ID z listy bloków.
 """
 
@@ -78,9 +96,10 @@ _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
 
 
 class LLMError(Exception):
-    def __init__(self, code: str, message: str, status: int = 502):
+    def __init__(self, code: str, message: str, status: int = 502, partial: str = ""):
         super().__init__(message)
         self.code, self.message, self.status = code, message, status
+        self.partial = partial  # the cut answer (LLM_TRUNCATED), to see where the model got stuck
 
 
 def build_user_prompt(ex: Document) -> str:
@@ -114,7 +133,7 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
     payload = {
         "model": settings.llm_model,
         "messages": msgs,
-        "format": FormSpec.model_json_schema(),
+        "format": model_schema(),
         "stream": False,
         "think": False,
         "options": {
@@ -132,17 +151,19 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
     if r.status_code != 200:
         raise LLMError("LLM_ERROR", f"Model językowy zwrócił błąd {r.status_code}: {r.text[:300]}")
     body = r.json()
+    content = body.get("message", {}).get("content", "")
     if body.get("done_reason") == "length":
-        raise truncated(settings)
-    return body.get("message", {}).get("content", "")
+        raise truncated(settings, content)
+    return content
 
 
-def truncated(settings: Settings) -> LLMError:
+def truncated(settings: Settings, partial: str = "") -> LLMError:
     """The answer hit `llm_max_tokens`: almost always a repetition loop. No retry: it would loop again
-    and double the cost."""
+    and double the cost. The cut answer is kept on the error (`partial`) for diagnosis."""
     return LLMError(
         "LLM_TRUNCATED",
         f"Odpowiedź modelu przekroczyła {settings.llm_max_tokens} tokenów (prawdopodobnie zapętlenie).",
+        partial=partial,
     )
 
 
@@ -172,7 +193,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         "messages": _eden_messages(messages, images),
         "response_format": {
             "type": "json_schema",
-            "json_schema": {"name": "FormSpec", "schema": FormSpec.model_json_schema()},
+            "json_schema": {"name": "FormSpec", "schema": model_schema()},
         },
     }
 
@@ -205,10 +226,10 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
             "cost": body.get("cost", usage.get("estimated_cost", 0.0)) or 0.0,
         }
     )
-    if body["choices"][0].get("finish_reason") == "length":
-        raise truncated(settings)
     if isinstance(content, list):  # content parts
         content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
+    if body["choices"][0].get("finish_reason") == "length":
+        raise truncated(settings, content or "")
     return content or ""
 
 
@@ -224,9 +245,7 @@ def generate_spec(ex: Document, settings: Settings) -> FormSpec:
     call = _call_eden if eden else _call_ollama
     system = SYSTEM_PROMPT
     if eden:  # json_schema may be dropped by the provider, so the schema also goes in the prompt
-        system += "\nSchemat JSON (FormSpec):\n" + json.dumps(
-            FormSpec.model_json_schema(), ensure_ascii=False
-        )
+        system += "\nSchemat JSON (FormSpec):\n" + json.dumps(model_schema(), ensure_ascii=False)
     messages = [{"role": "system", "content": system}, {"role": "user", "content": build_user_prompt(ex)}]
     content = call(messages, ex.images, settings)
     try:

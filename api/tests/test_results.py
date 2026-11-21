@@ -65,3 +65,14 @@ def test_files_have_unix_line_endings(out, nadplata_spec):
     (out / "02.spec.json").write_text(nadplata_spec.model_dump_json(), encoding="utf-8")
     results.run(2, Settings(_env_file=None), compile_only=True, force=False)
     assert b"\r\n" not in (out / "02.json").read_bytes()
+
+
+def test_truncated_answer_is_kept_for_diagnosis(out, monkeypatch):
+    def cut(document, settings):
+        raise results.llm.LLMError("LLM_TRUNCATED", "za długo", partial='{"title": "x", "pages": [')
+
+    monkeypatch.setattr(results.llm, "generate_spec", cut)
+    with pytest.raises(results.llm.LLMError):
+        results.run(2, Settings(_env_file=None), compile_only=False, force=False)
+    assert (out / "02.truncated.txt").read_text(encoding="utf-8") == '{"title": "x", "pages": ['
+    assert not (out / "02.spec.json").exists()

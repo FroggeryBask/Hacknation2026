@@ -93,7 +93,8 @@ Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Z
 
 **FormSpec** (`spec.py`), pola z wartościami domyślnymi, więc stare FormSpec są poprawne:
 - `FieldSpec.blocks`, `SectionSpec.blocks`: ID bloków, z których pochodzi element (etykieta, opcje).
-- `FormSpec.block_roles`: `{block, role}`, rola = `FIELD_LABEL`, `OPTION`, `HEADING`, `INSTRUCTION`
+- `FormSpec.block_roles` (w schemacie przed `pages`): `{block, to?, role}`, `to` = ostatni blok ciągu kolejnych
+  bloków o tej samej roli (np. cała klauzula RODO jednym wpisem); `spec.roles()` rozwija zakresy. Rola = `FIELD_LABEL`, `OPTION`, `HEADING`, `INSTRUCTION`
   (pouczenie), `LEGAL_BASIS` (podstawa prawna), `STATEMENT` (oświadczenie), `GDPR` (RODO), `SKIP` (tylko na papierze).
   Model podaje role **tylko** dla `INSTRUCTION`, `LEGAL_BASIS`, `STATEMENT`, `GDPR` i `SKIP`. Role dla wszystkich
   bloków nie mieszczą się w oknie modelu: formularz 8 (DOCX) ma 631 bloków, czyli ok. 8 tys. tokenów samych ról

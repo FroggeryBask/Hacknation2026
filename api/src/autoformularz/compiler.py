@@ -664,8 +664,19 @@ class SpecPages:
         if ref is None:
             self.b.warnings.append(f"Warunek odwołuje się do nieznanego pola „{c.field}” i został pominięty.")
             return []
+        value = c.equals
+        if ref.options and value not in ref.options:
+            # The model may write the option slightly differently ("TAK" vs "Tak"); an option that does not
+            # exist at all would hide the element forever, so the condition is dropped with a warning.
+            match = [o for o in ref.options if _norm(o) == _norm(value)]
+            if not match:
+                self.b.warnings.append(
+                    f"Warunek sprawdza opcję „{value}”, której nie ma w polu „{c.field}”; pominięty."
+                )
+                return []
+            value = match[0]
         same = section is not None and section.repeating and ref.section == self.section_of.get(id(section))
-        expr = selected(c.equals, ref, same_repeating_section=same)
+        expr = selected(value, ref, same_repeating_section=same)
         return show(not_(expr) if c.negate else expr)
 
     def field(self, f: FieldSpec, section: SectionSpec) -> Json:
@@ -773,7 +784,8 @@ def source_texts(spec: FormSpec, doc: Document | None) -> dict[Role, list[str]]:
     """Verbatim text of blocks with a copied role, in document order (the model only points to them)."""
     if doc is None:
         return {}
-    wanted = {r.block: r.role for r in spec.block_roles if r.role in {role for role, _, _ in SOURCE_SECTIONS}}
+    copied = {role for role, _, _ in SOURCE_SECTIONS}
+    wanted = {block: role for block, role in spec.roles().items() if role in copied}
     out: dict[Role, list[str]] = {}
     for block in doc.blocks:
         if role := wanted.get(block.id):

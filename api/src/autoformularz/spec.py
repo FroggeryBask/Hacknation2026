@@ -88,8 +88,29 @@ class Role(StrEnum):
 
 
 class BlockRole(BaseModel):
-    block: str = Field(description="Block ID from the document, e.g. 'b12'.")
+    """A role for one block, or for a run of consecutive blocks `block`..`to` (e.g. a whole GDPR clause):
+    one entry instead of one per line keeps the answer short on forms with long instructions."""
+
+    block: str = Field(description="Block ID from the document, e.g. 'b12' (first block of the run).")
+    to: str | None = Field(
+        default=None, description="Last block of a run of consecutive blocks with the same role, e.g. 'b40'."
+    )
     role: Role
+
+    def ids(self) -> list[str]:
+        """Block IDs covered, in order. IDs are `b<number>` in reading order (document.py); an unreadable
+        or backwards range covers only `block`."""
+        first, last = _number(self.block), _number(self.to) if self.to else None
+        if first is None or last is None or last < first:
+            return [self.block]
+        return [f"b{i}" for i in range(first, min(last, first + MAX_RUN) + 1)]
+
+
+MAX_RUN = 2000  # a range never covers more blocks than a real form has
+
+
+def _number(block_id: str) -> int | None:
+    return int(block_id[1:]) if block_id[:1] == "b" and block_id[1:].isdigit() else None
 
 
 def _blocks():
@@ -110,7 +131,7 @@ class Condition(BaseModel):
 
 # Upper bounds in the JSON Schema (maxItems). Generous for real forms (the largest material, form 9, merges
 # three applications), but they stop a model stuck in a repetition loop when the provider enforces the schema.
-MAX_PAGES, MAX_SECTIONS, MAX_FIELDS, MAX_OPTIONS, MAX_REFS = 10, 15, 40, 40, 30
+MAX_PAGES, MAX_SECTIONS, MAX_FIELDS, MAX_OPTIONS, MAX_REFS, MAX_ROLES = 10, 15, 40, 40, 30, 120
 
 
 class FieldSpec(BaseModel):
@@ -163,6 +184,16 @@ class FormSpec(BaseModel):
     )
     authority_name: str = Field(description="Office or authority with its unit, e.g. 'Urząd Gminy X'.")
     applicant: ApplicantSpec = Field(default_factory=ApplicantSpec)
+    # Before `pages`: the model first sets aside instructions, legal text and GDPR (as ranges), then
+    # describes fields. With roles last it turned every line of long instructions into a section (form 8).
+    block_roles: list[BlockRole] = Field(
+        default_factory=list,
+        max_length=MAX_ROLES,  # saved specs; the model gets the tighter MODEL_MAX_ROLES (model_schema)
+        # Only text the compiler copies or drops: listing every block overflows the context on big forms.
+        description="Only blocks with instructions, legal basis, statements, GDPR text, and SKIP for "
+        "paper-only text; consecutive blocks with the same role as one range (block..to). Not for field "
+        "labels, options or headings (blocks without a role are allowed).",
+    )
     pages: list[PageSpec] = Field(
         max_length=MAX_PAGES,
         description="Case-specific pages only (subject of the application), each page once.",
@@ -172,19 +203,40 @@ class FormSpec(BaseModel):
     )
     summary: str | None = Field(default=None, description="Optional info on what happens after sending.")
     signed: bool = True
-    block_roles: list[BlockRole] = Field(
-        default_factory=list,
-        # Only text the compiler copies or drops: listing every block overflows the context on big forms.
-        description="Only blocks with instructions, legal basis, statements, GDPR text, and SKIP for "
-        "paper-only text. Not for field labels, options or headings (blocks without a role are allowed).",
-    )
+
+    def roles(self) -> dict[str, Role]:
+        """Role of each block, ranges expanded. A later entry wins for a block listed twice."""
+        return {block: r.role for r in self.block_roles for block in r.ids()}
 
     def referenced_blocks(self) -> set[str]:
         """Block IDs used anywhere in the spec (fields, sections, roles)."""
-        refs = {r.block for r in self.block_roles}
+        refs = set(self.roles())
         for page in self.pages:
             for section in page.sections:
                 refs.update(section.blocks)
                 for f in section.fields:
                     refs.update(f.blocks)
         return refs
+
+
+# Roles the model may give (the others exist for code and old specs). With FIELD_LABEL/HEADING/OPTION
+# allowed, the model on material 8 spent 77 of 120 entries on them and ran out of tokens before the pages.
+MODEL_ROLES = [Role.INSTRUCTION, Role.LEGAL_BASIS, Role.STATEMENT, Role.GDPR, Role.SKIP]
+MODEL_MAX_ROLES = 40  # with ranges a whole form fits; forces one entry per run of blocks
+
+
+def model_schema() -> dict:
+    """JSON Schema sent to the model (Ollama `format`, Eden `json_schema`). Both providers enforce it, so
+    rules that must hold go here, not only in the prompt. Stricter than `FormSpec` itself, which still
+    loads saved specs:
+    - `block_roles[].role` only from MODEL_ROLES, at most MODEL_MAX_ROLES entries,
+    - `required` must be written for every field (with a default the model never wrote it, so every field
+      came out required, even ones the paper marks as optional)."""
+    schema = FormSpec.model_json_schema()
+    defs = schema["$defs"]
+    defs["BlockRole"]["properties"]["role"] = {"enum": [r.value for r in MODEL_ROLES], "type": "string"}
+    schema["properties"]["block_roles"]["maxItems"] = MODEL_MAX_ROLES
+    field = defs["FieldSpec"]
+    field["required"] = [*field.get("required", []), "required"]
+    field["properties"]["required"].pop("default", None)
+    return schema
