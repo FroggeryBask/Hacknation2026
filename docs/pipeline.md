@@ -1,0 +1,90 @@
+# Pipeline: wierny formularz i deterministyczny JSON
+
+Wynik brainstormu zespołu. Cel: z jednego pliku wygenerować e-formularz wierny źródłu (pola, teksty prawne, zależności) i JSON COI, który jest poprawny i powtarzalny (ten sam plik → ten sam JSON).
+
+## Zasada
+
+Wierność źródłu wymaga LLM, a powtarzalność wymaga kodu. Dlatego:
+- LLM tylko **klasyfikuje i wskazuje** (role bloków, typy pól, sekcje, warunki). Nie przepisuje tekstu i nie pisze JSON-a COI.
+- Wszystko, co da się zrobić regułami, robi kod: ekstrakcja, sprawdzenia, kanonizacja, kompilacja, lint.
+- **UI renderuje COI JSON**, nie FormSpec. Podgląd jest widokiem JSON-a, więc formularz i JSON nie mogą się rozjechać.
+
+## Zakres wejścia
+
+- Jedno wywołanie = **jeden plik** („REST API umożliwiający przesłanie pojedynczego pliku będącego blankietem formularza”).
+- Batch (rozszerzenie VI) = wiele **osobnych** formularzy przetwarzanych po kolei, bez sklejania plików.
+- Kolejność stron w pliku jest poprawna (nie obsługujemy pomieszanych stron).
+
+## Kroki
+
+```
+1. upload.py   plik → sprawdzenie nazwy, rozmiaru, MIME (tylko pamięć / temp)
+2. extract.py  plik → Document { bloki[id, tekst, strona, typ], kandydaci_na_pola[] }
+3. llm.py      Document → FormSpec (ID bloków, role, typy, warunki)
+4. check       FormSpec × Document → kotwice, pokrycie pól, pokrycie tekstu, słownik
+5. canon       FormSpec → kanoniczny FormSpec
+6. compiler.py FormSpec + Document → COI JSON
+7. lint.py     COI JSON → błędy i ostrzeżenia
+8. UI          COI JSON → formularz (ewaluacja states)
+```
+
+### 2. Extract (kod)
+- Tekst w kolejności czytania, podzielony na **bloki z ID**: akapit, wiersz, komórka tabeli, opcja `☐`.
+- **Kandydaci na pola**: `____`, `......`, `☐`/`□`, puste komórki tabel, pola AcroForm, wzorzec „Etykieta: ___”.
+- **Skany** (JPG, PNG, skan w PDF): osobny krok VLM robi tylko transkrypcję do tych samych bloków, bez interpretacji. Dalej pipeline jest taki sam.
+
+### 3. LLM (FormSpec)
+Wyjście ograniczone JSON Schemą, `temperature=0`, stały seed, przypięta wersja modelu. Model:
+- przypisuje każdemu blokowi rolę: `etykieta_pola`, `opcja`, `pouczenie`, `podstawa_prawna`, `oświadczenie`, `rodo`, `nagłówek`, `pomiń` (np. „miejsce na pieczęć”);
+- dla pól podaje typ, wymagalność i sekcję;
+- wskazuje potrzebne sekcje predefiniowane (adres, pełnomocnik, opłata skarbowa…);
+- podaje proste warunki: `{pokaż_gdy: <pole>, równe: <opcja>}`.
+
+Model **odwołuje się do ID bloków**, nigdy nie przepisuje ich treści.
+
+### 4. Check (kod)
+- **Kotwice**: każde ID bloku z FormSpec istnieje w Document. Jeśli nie, to halucynacja i pole jest odrzucane.
+- **Pokrycie pól**: każdy kandydat z ekstrakcji ma pole albo jawne `pomiń`.
+- **Pokrycie tekstu**: każdy blok ma rolę. Dla nieprzypisanych jest jedna ponowna próba LLM tylko z tymi blokami. Jeśli dalej brak, blok trafia jako `TEXT_BLOCK` do najbliższej sekcji z ostrzeżeniem. **Nic nie znika po cichu.**
+- **Słownik typów**: normalizacja etykiet do typów (PESEL, NIP, REGON, kod pocztowy, e-mail, data) i walidatory; rozpoznawanie zestawów pól jako sekcji predefiniowanych (np. ulica/nr/kod/miejscowość = adres).
+
+Przynależność pola do formularza sprawdzamy kotwicą w źródle, nie słownikiem „typ sprawy → pola” (takiego źródła nie ma w materiałach). Wyjątek: pola z szablonów sekcji predefiniowanych, które dokłada kompilator.
+
+### 5. Canon (kod)
+- Kolejność według pozycji bloków w dokumencie, a nie według kolejności z odpowiedzi modelu.
+- Znormalizowane etykiety (spacje, dwukropki), techNames z etykiet.
+- ID elementów: UUIDv5 z tytułu i techName (nie z indeksu), żeby jedno dodatkowe pole nie zmieniało ID wszystkich pól pod nim.
+
+### 6. Compiler (kod)
+- Sekcje predefiniowane z szablonów (te same techNames i zapytania co w referencji).
+- **Tekst prawny wklejany dosłownie** z bloków (pouczenia, RODO, podstawa prawna, oświadczenia) do `TEXT_BLOCK` lub opisu sekcji.
+- Warunki → `states` z zapytaniem jsonata w kształcie z referencji (`{"type": "SHOW", "query": "(\"…\" in tabs[…].questions[…].field.__userAnswer)"}`). Model nigdy nie pisze jsonaty.
+- Strony i flow.
+
+### 7. Lint (kod)
+Obecne reguły z „Reguł technicznych”, a do tego:
+- warunek wskazuje istniejące pole i opcję, pole sterujące jest wcześniej, brak cykli;
+- liczniki pokrycia tekstu i pól w odpowiedzi `?details=true`.
+
+### 8. UI
+- Renderer z COI JSON; `states` ewaluowane przy każdej odpowiedzi, a pola ukryte istnieją, ale się nie pokazują (np. „nie mam dzieci” ukrywa „liczbę dzieci”).
+- Widok obok siebie: bloki źródła i formularz, z podświetleniem, skąd jest każde pole i każdy tekst prawny.
+- Licznik pokrycia i lista nieprzypisanych bloków.
+- Ręczna korekta FormSpec → `/api/v1/forms/compile` → nowy JSON (deterministycznie, bez modelu).
+
+## Zmiany względem obecnego kodu
+- `extract.py` zwraca bloki z ID i kandydatów na pola zamiast samego tekstu.
+- `spec.py`: FormSpec odwołuje się do ID bloków i ma pole warunku.
+- Nowe kroki check i canon (mogą być funkcjami w istniejących modułach).
+- Kompilator bierze tekst z Document, nie z FormSpec.
+- Kontrakt `?details=true` dostaje `document.blocks` i `coverage`.
+
+## Weryfikacja
+- Testy migawkowe na formularzach z `materialy/`: każdy uruchomiony kilka razy, JSON-y identyczne.
+- Pokrycie i precyzja pól względem ręcznie spisanej listy pól dla każdego formularza.
+- Lint z zerem błędów.
+
+## Otwarte decyzje
+- Pole „…(jeśli dotyczy)” bez pytania sterującego w źródle: (a) pole opcjonalne, zawsze widoczne (wierne źródłu) czy (b) kompilator dokłada pytanie Tak/Nie z warunkiem (lepszy UX, ale dodaje coś spoza pliku). Najpierw sprawdzić „Standardy i dobre praktyki”, potem zapytać mentorów.
+- Cache wyników w pamięci po hashu pliku: potwierdzić z mentorami, że nie łamie zakazu przechowywania plików.
+- Głosowanie z kilku przebiegów LLM i podział na wywołania per sekcja: dopiero jeśli testy migawkowe pokażą rozrzut.

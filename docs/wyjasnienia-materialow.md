@@ -17,19 +17,30 @@ Niespójności znalezione w `materialy/` i ustalenia zespołu (po rozmowie z men
 - Treść zadania (`COI - Pełna treść zadania konkursowego.pdf`, s. 3 „Wymagania techniczne”) zakazuje zależności typu zewnętrzne API / SaaS, a s. 5 „Konteneryzacja” wymaga Dockera.
 - Ustalenie: usuwamy Supabase i Vercel, wszystko działa w kontenerach Docker.
 
-## Do potwierdzenia
-
 ### Strona FINISH: INFO_SECTION czy TEXT_BLOCK
-- Reguła: `Materiały do zadania dla Uczestników/Reguły techniczne konfiguracji formularzy i pól na formularzu - materiał do zadania obligatoryjnego  (2).docx`: na stronie `finish` „może być dodane wyłącznie pole typu sekcja informacyjna INFO_SECTION”.
-- Przykłady mają tam `SECTION` z `TEXT_BLOCK`: przykład 1 (FINISH linia 1609, TEXT_BLOCK 1633), przykład 5 (FINISH 1720, TEXT_BLOCK 1744).
-- Wstępnie: robimy jak w przykładach, bo formularze często muszą zawierać na końcu informacje prawne i podstawę prawną (ustawę).
+- Problem: „Reguły techniczne…” (`Materiały do zadania dla Uczestników/Reguły techniczne konfiguracji formularzy i pól na formularzu - materiał do zadania obligatoryjnego  (2).docx`) dopuszczają na stronie `finish` „wyłącznie pole typu sekcja informacyjna INFO_SECTION”. „Standardy…” (rozdz. „Podsumowanie i podgląd”) każą tam dać „pole typu blok tekstu”, a przykłady 1 i 5 mają `SECTION` z `TEXT_BLOCK` (przykład 1: FINISH linia 1609, TEXT_BLOCK 1633; przykład 5: FINISH 1720, TEXT_BLOCK 1744).
+- Ustalenie (mentorzy COI): **można obydwu**. Linter nie powinien zgłaszać `TEXT_BLOCK` na stronie końcowej. Pola do wprowadzania danych na tej stronie nadal są zabronione.
 
 ### `repetingSectionGrid` czy `repeatingSectionGrid`
-- Literówka tylko w schemacie `Materiały do zadania dla Uczestników/importowanyPlikJsonSchemat (1).json:85` i w `OpisImportowanegoPlikuJSON (1).docx`. Przykłady 1 i 5 oraz „Reguły techniczne…” używają `repeatingSectionGrid`.
-- Wstępnie: trzymamy się przykładów (`repeatingSectionGrid`).
+- Literówka tylko w schemacie `Materiały do zadania dla Uczestników/importowanyPlikJsonSchemat (1).json:85` i w `OpisImportowanegoPlikuJSON (1).docx`. Przykłady 1 i 5 oraz „Reguły techniczne…” (przykład zapytania jsonata) używają `repeatingSectionGrid`.
+- Ustalenie: `repeatingSectionGrid`.
 
-### Sprzęt na obronie
-- Materiały nie mówią, czy obrona jest na CPU czy GPU, czy model ma być w obrazie czy jako volume, ani czy jest internet. Od tego zależy rozmiar modelu.
+### Uruchomienie rozwiązania do oceny
+- Ustalenie (mentorzy COI): kod wgrywamy na platformę Hacktribe (termin: 22.11.2026, 11:00, regulamin HackNation §4 pkt 3).
+- Konsekwencja: rozwiązanie musi uruchomić się u kogoś innego, bez naszej pomocy, z samego README i `docker compose up --build`. README musi jasno podawać wymagania (RAM, dysk, czas pobrania modelu ~6 GB, GPU opcjonalne) i działać na samym CPU.
 
 ### Eden AI a zakaz LLM przez API
-- Treść zadania (s. 3): „rozwiązanie nie może używać modeli LLM dostępnych wyłącznie przez API (ale można ich używać do pisania/testowania/projektowania kodu)”. Eden AI to API, więc w oddawanym rozwiązaniu tylko lokalny model (Ollama); Eden wyłącznie do pracy/testów.
+- Treść zadania (s. 3): „rozwiązanie nie może używać modeli LLM dostępnych wyłącznie przez API (ale można ich używać do pisania/testowania/projektowania kodu)”.
+- Ustalenie: w oddawanym rozwiązaniu tylko lokalny model (Ollama). Eden AI wyłącznie do pracy i testów.
+
+### LibreOffice (konwersja .doc i .ods)
+- Po co: `.doc` (stary binarny format Worda) nie ma sensownego parsera w Pythonie na licencji innej niż copyleft, więc konwertujemy go do `.docx` przez LibreOffice uruchamiane jako osobny proces. `.ods` też idzie tą drogą, choć da się go czytać bez LibreOffice (to ZIP z XML, jak `.docx`).
+- Ustalenie (mentorzy COI): dopuszczalne tylko przy licencji, która nie wymaga udostępnienia naszego kodu. **Trzeba uważać.**
+- Stan: LibreOffice ma licencję MPL-2.0 (słaby copyleft, obowiązek publikacji dotyczy tylko zmienionych plików samego LibreOffice). Nie modyfikujemy go ani nie linkujemy, tylko wywołujemy binarkę, więc naszego kodu to nie obejmuje. Do zrobienia: czytać `.ods` bezpośrednio z XML i zostawić LibreOffice tylko dla `.doc`; opisać licencję w README.
+
+### Numeracja rozszerzeń
+- Problem: w pkt 3.3 treści zadania V to wizualizacja, VI to walidacje, a w kryteriach oceny „Punkt V (Walidacje pól)”.
+- Ustalenie (mentorzy COI): punktowane są **i walidacja, i wizualizacja**.
+
+## Do potwierdzenia
+- Otwarte decyzje z [pipeline.md](pipeline.md): pole „(jeśli dotyczy)” bez pytania sterującego oraz cache wyników w pamięci po hashu pliku.
