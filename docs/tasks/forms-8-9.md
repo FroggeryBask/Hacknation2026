@@ -127,6 +127,8 @@ nagłówek B.4).
   `qwen3-vl:30b-a3b` (i ewentualnie `gemma4:26b`). Zmiana modelu to tylko `AUTOFORMULARZ_LLM_MODEL` + README.
 
 ## Ryzyka dla Dockera (Ollama)
+Załatwione w `feat/docker`: `num_ctx=24576`, `timeout=1800`, model 8B domyślnie (docs/tasks/docker-docs.md).
+
 - `llm_num_ctx=16384` obejmuje prompt i odpowiedź. Formularze 8/9: ~9–10 tys. tokenów promptu + 6–8 tys.
   odpowiedzi ≈ granica okna. Podnieść np. do 24576 (koszt: ~1–2 GB RAM).
 - `llm_timeout_s=600`: model 8B na CPU ~5–10 tok/s, czyli 6 tys. tokenów to 10–20 min. Duże formularze na CPU

@@ -30,8 +30,12 @@ class Settings(BaseSettings):
     # Local LLM served by Ollama (no external APIs allowed by the task rules)
     ollama_url: str = "http://localhost:11434"
     llm_model: str = "qwen3-vl:8b"
-    llm_timeout_s: float = 600.0
-    llm_num_ctx: int = 16384
+    # CPU without GPU: the 8B model writes a few tokens/s, a large form (up to llm_max_tokens) takes 15-25 min.
+    # Eden AI ends a request itself after ~400 s, so the long limit only matters for Ollama.
+    llm_timeout_s: float = 1800.0
+    # Prompt + answer. Form 8 (largest): ~9-10k prompt tokens + up to llm_max_tokens (8000) answer > 16384.
+    # 24576 with qwen3-vl:8b: 9.4 GB in memory (ollama ps); docs/tasks/docker-docs.md.
+    llm_num_ctx: int = 24576
     # Cap on the model's answer. A FormSpec of the largest material fits easily; a model stuck in a
     # repetition loop is cut here instead of running until the provider's limit (Eden: 400 s, ~16k tokens).
     llm_max_tokens: int = 8000
@@ -43,8 +47,8 @@ class Settings(BaseSettings):
     # data before the model, so they are left out of the prompt and the answer (presort.py).
     presort: bool = True
 
-    # LLM provider. "eden" (Eden AI, open-weight models only) is for local development and tests only;
-    # docker-compose forces "ollama" for the delivered solution.
+    # LLM provider. "eden" (Eden AI, open-weight models only) is for local development, tests and the demo;
+    # docker-compose.yml alone forces "ollama" (delivered solution), docker-compose.eden.yml enables Eden.
     llm_provider: Literal["ollama", "eden"] = "ollama"
     eden_base_url: str = "https://api.edenai.run/v3"
     # Read from EDENAI_API_KEY (no prefix: the organizers' name, already in .env.local)

@@ -8,6 +8,12 @@ services:
     image: ollama/ollama:0.40.17
     volumes:
       - ollama:/root/.ollama
+    # Ready = the server answers; the model download waits for this instead of guessing with sleep.
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     # deploy:
     #   resources:
     #     reservations:
@@ -18,28 +24,35 @@ services:
     image: ollama/ollama:0.40.17
     environment:
       OLLAMA_HOST: http://ollama:11434
-    entrypoint: ["/bin/sh", "-c", "sleep 3 && ollama pull ${AUTOFORMULARZ_LLM_MODEL:-qwen3-vl:8b}"]
+    entrypoint: ["ollama", "pull", "${AUTOFORMULARZ_LLM_MODEL:-qwen3-vl:8b}"]
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     restart: "no"
 
   api:
     build: ./api
+    image: autoformularz-api:0.1.0  # explicit version instead of the default `latest` tag
     env_file: .env
     environment:
       AUTOFORMULARZ_OLLAMA_URL: http://ollama:11434
-      # Delivered solution always uses the local model; Eden AI is for local development only.
+      # Default: the local model. The demo overlay docker-compose.eden.yml switches the API to Eden AI.
       AUTOFORMULARZ_LLM_PROVIDER: ollama
       EDENAI_API_KEY: ""
     ports:
       - "8000:8000"
+    # Starts once the model is in the volume, so the first request does not fail with "model not found".
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
+      model:
+        condition: service_completed_successfully
 
   web:
     build:
       context: .
       dockerfile: Dockerfile.web
+    image: autoformularz-web:0.1.0
     env_file: .env
     environment:
       AUTOFORMULARZ_API_URL: http://api:8000

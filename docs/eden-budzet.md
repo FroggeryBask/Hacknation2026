@@ -18,3 +18,4 @@
 | 2026-11-21 | Ewelina | wyniki formularze 8 (ok), 9 (gorszy niż poprzedni, zostaje spec z poprzedniej serii) po zakresach ról | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 2 | 0.0115 |
 | 2026-11-21 | Ewelina | wyniki formularz 8 z regułami o polach nieobowiązkowych w prompcie: ucięty (role HEADING dla każdego bloku), zostaje poprzedni spec | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0066 |
 | 2026-11-21 | Ewelina | wyniki formularz 8 ze schematem dla modelu (tylko dozwolone role, `required` obowiązkowe): ok | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0060 |
+| 2026-11-21 | Ewelina | test Dockera z `docker-compose.eden.yml`: formularze 2 i 8 przez API w kontenerze (ok); wcześniej przerwany skrypt pomiaru mógł wysłać 1–2 zapytania (koszt nieznany, ≤ 0,01) | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 2 | 0.0080 |
