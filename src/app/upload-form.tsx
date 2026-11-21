@@ -38,8 +38,8 @@ const PREVIEWABLE = ["pdf", "jpg", "jpeg", "png"];
 
 const STEPS = [
   "Dodaj plik formularza",
-  "Tworzymy formularz",
-  "Sprawdź formularz utworzony przez AI",
+  "Generowanie formularza",
+  "Weryfikacja formularza",
 ];
 
 type Issue = {
@@ -362,7 +362,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                   focus={moved.current}
                 >
                   <FormSection
-                    title="Tworzymy formularz"
+                    title="Generowanie formularza"
                     description={<FileName file={file} url={fileUrl} />}
                   >
                     <div className="flex items-center gap-3 text-sm">
