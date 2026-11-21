@@ -5,7 +5,6 @@ AUTOFORMULARZ_LLM_PROVIDER=ollama runs the model locally instead (offline option
 as `format`, so decoding is constrained to valid JSON of the right shape."""
 
 import base64
-import contextlib
 import json
 import logging
 import re
@@ -15,6 +14,7 @@ from dataclasses import dataclass, field
 import httpx
 from pydantic import ValidationError
 
+from autoformularz import progress
 from autoformularz.config import Settings
 from autoformularz.document import FILL_LINE, Document
 from autoformularz.spec import FormSpec, model_schema
@@ -201,8 +201,7 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
             "num_predict": settings.llm_max_tokens,
         },
     }
-    parts: list[str] = []
-    size = checked = 0
+    answer = Answer()
     done_reason = None
     try:
         with httpx.stream(
@@ -216,28 +215,15 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
                     chunk = json.loads(line)
                 except ValueError:
                     continue
-                piece = (chunk.get("message") or {}).get("content", "")
-                parts.append(piece)
-                size += len(piece)
                 done_reason = chunk.get("done_reason") or done_reason
+                answer.add((chunk.get("message") or {}).get("content", ""))
                 if chunk.get("done"):
                     break
-                # The model began writing the form again (form 9: once per version of the request): stop
-                # now instead of at llm_max_tokens. Leaving the block closes the connection and Ollama stops
-                # generating; the complete part is used (generate_spec -> salvage). On form 9 this halves
-                # the answer; a healthy answer never repeats a whole section, so it is never cut.
-                if size - checked >= REPEAT_CHECK_CHARS:
-                    checked = size
-                    text = "".join(parts)
-                    found = _complete_pages(text)
-                    if found and first_repeat(found[1]):
-                        log.warning("Model started repeating sections: stopped after %d characters.", size)
-                        raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
     except httpx.HTTPError as e:
         raise LLMError(
             "LLM_UNAVAILABLE", f"Model językowy jest niedostępny ({settings.ollama_url}).", 503
         ) from e
-    content = "".join(parts)
+    content = answer.text()
     if done_reason == "length":
         raise truncated(settings, content)
     return content
@@ -254,6 +240,93 @@ def truncated(settings: Settings, partial: str = "") -> LLMError:
         f"Odpowiedź modelu przekroczyła {settings.llm_max_tokens} tokenów (prawdopodobnie zapętlenie).",
         partial=partial,
     )
+
+
+class Outline:
+    """Reads a streamed FormSpec and reports the form title and the page, section and field names as soon
+    as each one is complete (progress, shown in the UI while the model writes). A small JSON scanner: it
+    only tracks strings, keys and which key opened each array or object."""
+
+    NAMES = {
+        ((), "title"): "Tytuł",
+        (("pages",), "title"): "Strona",
+        (("pages", "sections"), "title"): "Sekcja",
+        (("pages", "sections", "fields"), "label"): "Pole",
+    }
+
+    def __init__(self) -> None:
+        self.stack: list[str | None] = []  # key whose value each open container is (None in arrays)
+        self.key: str | None = None  # last key read in the innermost object
+        self.pending: str | None = None  # a complete string: a key if ":" follows, else a value
+        self.raw: list[str] | None = None  # the string being read (None outside strings)
+        self.escape = False
+
+    def feed(self, piece: str) -> None:
+        for ch in piece:
+            if self.raw is not None:
+                if self.escape:
+                    self.escape = False
+                elif ch == "\\":
+                    self.escape = True
+                elif ch == '"':
+                    try:
+                        self.pending = json.loads('"' + "".join(self.raw) + '"')
+                    except ValueError:
+                        self.pending = ""
+                    self.raw = None
+                    continue
+                self.raw.append(ch)
+            elif ch == '"':
+                self.raw = []
+            elif ch == ":":
+                self.key, self.pending = self.pending, None
+            elif ch in ",}]":
+                if self.pending is not None:
+                    self._value(self.pending)
+                    self.pending = None
+                if ch != ",":
+                    if self.stack:
+                        self.stack.pop()
+                    self.key = None
+            elif ch in "{[":
+                self.stack.append(self.key)
+                self.key = None
+
+    def _value(self, value: str) -> None:
+        path = tuple(k for k in self.stack if k is not None)
+        if (name := self.NAMES.get((path, self.key or ""))) and value.strip():
+            progress.item(f"{name}: {value.strip()}")
+
+
+class Answer:
+    """A model answer read piece by piece: reports its outline and stops a looping answer early."""
+
+    def __init__(self) -> None:
+        self.parts: list[str] = []
+        self.size = self.checked = 0
+        self.outline = Outline()
+
+    def text(self) -> str:
+        return "".join(self.parts)
+
+    def add(self, piece: str) -> None:
+        if not piece:
+            return
+        self.parts.append(piece)
+        self.size += len(piece)
+        self.outline.feed(piece)
+        progress.tick()  # a cancelled job stops here: leaving the stream closes it and the model stops
+        # The model began writing the form again (form 9: once per version of the request): stop now
+        # instead of at llm_max_tokens. Leaving the stream closes the connection and the model stops
+        # generating; the complete part is used (generate_spec -> salvage). On form 9 this halves the
+        # answer; a healthy answer never repeats a whole section, so it is never cut.
+        if self.size - self.checked >= REPEAT_CHECK_CHARS:
+            self.checked = self.size
+            text = self.text()
+            found = _complete_pages(text)
+            if found and first_repeat(found[1]):
+                log.warning("Model started repeating sections: stopped after %d characters.", self.size)
+                raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
 
 
 def _eden_messages(messages: list[dict], images: list[bytes]) -> list[dict]:
@@ -280,40 +353,99 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         "temperature": 0,
         "max_tokens": settings.llm_max_tokens,
         "messages": _eden_messages(messages, images),
+        "stream": True,
+        "stream_options": {"include_usage": True},
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "FormSpec", "schema": model_schema()},
         },
     }
 
-    def post() -> httpx.Response:
+    def post() -> tuple[httpx.Response, dict | None, Answer]:
+        """One call. Streamed (SSE) so progress shows and a looping answer stops early; the body is None
+        when the provider answered with plain JSON instead (then read as before)."""
         for guard in before_eden_call:
             guard(settings.eden_model)
+        answer = Answer()
         try:
-            r = httpx.post(
-                url, json=payload, headers={"Authorization": f"Bearer {key}"}, timeout=settings.llm_timeout_s
-            )
+            with httpx.stream(
+                "POST",
+                url,
+                json=payload,
+                headers={"Authorization": f"Bearer {key}"},
+                timeout=settings.llm_timeout_s,
+            ) as r:
+                if r.status_code != 200 or "text/event-stream" not in r.headers.get("content-type", ""):
+                    r.read()
+                    return r, None, answer
+                return r, _read_sse(r, answer), answer
         except httpx.HTTPError as e:
             raise LLMError("LLM_UNAVAILABLE", "Model językowy jest niedostępny (Eden AI).", 503) from e
-        if r.status_code == 200:
-            with contextlib.suppress(ValueError):  # not JSON: reported as LLM_BAD_OUTPUT below
-                _report(_usage(settings.eden_model, r.json()))
-        return r
 
-    r = post()
+    r, body, answer = post()
     if 400 <= r.status_code < 500 and "response_format" in r.text:
         # Some providers behind Eden reject json_schema; the schema is in the prompt and Pydantic validates.
         payload["response_format"] = {"type": "json_object"}
-        r = post()
+        r, body, answer = post()
     if r.status_code != 200:
         snippet = r.text[:300].replace(key, "***")
         raise LLMError("LLM_ERROR", f"Model językowy zwrócił błąd {r.status_code}: {snippet}")
-    try:
-        body = r.json()
-        content = body["choices"][0]["message"]["content"]
-    except (ValueError, KeyError, IndexError, TypeError) as e:
-        raise LLMError("LLM_BAD_OUTPUT", "Model zwrócił odpowiedź w nieoczekiwanym formacie.") from e
-    usage = body.get("usage") or {}
+    if body is None:
+        try:
+            body = r.json()
+            choice = body["choices"][0]
+            content = choice["message"]["content"]
+        except (ValueError, KeyError, IndexError, TypeError) as e:
+            _record(settings.eden_model, body if isinstance(body, dict) else {})
+            raise LLMError("LLM_BAD_OUTPUT", "Model zwrócił odpowiedź w nieoczekiwanym formacie.") from e
+        if isinstance(content, list):  # content parts
+            content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
+        content = content or ""
+        answer.outline.feed(content)
+        finish = choice.get("finish_reason")
+    else:
+        content, finish = answer.text(), body.get("finish_reason")
+    _record(settings.eden_model, body)
+    if finish == "length":
+        raise truncated(settings, content)
+    return content
+
+
+def _read_sse(r: httpx.Response, answer: Answer) -> dict:
+    """A streamed Chat Completions answer: the text goes to `answer`; returns the finish reason and the
+    usage and cost sent in the last chunks (`stream_options.include_usage`)."""
+    out: dict = {}
+    for line in r.iter_lines():
+        if not line.startswith("data:"):
+            continue
+        data = line[5:].strip()
+        if data == "[DONE]":
+            break
+        try:
+            chunk = json.loads(data)
+        except ValueError:
+            continue
+        if not isinstance(chunk, dict):
+            continue
+        if isinstance(chunk.get("usage"), dict) and chunk["usage"]:
+            out["usage"] = chunk["usage"]
+        if "cost" in chunk:
+            out["cost"] = chunk["cost"]
+        for choice in chunk.get("choices") or []:
+            piece = (choice.get("delta") or {}).get("content") or ""
+            if isinstance(piece, list):
+                piece = "".join(p.get("text", "") for p in piece if isinstance(p, dict))
+            answer.add(piece)
+            out["finish_reason"] = choice.get("finish_reason") or out.get("finish_reason")
+    if "usage" not in out:
+        log.warning("Eden AI sent no usage in the stream: this call's cost is not recorded.")
+    return out
+
+
+def _record(model: str, body: dict) -> None:
+    """Usage and cost of one paid response: log, hooks and EDEN_USAGE (/health)."""
+    _report(_usage(model, body))
+    usage = body.get("usage") if isinstance(body.get("usage"), dict) else {}
     EDEN_USAGE.append(
         {
             "promptTokens": usage.get("prompt_tokens", 0),
@@ -321,11 +453,6 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
             "cost": body.get("cost", usage.get("estimated_cost", 0.0)) or 0.0,
         }
     )
-    if isinstance(content, list):  # content parts
-        content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
-    if body["choices"][0].get("finish_reason") == "length":
-        raise truncated(settings, content or "")
-    return content or ""
 
 
 def parse_spec(content: str) -> FormSpec:
@@ -438,6 +565,7 @@ def generate_spec(ex: Document, settings: Settings) -> FormSpec:
     if eden:  # json_schema may be dropped by the provider, so the schema also goes in the prompt
         system += "\nSchemat JSON (FormSpec):\n" + json.dumps(model_schema(), ensure_ascii=False)
     messages = [{"role": "system", "content": system}, {"role": "user", "content": build_user_prompt(ex)}]
+    progress.stage("Model opisuje formularz")
     try:
         content = call(messages, ex.images, settings)
     except LLMError as e:
@@ -462,6 +590,7 @@ def generate_spec(ex: Document, settings: Settings) -> FormSpec:
             "Zwróć poprawiony JSON, bez komentarzy.",
         },
     ]
+    progress.stage("Model poprawia odpowiedź")
     content = call(retry, ex.images, settings)
     try:
         return parse_spec(content)

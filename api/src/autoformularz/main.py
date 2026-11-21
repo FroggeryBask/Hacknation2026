@@ -4,16 +4,16 @@ from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
-from autoformularz import pipeline
+from autoformularz import jobs, pipeline
 from autoformularz.auth import require_jwt
 from autoformularz.config import Settings, get_settings
 from autoformularz.lint import as_dicts, lint
 from autoformularz.llm import LLMError, llm_status, warn_if_dev_provider
 from autoformularz.spec import FormSpec
-from autoformularz.upload import UploadError
+from autoformularz.upload import UploadError, validate_upload
 
 app = FastAPI(
     title="autoformularz",
@@ -24,7 +24,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in get_settings().cors_origins.split(",") if o.strip()],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["Authorization", "Content-Type"],
     expose_headers=["X-Autoformularz-Errors", "X-Autoformularz-Warnings"],
 )
@@ -45,15 +45,11 @@ async def llm_error(_: Request, e: LLMError) -> JSONResponse:
     return JSONResponse({"error": {"code": e.code, "message": e.message}}, status_code=e.status)
 
 
-def respond(result: pipeline.Result, details: bool) -> JSONResponse:
-    errors = sum(i.level == "error" for i in result.issues)
-    headers = {
-        "X-Autoformularz-Errors": str(errors),
-        "X-Autoformularz-Warnings": str(len(result.issues) - errors),
-    }
+def body(result: pipeline.Result, details: bool) -> dict[str, Any]:
+    """The importable JSON as-is, or with `details` also FormSpec, lint issues, notes and coverage."""
     if not details:
-        return JSONResponse(result.form, headers=headers)
-    body: dict[str, Any] = {
+        return result.form
+    return {
         "form": result.form,
         "spec": result.spec.model_dump(mode="json"),
         "issues": as_dicts(result.issues),
@@ -62,7 +58,19 @@ def respond(result: pipeline.Result, details: bool) -> JSONResponse:
         "document": result.document.as_dict() if result.document else None,
         "coverage": result.coverage.as_dict() if result.coverage else None,
     }
-    return JSONResponse(body, headers=headers)
+
+
+def respond(result: pipeline.Result, details: bool) -> JSONResponse:
+    errors = sum(i.level == "error" for i in result.issues)
+    headers = {
+        "X-Autoformularz-Errors": str(errors),
+        "X-Autoformularz-Warnings": str(len(result.issues) - errors),
+    }
+    return JSONResponse(body(result, details), headers=headers)
+
+
+def error(status: int, code: str, message: str) -> JSONResponse:
+    return JSONResponse({"error": {"code": code, "message": message}}, status_code=status)
 
 
 @app.get("/health")
@@ -81,6 +89,41 @@ async def convert(
     data = await file.read(max_bytes + 1)  # read one byte over the limit to detect oversize files
     result = await run_in_threadpool(pipeline.from_file, file.filename, data, settings)
     return respond(result, details)
+
+
+@app.post(
+    "/api/v1/jobs",
+    status_code=202,
+    summary="Plik formularza → zadanie w tle; postęp i wynik w GET /api/v1/jobs/{id}",
+)
+async def start_job(
+    _: Auth,
+    settings: Cfg,
+    file: Annotated[UploadFile, File(description="Jeden plik: pdf, doc, docx, ods, xlsx, jpg, jpeg, png")],
+    details: Annotated[bool, Query(description="Wynik z FormSpec, raportem walidacji i uwagami")] = False,
+) -> JSONResponse:
+    max_bytes = int(settings.max_upload_mb * 1_048_576)
+    data = await file.read(max_bytes + 1)
+    validate_upload(file.filename, data, max_bytes)  # a bad file is a 4xx now, not a failed job
+    name = file.filename
+    job = jobs.start(lambda: body(pipeline.from_file(name, data, settings), details))
+    if job is None:
+        return error(429, "BUSY", "Serwer przetwarza już zbyt wiele plików. Spróbuj ponownie za chwilę.")
+    return JSONResponse({"id": job.id}, status_code=202)
+
+
+@app.get("/api/v1/jobs/{job_id}", summary="Postęp zadania (kroki) i wynik, gdy gotowe")
+def job_status(_: Auth, job_id: str) -> JSONResponse:
+    if (job := jobs.get(job_id)) is None:
+        return error(404, "JOB_NOT_FOUND", "Nie ma takiego zadania (mogło wygasnąć).")
+    return JSONResponse(job.view())
+
+
+@app.delete("/api/v1/jobs/{job_id}", status_code=204, summary="Anuluj zadanie (model przestaje pisać)")
+def cancel_job(_: Auth, job_id: str) -> Response:
+    if not jobs.cancel(job_id):
+        return error(404, "JOB_NOT_FOUND", "Nie ma takiego zadania (mogło wygasnąć).")
+    return Response(status_code=204)
 
 
 @app.post("/api/v1/forms/compile", summary="FormSpec → JSON (bez modelu, np. po ręcznej korekcie)")

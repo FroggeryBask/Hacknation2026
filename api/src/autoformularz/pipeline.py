@@ -5,6 +5,7 @@ from typing import Any
 
 from autoformularz import llm as llm_module
 from autoformularz import presort as presort_step
+from autoformularz import progress
 from autoformularz.check import (
     Coverage,
     coverage,
@@ -38,13 +39,18 @@ class Result:
 def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     """Canon, then compile. `document` (the source file) adds verbatim legal text; None for /compile."""
     # Canon: a model's repetitions and copies of the predefined part never reach the form.
+    progress.stage("Budowanie formularza JSON")
     spec, repeated = dedupe(spec)
     spec, standard = drop_standard_sections(spec)
     spec, amounts = printed_amounts_as_info(spec)
     spec, conditions = drop_broken_conditions(spec)  # last: the rules above may drop a controlling field
     form, warnings = compile_form(spec, document)
+    progress.stage("Sprawdzanie reguł technicznych")
+    issues = lint(form)
+    errors = sum(i.level == "error" for i in issues)
+    progress.item(f"Błędy: {errors}, ostrzeżenia: {len(issues) - errors}")
     return Result(
-        form=form, spec=spec, issues=lint(form), notes=repeated + standard + amounts + conditions + warnings
+        form=form, spec=spec, issues=issues, notes=repeated + standard + amounts + conditions + warnings
     )
 
 
@@ -55,14 +61,22 @@ def ask_model(document: Document, settings: Settings, llm=None) -> FormSpec:
     call = llm or llm_module.generate_spec
     if not settings.presort:
         return call(document, settings)
+    progress.stage("Rozpoznawanie części standardowej")
     pre = presort_step.presort(document)
+    if dropped := sum(pre.counts.values()):
+        progress.item(
+            f"Fragmenty rozpoznane bez modelu (RODO, części papierowe, dane wnioskodawcy): {dropped}"
+        )
     return presort_step.apply(call(pre.model_doc, settings), pre)
 
 
 def from_file(name: str | None, data: bytes, settings: Settings, llm=generate_spec) -> Result:
+    progress.stage("Sprawdzanie pliku")
     kind = validate_upload(name, data, int(settings.max_upload_mb * 1_048_576))
+    progress.stage("Odczytywanie dokumentu")
     ocr = ocr_from(settings.ocr_bin, settings.ocr_lang, settings.tessdata_dir)
     document = extract(kind, data, soffice=settings.soffice_bin, max_pages=settings.max_pdf_pages, ocr=ocr)
+    progress.item(f"Fragmenty tekstu: {len(document.blocks)}, obrazy stron: {len(document.images)}")
     spec = ask_model(document, settings, llm)
     result = from_spec(spec, document if settings.copy_source_text else None)
     result.notes = document.notes + result.notes

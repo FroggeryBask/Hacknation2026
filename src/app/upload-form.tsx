@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 import {
+  Check,
   CircleCheck,
   Download,
   ExternalLink,
@@ -49,10 +50,92 @@ type Issue = {
   path: string;
 };
 type Result = { form: CoiForm; issues: Issue[]; notes: string[] };
+/** A pipeline stage, or what the model or the code found in it (api progress.py). */
+type Progress = { kind: "stage" | "item"; text: string };
+type Job = {
+  status: "running" | "done" | "error" | "cancelled";
+  steps: Progress[];
+  result?: Result;
+  error?: { message: string };
+};
 type State =
   | { step: "idle" }
-  | { step: "sending" }
+  | { step: "sending"; steps: Progress[] }
   | { step: "done"; result: Result };
+
+const POLL_MS = 1500;
+// Polls that may fail in a row (e.g. a restarting proxy) before the page gives up.
+const POLL_RETRIES = 3;
+
+const wait = (ms: number, signal: AbortSignal) =>
+  new Promise<void>((resolve) => {
+    const t = setTimeout(resolve, ms);
+    signal.addEventListener("abort", () => {
+      clearTimeout(t);
+      resolve();
+    });
+  });
+
+/** Stages with the items found in each, in the order they came. */
+function groupSteps(steps: Progress[]) {
+  const out: { stage: string; items: string[] }[] = [];
+  for (const s of steps) {
+    if (s.kind === "stage") out.push({ stage: s.text, items: [] });
+    else if (out.length) out[out.length - 1].items.push(s.text);
+  }
+  return out;
+}
+
+/** Stages one under another; the current one spins, items are listed under their stage. */
+function StepLog({ steps }: { steps: Progress[] }) {
+  const end = useRef<HTMLDivElement>(null);
+  const groups = groupSteps(steps);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: follow new steps
+  useEffect(() => {
+    end.current?.scrollIntoView({ block: "nearest" });
+  }, [steps.length]);
+  if (!groups.length) return null;
+  return (
+    <div className="max-h-80 overflow-y-auto rounded-sm border bg-secondary px-3 py-2 text-sm">
+      <ol className="flex flex-col gap-2">
+        {groups.map((g, i) => {
+          const current = i === groups.length - 1;
+          return (
+            <li key={`${i}-${g.stage}`}>
+              <span className="flex items-center gap-2 font-bold">
+                {current ? (
+                  <LoaderCircle
+                    className="size-4 shrink-0 animate-spin text-primary"
+                    aria-hidden
+                  />
+                ) : (
+                  <Check className="size-4 shrink-0 text-success" aria-hidden />
+                )}
+                {g.stage}
+              </span>
+              {g.items.length > 0 && (
+                <ul className="mt-1 flex flex-col gap-0.5 pl-6 text-muted-foreground">
+                  {g.items.map((t, j) => (
+                    <motion.li
+                      // biome-ignore lint/suspicious/noArrayIndexKey: items only append, names may repeat
+                      key={j}
+                      initial={{ opacity: 0, y: -2 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {t}
+                    </motion.li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+      <div ref={end} />
+    </div>
+  );
+}
 
 const formatSize = (b: number) =>
   b < 1024 * 1024
@@ -206,19 +289,53 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
       return;
     }
     setError(undefined);
-    goTo({ step: "sending" });
+    goTo({ step: "sending", steps: [] });
     const body = new FormData();
     body.append("file", file);
     const controller = new AbortController();
     abort.current = controller;
+    const { signal } = controller;
+    let id: string | undefined;
+    // Cancelling stops the job on the server too: the model stops writing, no more tokens are paid.
+    signal.addEventListener("abort", () => {
+      if (id) fetch(`/api/forms/${id}`, { method: "DELETE" }).catch(() => {});
+    });
     try {
-      const res = await fetch("/api/forms", {
-        method: "POST",
-        body,
-        signal: controller.signal,
-      });
+      const res = await fetch("/api/forms", { method: "POST", body, signal });
       if (!res.ok) throw new Error(await errorMessage(res));
-      const result = (await res.json()) as Result;
+      id = ((await res.json()) as { id: string }).id;
+      let failures = 0;
+      let job: Job | undefined;
+      while (!signal.aborted) {
+        await wait(POLL_MS, signal);
+        if (signal.aborted) break;
+        const poll = await fetch(`/api/forms/${id}`, { signal }).catch(
+          () => undefined,
+        );
+        if (!poll?.ok) {
+          if (poll && poll.status < 500)
+            throw new Error(await errorMessage(poll));
+          if (++failures > POLL_RETRIES)
+            throw new Error(
+              poll ? await errorMessage(poll) : "Failed to fetch",
+            );
+          continue;
+        }
+        failures = 0;
+        job = (await poll.json()) as Job;
+        const steps = job.steps;
+        setState((s) =>
+          s.step === "sending" ? { step: "sending", steps } : s,
+        );
+        if (job.status !== "running") break;
+      }
+      if (signal.aborted) throw new Error("Anulowano.");
+      if (job?.status !== "done" || !job.result)
+        throw new Error(
+          job?.error?.message ??
+            "Nie udało się utworzyć formularza. Spróbuj ponownie.",
+        );
+      const result = job.result;
       setRun((r) => r + 1);
       goTo({ step: "done", result });
     } catch (e) {
@@ -371,7 +488,10 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                         aria-hidden
                       />
                       <output>
-                        Trwa tworzenie formularza. Może to potrwać kilka minut.
+                        {state.step === "sending" && state.steps.length
+                          ? `Trwa: ${groupSteps(state.steps).at(-1)?.stage}.`
+                          : "Trwa tworzenie formularza."}{" "}
+                        Może to potrwać kilka minut.
                         {/* Ticking timer is visual only, so screen readers hear the status once. */}
                         <span
                           className="block text-muted-foreground"
@@ -381,6 +501,9 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                         </span>
                       </output>
                     </div>
+                    {state.step === "sending" && (
+                      <StepLog steps={state.steps} />
+                    )}
                   </FormSection>
                   <div className="flex justify-end">
                     <AlertDialog>

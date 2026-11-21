@@ -7,7 +7,7 @@ import json
 import httpx
 import pytest
 
-from autoformularz import llm
+from autoformularz import llm, progress
 from autoformularz.config import Settings
 from autoformularz.document import Document, build
 from autoformularz.llm import LLMError, generate_spec, llm_status
@@ -169,7 +169,7 @@ def test_key_never_in_errors(post, monkeypatch):
     def down(*_, **__):
         raise httpx.ConnectError("boom")
 
-    monkeypatch.setattr(llm.httpx, "post", down)
+    monkeypatch.setattr(llm.httpx, "stream", down)
     with pytest.raises(LLMError) as e:
         generate_spec(doc(text="x"), eden())
     errors.append(e.value)
@@ -421,3 +421,85 @@ def test_one_repeated_section_is_not_a_loop():
     assert llm.first_repeat(pages) is None  # "Uwagi" after "Uwagi" alone is still one repeat
     pages[1]["sections"].append({"title": "Dane", "fields": []})
     assert llm.first_repeat(pages) == (1, 3)
+
+
+# ---------------------------------------------------------------- streamed answers and progress
+
+
+def sse(content: str, size: int = 7, **usage) -> httpx.Response:
+    """An Eden answer streamed as Server-Sent Events, `size` characters per chunk, usage in the last one."""
+    lines = [
+        "data: " + json.dumps({"choices": [{"delta": {"content": content[i : i + size]}}]})
+        for i in range(0, len(content), size)
+    ]
+    lines.append("data: " + json.dumps({"choices": [{"delta": {}, "finish_reason": "stop"}]}))
+    if usage:
+        lines.append("data: " + json.dumps({"choices": [], "usage": usage, "cost": usage.get("cost")}))
+    lines.append("data: [DONE]")
+    return httpx.Response(
+        200, text="\n\n".join(lines) + "\n\n", headers={"content-type": "text/event-stream"}
+    )
+
+
+def test_eden_streams_and_records_usage(post, nadplata_spec, monkeypatch):
+    monkeypatch.setattr(llm, "EDEN_USAGE", [])
+    rec = post(sse(spec_json(nadplata_spec), prompt_tokens=50, completion_tokens=20, cost=0.001))
+    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+    sent = rec.calls[0]["json"]
+    assert sent["stream"] is True and sent["stream_options"] == {"include_usage": True}
+    assert llm.EDEN_USAGE == [{"promptTokens": 50, "completionTokens": 20, "cost": 0.001}]
+
+
+def test_progress_lists_names_as_the_model_writes(post, nadplata_spec):
+    steps: list[tuple[str, str]] = []
+    post(sse(spec_json(nadplata_spec), size=3))
+    with progress.reporting(lambda kind, text: steps.append((kind, text))):
+        generate_spec(doc(text="x"), eden())
+    items = [t for k, t in steps if k == "item"]
+    assert ("stage", "Model opisuje formularz") in steps
+    assert items[0] == f"Tytuł: {nadplata_spec.title}"
+    page, section = nadplata_spec.pages[0], nadplata_spec.pages[0].sections[0]
+    assert items[1:3] == [f"Strona: {page.title}", f"Sekcja: {section.title}"]
+    assert f"Pole: {section.fields[0].label}" in items
+    fields = sum(len(s.fields) for p in nadplata_spec.pages for s in p.sections)
+    assert sum(t.startswith("Pole: ") for t in items) == fields
+
+
+def test_outline_reads_escapes_and_nested_titles():
+    steps: list[str] = []
+    text = json.dumps(
+        {
+            "title": 'Wniosek "A"',
+            "applicant": {"title": "nie"},
+            "pages": [{"title": "S1", "sections": [{"title": "Sek", "fields": [{"label": "Łódź\\x"}]}]}],
+        },
+        ensure_ascii=True,
+    )
+    with progress.reporting(lambda kind, t: steps.append(t)):
+        outline = llm.Outline()
+        for ch in text:
+            outline.feed(ch)
+    assert steps == ['Tytuł: Wniosek "A"', "Strona: S1", "Sekcja: Sek", "Pole: Łódź\\x"]
+
+
+def test_eden_looping_stream_stops_early(post, nadplata_spec):
+    """The same check as for Ollama: a stream that starts writing its sections again is cut (fewer tokens)."""
+    page = nadplata_spec.pages[0].model_dump(mode="json")
+    twice = {**page, "sections": page["sections"] * 2 + page["sections"] * 50}
+    head = nadplata_spec.model_dump(mode="json") | {"pages": [twice]}
+    rec = post(sse(json.dumps(head, ensure_ascii=False), size=50))
+    spec = generate_spec(doc(text="x"), eden())
+    assert len(rec.calls) == 1 and spec.pages[0].sections == nadplata_spec.pages[0].sections
+
+
+def test_cancel_stops_the_stream(post, nadplata_spec):
+    class Stop(Exception):
+        pass
+
+    def sink(kind: str, _: str) -> None:
+        if kind == "item":
+            raise Stop
+
+    post(sse(spec_json(nadplata_spec)))
+    with progress.reporting(sink), pytest.raises(Stop):
+        generate_spec(doc(text="x"), eden())

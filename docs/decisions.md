@@ -25,6 +25,7 @@
 - [upload] `.doc` and `.docx` are one format ("DOC (.doc .docx)" in the task): the content decides how it is read (materials 5 and 7 are DOCX named .DOC)
 - [api] Contract for parallel work: `extract` returns a `Document` (blocks `b1…` + field candidates), FormSpec points to block IDs (`blocks`, `block_roles`), `?details=true` adds `document` and `coverage` (model classifies, code keeps the text; see docs/pipeline.md "Kontrakt")
 - [api] `POST /api/v1/forms` returns the importable JSON as-is; `?details=true` adds FormSpec, lint issues and notes for the UI
+- [api] Progress via polled jobs: `POST /api/v1/jobs` returns 202 + id, `GET /api/v1/jobs/{id}` gives the steps so far (pipeline stages, then title/page/section/field names read from the streamed model answer) and the result, `DELETE` cancels (the stream closes, the model stops). Jobs only in process memory, dropped 15 min after the last change, max 4 running. Reason: one long request hit fetch's 5-minute header timeout in the Next proxy; progress costs no tokens (no extra model calls, Eden streams with `stream_options.include_usage`). `POST /api/v1/forms` stays synchronous for other clients
 - [api] JWT HS256 with shared secret from env; `AUTOFORMULARZ_AUTH_ENABLED=false` only for local dev
 - [docker] Debian slim, not Alpine (LibreOffice and PDF/imaging wheels need glibc); LibreOffice optional via build arg
 - [tooling] Biome (not ESLint/Prettier); ruff + pytest via uv for `api/` and `scripts/`; lefthook git hooks
