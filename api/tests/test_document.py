@@ -87,3 +87,12 @@ def test_coverage():
     assert c.candidates_without_field == ["b3"]
     assert c.unknown_refs == ["b9"]
     assert c.as_dict()["candidatesWithoutField"] == ["b3"]
+
+
+def test_prompt_asks_roles_only_for_text_to_copy():
+    """Roles for every block overflow the model context on big forms (form 8: 631 blocks)."""
+    from autoformularz.llm import SYSTEM_PROMPT
+
+    assert "TYLKO dla bloków" in SYSTEM_PROMPT
+    assert "każdego pozostałego bloku" not in SYSTEM_PROMPT
+    assert "Not for field labels" in FormSpec.model_json_schema()["properties"]["block_roles"]["description"]
