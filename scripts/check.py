@@ -1,24 +1,31 @@
 """Run every check; exit 1 if any fail. Usage:
-npm run check            # lint, types, python, db audit
+npm run check            # frontend lint + types, API lint + tests, scripts lint
 npm run check -- --build # also run `next build`
 """
 
+import shutil
 import subprocess
 import sys
 import time
 
 from _env import ROOT
 
+API = ["uv", "run", "--project", "api"]
+SCRIPTS = ["uv", "run", "--project", "scripts"]
+
 STEPS: list[tuple[str, list[str]]] = [
     ("biome (lint + format)", ["npx", "biome", "check", "."]),
     ("typescript", ["npx", "tsc", "--noEmit"]),
-    ("ruff lint", ["uv", "run", "--project", "scripts", "ruff", "check", "scripts"]),
-    ("ruff format", ["uv", "run", "--project", "scripts", "ruff", "format", "--check", "scripts"]),
-    ("supabase audit", ["uv", "run", "--project", "scripts", "python", "scripts/check_db.py"]),
+    ("ruff lint (api)", [*API, "ruff", "check", "api"]),
+    ("ruff format (api)", [*API, "ruff", "format", "--check", "api"]),
+    ("pytest (api)", [*API, "pytest", "-q", "api"]),
+    ("ruff lint (scripts)", [*SCRIPTS, "ruff", "check", "scripts"]),
+    ("ruff format (scripts)", [*SCRIPTS, "ruff", "format", "--check", "scripts"]),
 ]
 
 
 def main() -> int:
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows consoles default to cp1250 (no ▶/✔ glyphs)
     steps = list(STEPS)
     if "--build" in sys.argv:
         steps.append(("next build", ["npm", "run", "build"]))
@@ -27,7 +34,8 @@ def main() -> int:
     for name, cmd in steps:
         print(f"\n\033[1m▶ {name}\033[0m", flush=True)
         start = time.monotonic()
-        code = subprocess.run(cmd, cwd=ROOT).returncode
+        exe = shutil.which(cmd[0]) or cmd[0]  # Windows: npx/npm are .cmd shims
+        code = subprocess.run([exe, *cmd[1:]], cwd=ROOT).returncode
         results.append((name, code == 0, time.monotonic() - start))
 
     print("\n\033[1mSummary\033[0m")

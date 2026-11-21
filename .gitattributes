@@ -1,0 +1,4 @@
+# Text files always LF in the working tree (Biome and ruff expect LF; Windows autocrlf would add CR).
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf

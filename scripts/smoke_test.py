@@ -1,6 +1,6 @@
 """Hit key routes on a running app. Usage:
     uv run --project scripts scripts/smoke_test.py [base_url]
-Default base_url: http://localhost:3000. Use your Vercel URL before the demo.
+Default base_url: http://localhost:3000 (frontend). API: http://localhost:8000.
 Add routes to ROUTES as you build them.
 """
 

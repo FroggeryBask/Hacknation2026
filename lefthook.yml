@@ -6,17 +6,19 @@ pre-commit:
       glob: "*.{js,ts,jsx,tsx,json,jsonc,css}"
       run: npx biome check --write --no-errors-on-unmatched {staged_files}
       stage_fixed: true
-    ruff:
+    ruff-scripts:
       glob: "scripts/**/*.py"
       run: uv run --project scripts ruff check --fix {staged_files} && uv run --project scripts ruff format {staged_files}
+      stage_fixed: true
+    ruff-api:
+      glob: "api/**/*.py"
+      run: uv run --project api ruff check --fix {staged_files} && uv run --project api ruff format {staged_files}
       stage_fixed: true
 
 commit-msg:
   commands:
     no-ai-attribution:
-      run: >-
-        if grep -qiE '^co-authored-by:.*(claude|anthropic|copilot|cursor|openai|chatgpt|gpt|gemini|codex|noreply@anthropic)|generated (with|by) .*(claude|ai\b|copilot|cursor|chatgpt|codex)|🤖' {1};
-        then echo "Commit message contains AI attribution. Remove it (see CLAUDE.md > Rules)."; exit 1; fi
+      run: sh scripts/commit-msg.sh {1}
 
 pre-push:
   commands:
