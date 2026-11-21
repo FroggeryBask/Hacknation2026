@@ -74,6 +74,31 @@ Validator = Literal["PESEL", "NIP", "REGON", "ZIP_CODE", "EMAIL", "EPUAP", "ADE"
 Dictionary = Literal["Kraje", "TERYT_4G_DOWODOWY", "NUMERY_KIERUNKOWE"]
 
 
+class Role(StrEnum):
+    """What a source block is (docs/pipeline.md, step 3). The model classifies, the code copies text."""
+
+    FIELD_LABEL = "FIELD_LABEL"  # label of something to fill in
+    OPTION = "OPTION"  # one option of a choice field (☐ …)
+    HEADING = "HEADING"  # section or page title
+    INSTRUCTION = "INSTRUCTION"  # pouczenie: how to fill in, what happens next
+    LEGAL_BASIS = "LEGAL_BASIS"  # podstawa prawna (act, article)
+    STATEMENT = "STATEMENT"  # oświadczenie the applicant confirms
+    GDPR = "GDPR"  # RODO / personal data clause
+    SKIP = "SKIP"  # paper-only: signature, stamp, "wypełnia urząd", date and place
+
+
+class BlockRole(BaseModel):
+    block: str = Field(description="Block ID from the document, e.g. 'b12'.")
+    role: Role
+
+
+def _blocks():
+    return Field(
+        default_factory=list,
+        description="IDs of the source blocks this element comes from (label, options), e.g. ['b12', 'b13'].",
+    )
+
+
 class Condition(BaseModel):
     """Show the element only when a choice field has (or has not) a given option selected."""
 
@@ -94,6 +119,7 @@ class FieldSpec(BaseModel):
     show_if: Condition | None = None
     allowed_formats: list[str] = Field(default_factory=list, description="FILE only, e.g. ['pdf','jpg'].")
     max_files: int | None = Field(default=None, description="FILE only.")
+    blocks: list[str] = _blocks()
 
 
 class SectionSpec(BaseModel):
@@ -102,6 +128,7 @@ class SectionSpec(BaseModel):
     description: str | None = None
     fields: list[FieldSpec]
     show_if: Condition | None = None
+    blocks: list[str] = _blocks()
 
 
 class PageSpec(BaseModel):
@@ -134,3 +161,18 @@ class FormSpec(BaseModel):
     )
     summary: str | None = Field(default=None, description="Optional info on what happens after sending.")
     signed: bool = True
+    block_roles: list[BlockRole] = Field(
+        default_factory=list,
+        description="Role of every source block that is not a field label or option: headings, "
+        "instructions, legal basis, statements, GDPR, and SKIP for paper-only text.",
+    )
+
+    def referenced_blocks(self) -> set[str]:
+        """Block IDs used anywhere in the spec (fields, sections, roles)."""
+        refs = {r.block for r in self.block_roles}
+        for page in self.pages:
+            for section in page.sections:
+                refs.update(section.blocks)
+                for f in section.fields:
+                    refs.update(f.blocks)
+        return refs

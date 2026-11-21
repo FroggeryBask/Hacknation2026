@@ -54,6 +54,24 @@ def test_convert_details(client):
     )
     body = r.json()
     assert body["sourceFormat"] == "docx" and body["spec"]["title"] and "issues" in body
+    blocks = body["document"]["blocks"]
+    assert blocks and set(blocks[0]) == {"id", "text", "kind", "page"}
+    assert set(body["coverage"]) == {
+        "blocks",
+        "referenced",
+        "unreferenced",
+        "candidates",
+        "candidatesWithoutField",
+        "unknownRefs",
+    }
+    assert body["coverage"]["blocks"] == len(blocks)
+
+
+def test_compile_details_has_no_document(client, nadplata_spec):
+    r = client.post(
+        "/api/v1/forms/compile?details=true", headers=auth(), json=nadplata_spec.model_dump(mode="json")
+    )
+    assert r.json()["document"] is None and r.json()["coverage"] is None
 
 
 def test_rejects_mismatched_file(client):
