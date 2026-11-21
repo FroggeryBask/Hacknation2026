@@ -9,14 +9,16 @@
 Per form `NN`: `NN.json` (COI form, the deliverable), `NN.spec.json` (FormSpec from the model),
 `NN.report.json` (source, model, lint issues, notes, coverage). The spec is the only model output:
 everything else is rebuilt from it deterministically, so a compiler change costs no model calls.
-The model (Ollama or Eden AI) comes from the usual settings (.env.local)."""
+The model (Ollama or Eden AI) comes from the usual settings (.env.local). Eden AI usage (tokens, cost in
+USD as reported by Eden) goes to each report and a summary line for docs/eden-budzet.md is printed."""
 
 import argparse
+import datetime
 import json
 import sys
 from pathlib import Path
 
-from autoformularz import pipeline
+from autoformularz import llm, pipeline
 from autoformularz.check import coverage
 from autoformularz.config import Settings
 from autoformularz.extract import extract
@@ -43,6 +45,16 @@ def write(path: Path, data) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def usage_since(start: int) -> dict:
+    calls = llm.EDEN_USAGE[start:]
+    return {
+        "calls": len(calls),
+        "promptTokens": sum(c["promptTokens"] for c in calls),
+        "completionTokens": sum(c["completionTokens"] for c in calls),
+        "costUsd": round(sum(c["cost"] for c in calls), 6),
+    }
+
+
 def run(n: int, settings: Settings, *, compile_only: bool, force: bool) -> str:
     src = source_file(n)
     data = src.read_bytes()
@@ -53,13 +65,14 @@ def run(n: int, settings: Settings, *, compile_only: bool, force: bool) -> str:
     if spec_path.exists() and not force:
         spec = FormSpec.model_validate_json(spec_path.read_text(encoding="utf-8"))
         model = "zapisany FormSpec"
+        usage = usage_since(len(llm.EDEN_USAGE))
     elif compile_only:
         return f"{n:02d}: pominięty (brak {spec_path.name}, --compile nie pyta modelu)"
     else:
-        from autoformularz.llm import generate_spec
-
-        spec = generate_spec(document, settings)
+        start = len(llm.EDEN_USAGE)
+        spec = llm.generate_spec(document, settings)
         write(spec_path, spec.model_dump(mode="json"))
+        usage = usage_since(start)
         model = settings.eden_model if settings.llm_provider == "eden" else settings.llm_model
     result = pipeline.from_spec(spec)
     errors = sum(i.level == "error" for i in result.issues)
@@ -74,6 +87,7 @@ def run(n: int, settings: Settings, *, compile_only: bool, force: bool) -> str:
             "issues": as_dicts(result.issues),
             "notes": document.notes + result.notes,
             "coverage": coverage(spec, document).as_dict(),
+            "edenUsage": usage,
         },
     )
     return f"{n:02d}: {src.name} -> błędy lintera: {errors}, ostrzeżenia: {len(result.issues) - errors} ({model})"
@@ -88,12 +102,25 @@ def main(argv: list[str] | None = None) -> int:
     settings = Settings()
     OUT.mkdir(exist_ok=True)
     failed = 0
+    start = len(llm.EDEN_USAGE)
     for n in args.only or FORMS:
         try:
             print(run(n, settings, compile_only=args.compile, force=args.force), flush=True)
         except Exception as e:  # one bad form must not stop the others
             failed += 1
             print(f"{n:02d}: BŁĄD {type(e).__name__}: {getattr(e, 'message', e)}", flush=True)
+    total = usage_since(start)
+    if total["calls"]:
+        forms = ",".join(str(n) for n in args.only or FORMS)
+        print()
+        print(
+            f"Eden AI: {total['calls']} zapytań, {total['promptTokens']}+{total['completionTokens']} "
+            f"tokenów, {total['costUsd']:.4f} USD. Linia do docs/eden-budzet.md:"
+        )
+        print(
+            f"| {datetime.date.today()} | <kto> | wyniki (formularze {forms}) | {settings.eden_model} | "
+            f"{total['calls']} | {total['costUsd']:.4f} |"
+        )
     return 1 if failed else 0
 
 

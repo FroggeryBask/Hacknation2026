@@ -101,3 +101,55 @@ def test_prompt_asks_roles_only_for_text_to_copy():
     assert "TYLKO dla bloków" in SYSTEM_PROMPT
     assert "każdego pozostałego bloku" not in SYSTEM_PROMPT
     assert "Not for field labels" in FormSpec.model_json_schema()["properties"]["block_roles"]["description"]
+
+
+def test_dedupe_drops_a_models_repetitions(nadplata_spec):
+    """Form 2 on Eden repeated the page 'Dane wnioskodawcy' 5 times and 'Miejscowość' 10 times."""
+    from autoformularz.check import dedupe
+
+    f = lambda label: FieldSpec(label=label, kind=Kind.TEXT)  # noqa: E731
+    address = SectionSpec(title="Adres", fields=[f("Miejscowość"), f("Ulica"), f("Miejscowość")])
+    page = PageSpec(title="Dane wnioskodawcy", sections=[address])
+    other = PageSpec(title="Opłata", sections=[SectionSpec(title="Opłata", fields=[f("Kwota")]), address])
+    spec = FormSpec(title="Wniosek", authority_name="Urząd", pages=[page, page, other, page])
+    clean, notes = dedupe(spec)
+    assert [p.title for p in clean.pages] == ["Dane wnioskodawcy", "Opłata"]
+    assert [x.label for x in clean.pages[0].sections[0].fields] == ["Miejscowość", "Ulica"]
+    assert [s.title for s in clean.pages[1].sections] == ["Opłata"]  # repeated section dropped
+    assert notes[0] == "Pominięto powtórzone pole „Miejscowość” w sekcji „Adres”."
+    assert "Pominięto powtórzoną stronę „Dane wnioskodawcy”." in notes
+    assert dedupe(nadplata_spec) == (nadplata_spec, [])  # a correct spec is left as it is
+
+
+def test_schema_bounds_lists():
+    schema = FormSpec.model_json_schema()
+    assert schema["properties"]["pages"]["maxItems"] == 10
+    assert schema["$defs"]["SectionSpec"]["properties"]["fields"]["maxItems"] == 40
+
+
+def test_standard_sections_are_left_to_the_compiler(nadplata_spec):
+    """Form 2 on Eden: the model copied 'Dane pełnomocnika' etc. although the compiler adds them."""
+    from autoformularz.check import drop_standard_sections
+
+    f = FieldSpec(label="Miejscowość", kind=Kind.TEXT)
+    sec = lambda title: SectionSpec(title=title, fields=[f])  # noqa: E731
+    spec = FormSpec(
+        title="Wniosek",
+        authority_name="Urząd",
+        pages=[
+            PageSpec(
+                title="Dane wnioskodawcy",
+                sections=[sec("Dane identyfikacyjne wnioskodawcy"), sec("Dane pełnomocnika")],
+            ),
+            PageSpec(
+                title="Pies", sections=[sec("Miejsce utrzymywania psa"), sec("Dane kontaktowe wnioskodawcy")]
+            ),
+        ],
+    )
+    clean, notes = drop_standard_sections(spec)
+    assert [(p.title, [s.title for s in p.sections]) for p in clean.pages] == [
+        ("Pies", ["Miejsce utrzymywania psa"])
+    ]
+    assert notes[0] == "Strona „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
+    assert len(notes) == 2
+    assert drop_standard_sections(nadplata_spec) == (nadplata_spec, [])

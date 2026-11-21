@@ -22,7 +22,7 @@ def test_best_source_is_docx():
 
 
 def test_compile_only_never_calls_the_model(out, monkeypatch):
-    monkeypatch.setattr("autoformularz.llm.generate_spec", lambda *a: pytest.fail("model called"))
+    monkeypatch.setattr(results.llm, "generate_spec", lambda *a: pytest.fail("model called"))
     line = results.run(2, Settings(_env_file=None), compile_only=True, force=False)
     assert "pominięty" in line and not list(out.iterdir())
 
@@ -37,5 +37,24 @@ def test_saved_spec_gives_identical_files(out, nadplata_spec):
     assert {p.name: p.read_bytes() for p in out.iterdir()} == first  # deterministic
     report = json.loads((out / "02.report.json").read_text(encoding="utf-8"))
     assert report["model"] == "zapisany FormSpec" and report["errors"] == 0
+    assert report["edenUsage"] == {"calls": 0, "promptTokens": 0, "completionTokens": 0, "costUsd": 0}
     assert report["source"].endswith(".docx") and "coverage" in report
     assert json.loads((out / "02.json").read_text(encoding="utf-8"))["tabs"]
+
+
+def test_model_usage_goes_to_report(out, nadplata_spec, monkeypatch):
+    def fake_model(document, settings):
+        results.llm.EDEN_USAGE.append({"promptTokens": 9000, "completionTokens": 2000, "cost": 0.00255})
+        return nadplata_spec
+
+    monkeypatch.setattr(results.llm, "EDEN_USAGE", [])
+    monkeypatch.setattr(results.llm, "generate_spec", fake_model)
+    results.run(2, Settings(_env_file=None), compile_only=False, force=False)
+    report = json.loads((out / "02.report.json").read_text(encoding="utf-8"))
+    assert report["edenUsage"] == {
+        "calls": 1,
+        "promptTokens": 9000,
+        "completionTokens": 2000,
+        "costUsd": 0.00255,
+    }
+    assert (out / "02.spec.json").exists()

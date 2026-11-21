@@ -1,8 +1,10 @@
 """Check step (docs/pipeline.md, step 4): does the FormSpec stay true to the Document?
 
-First version: coverage counts only. Later: dropping fields whose anchors don't exist, a retry for
-blocks without a role, TEXT_BLOCK fallback, type normalisation."""
+Coverage counts and canon (`dedupe`: repeated pages, sections, fields; `drop_standard_sections`: copies of
+the predefined applicant/proxy/contact part). Later: dropping fields whose anchors do not exist, a retry
+for blocks without a role, TEXT_BLOCK fallback, type normalisation."""
 
+import re
 from dataclasses import asdict, dataclass, field
 
 from autoformularz.document import Document
@@ -46,3 +48,70 @@ def coverage(spec: FormSpec, doc: Document) -> Coverage:
         candidates_without_field=without_field,
         unknown_refs=sorted(refs - known, key=lambda i: (len(i), i)),
     )
+
+
+def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
+    """Canon, first rule: drop what a model repeated (a repetition loop writes the same page, section or
+    field again and again). Deterministic, keeps the first occurrence and the order:
+    - a page with the same title and the same content as an earlier page,
+    - a section with the same title and field labels as an earlier section (anywhere in the form),
+    - a field with the same label as an earlier field in its section.
+    Returns a new spec and notes about what was dropped."""
+    notes: list[str] = []
+    seen_pages: set[str] = set()
+    seen_sections: set[tuple[str, tuple[str, ...]]] = set()
+    pages = []
+    for page in spec.pages:
+        key = page.model_dump_json()
+        if key in seen_pages:
+            notes.append(f"Pominięto powtórzoną stronę „{page.title}”.")
+            continue
+        seen_pages.add(key)
+        sections = []
+        for section in page.sections:
+            labels: list[str] = []
+            fields = []
+            for f in section.fields:
+                if f.label in labels:
+                    notes.append(f"Pominięto powtórzone pole „{f.label}” w sekcji „{section.title}”.")
+                    continue
+                labels.append(f.label)
+                fields.append(f)
+            skey = (section.title, tuple(labels))
+            if skey in seen_sections:
+                notes.append(f"Pominięto powtórzoną sekcję „{section.title}”.")
+                continue
+            seen_sections.add(skey)
+            sections.append(section.model_copy(update={"fields": fields}))
+        if sections:
+            pages.append(page.model_copy(update={"sections": sections}))
+        else:
+            notes.append(f"Pominięto stronę „{page.title}” (same powtórzenia).")
+    return spec.model_copy(update={"pages": pages}), notes
+
+
+# Section titles of the predefined part that the compiler always adds from the design standard (applicant,
+# proxy, contact). A model sometimes copies them from the paper form anyway; they would appear twice.
+STANDARD_SECTION = re.compile(
+    r"wnioskodawc|pełnomocni|dane kontaktowe|dane do kontaktu|podpis", re.IGNORECASE
+)
+
+
+def drop_standard_sections(spec: FormSpec) -> tuple[FormSpec, list[str]]:
+    """Canon, second rule: sections about the applicant, proxy or contact data are left to the compiler's
+    predefined sections. Deterministic (by page and section title); a page left empty is dropped too."""
+    notes: list[str] = []
+    pages = []
+    for page in spec.pages:
+        if STANDARD_SECTION.search(page.title):
+            notes.append(f"Strona „{page.title}” jest w części standardowej formularza (pominięta).")
+            continue
+        sections = []
+        for section in page.sections:
+            if STANDARD_SECTION.search(section.title):
+                notes.append(f"Sekcja „{section.title}” jest w części standardowej formularza (pominięta).")
+            else:
+                sections.append(section)
+        if sections:
+            pages.append(page.model_copy(update={"sections": sections}))
+    return spec.model_copy(update={"pages": pages}), notes

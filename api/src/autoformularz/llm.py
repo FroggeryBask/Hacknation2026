@@ -28,9 +28,16 @@ Część standardowa jest dodawana automatycznie. NIE umieszczaj jej w `pages`:
 - dane do kontaktu (telefon, e-mail), zgoda na przetwarzanie danych osobowych (RODO), podgląd i podpis.
 Pomiń elementy, które mają sens tylko na papierze: „miejscowość i data”, „podpis wnioskodawcy”, pieczątki,
 adnotacje urzędu („wypełnia urząd”, „data wpływu”), pouczenia o sposobie wypełniania drukiem.
+Bloki z tymi danymi (np. „Imię i nazwisko”, „Nazwa”, „NIP”, „Miejscowość”, „Ulica”, „Nr domu”, „Nr lokalu”,
+„Kod pocztowy”, „Numer telefonu”, „Adres e-mail”, „Dane pełnomocnika”, „Instrukcja wypełnienia”, „Podpis”)
+NIE są polami w `pages`: dane wnioskodawcy i pełnomocnika opisuje tylko `applicant`, a instrukcje i podpis
+dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, które dotyczą przedmiotu sprawy
+(np. adres nieruchomości, miejsce utrzymywania psa), są polami w `pages`.
 
 `pages` to strony dotyczące przedmiotu sprawy. Zasady:
 - Grupuj pola tematycznie w sekcje. Strona ma krótki tytuł opisujący temat (np. „Informacje o budynku”).
+- Każdą stronę, sekcję i pole wpisz tylko raz. Nie powtarzaj stron ani sekcji. Gdy opiszesz wszystkie bloki
+  formularza, zakończ JSON.
 - Zachowaj zakres danych z formularza. Nie wymyślaj pól, których nie ma w dokumencie.
 - Typ pola: TEXT krótki tekst; LONG_TEXT opis lub uzasadnienie; NUMBER tylko liczby (kwoty, liczby osób);
   DATE daty; SINGLE_CHOICE jedna z kilku opcji (kratki do zaznaczenia jednej odpowiedzi); MULTI_CHOICE wiele
@@ -61,6 +68,10 @@ Bloki: treść formularza dostajesz jako bloki z identyfikatorami, np. `[b12] Im
 
 
 log = logging.getLogger("autoformularz.llm")
+
+# Eden AI usage per call ({promptTokens, completionTokens, cost} in USD, as reported by Eden), so the
+# shared budget can be tracked (docs/eden-budzet.md). Ollama calls are free and not recorded.
+EDEN_USAGE: list[dict] = []
 
 DEV_WARNING = "LLM przez Eden AI: tryb deweloperski, nie do oddania (oddawane rozwiązanie używa Ollamy)."
 _FENCE = re.compile(r"^```(?:json)?\s*(.*?)\s*```$", re.DOTALL)
@@ -106,7 +117,11 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
         "format": FormSpec.model_json_schema(),
         "stream": False,
         "think": False,
-        "options": {"temperature": 0, "num_ctx": settings.llm_num_ctx},
+        "options": {
+            "temperature": 0,
+            "num_ctx": settings.llm_num_ctx,
+            "num_predict": settings.llm_max_tokens,
+        },
     }
     try:
         r = httpx.post(f"{settings.ollama_url}/api/chat", json=payload, timeout=settings.llm_timeout_s)
@@ -116,7 +131,19 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
         ) from e
     if r.status_code != 200:
         raise LLMError("LLM_ERROR", f"Model językowy zwrócił błąd {r.status_code}: {r.text[:300]}")
-    return r.json().get("message", {}).get("content", "")
+    body = r.json()
+    if body.get("done_reason") == "length":
+        raise truncated(settings)
+    return body.get("message", {}).get("content", "")
+
+
+def truncated(settings: Settings) -> LLMError:
+    """The answer hit `llm_max_tokens`: almost always a repetition loop. No retry: it would loop again
+    and double the cost."""
+    return LLMError(
+        "LLM_TRUNCATED",
+        f"Odpowiedź modelu przekroczyła {settings.llm_max_tokens} tokenów (prawdopodobnie zapętlenie).",
+    )
 
 
 def _eden_messages(messages: list[dict], images: list[bytes]) -> list[dict]:
@@ -141,6 +168,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
     payload = {
         "model": settings.eden_model,
         "temperature": 0,
+        "max_tokens": settings.llm_max_tokens,
         "messages": _eden_messages(messages, images),
         "response_format": {
             "type": "json_schema",
@@ -165,9 +193,20 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         snippet = r.text[:300].replace(key, "***")
         raise LLMError("LLM_ERROR", f"Model językowy zwrócił błąd {r.status_code}: {snippet}")
     try:
-        content = r.json()["choices"][0]["message"]["content"]
+        body = r.json()
+        content = body["choices"][0]["message"]["content"]
     except (ValueError, KeyError, IndexError, TypeError) as e:
         raise LLMError("LLM_BAD_OUTPUT", "Model zwrócił odpowiedź w nieoczekiwanym formacie.") from e
+    usage = body.get("usage") or {}
+    EDEN_USAGE.append(
+        {
+            "promptTokens": usage.get("prompt_tokens", 0),
+            "completionTokens": usage.get("completion_tokens", 0),
+            "cost": body.get("cost", usage.get("estimated_cost", 0.0)) or 0.0,
+        }
+    )
+    if body["choices"][0].get("finish_reason") == "length":
+        raise truncated(settings)
     if isinstance(content, list):  # content parts
         content = "".join(p.get("text", "") for p in content if isinstance(p, dict))
     return content or ""

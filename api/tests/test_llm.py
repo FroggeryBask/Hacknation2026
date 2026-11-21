@@ -184,3 +184,46 @@ def test_dev_provider_warning(caplog):
     caplog.clear()
     llm.warn_if_dev_provider(Settings(_env_file=None, llm_provider="ollama"))
     assert caplog.text == ""
+
+
+def test_eden_usage_is_recorded(post, nadplata_spec, monkeypatch):
+    monkeypatch.setattr(llm, "EDEN_USAGE", [])
+    body = {
+        "choices": [{"message": {"role": "assistant", "content": spec_json(nadplata_spec)}}],
+        "usage": {"prompt_tokens": 1200, "completion_tokens": 300},
+        "cost": 0.00036,
+    }
+    post(httpx.Response(200, json=body))
+    generate_spec(doc(text="Wniosek"), eden())
+    assert llm.EDEN_USAGE == [{"promptTokens": 1200, "completionTokens": 300, "cost": 0.00036}]
+
+
+def test_answer_length_is_capped(post, nadplata_spec):
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="x"), eden(llm_max_tokens=1234))
+    assert rec.calls[0]["json"]["max_tokens"] == 1234
+    rec = post(httpx.Response(200, json={"message": {"content": spec_json(nadplata_spec)}}))
+    generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama", llm_max_tokens=99))
+    assert rec.calls[0]["json"]["options"]["num_predict"] == 99
+
+
+def test_eden_truncated_answer_fails_without_retry(post, monkeypatch):
+    """A repetition loop hits max_tokens: no second call (it would loop again), but the cost is recorded."""
+    monkeypatch.setattr(llm, "EDEN_USAGE", [])
+    looping = {
+        "choices": [{"message": {"content": '{"title": "x", "pages": [{"ti'}, "finish_reason": "length"}],
+        "usage": {"prompt_tokens": 4000, "completion_tokens": 8000},
+        "cost": 0.0054,
+    }
+    rec = post(httpx.Response(200, json=looping))
+    with pytest.raises(LLMError) as e:
+        generate_spec(doc(text="x"), eden())
+    assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1
+    assert llm.EDEN_USAGE[0]["cost"] == 0.0054
+
+
+def test_ollama_truncated_answer_fails_without_retry(post):
+    rec = post(httpx.Response(200, json={"message": {"content": "{"}, "done_reason": "length"}))
+    with pytest.raises(LLMError) as e:
+        generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama"))
+    assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1
