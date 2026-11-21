@@ -62,7 +62,7 @@ def test_image_has_no_blocks():
 
 def test_prompt_lists_block_ids():
     prompt = build_user_prompt(build([("Imię: ____", None), ("Podpis", None)]))
-    assert "[b1] Imię: ____" in prompt and "[b2] Podpis" in prompt
+    assert "[b1] Imię: ……" in prompt and "[b2] Podpis" in prompt  # the line to fill in, shortened
 
 
 def test_old_specs_still_valid(nadplata_spec):
@@ -337,3 +337,45 @@ def test_printed_amounts_become_info():
     assert (out[1].kind, out[1].description) == (Kind.INFO, "Stawka opłaty: 38 zł")
     assert (out[2].kind, out[2].description) == (Kind.INFO, "Stawka zwolnienia: - 15 zł 00 gr")
     assert len(notes) == 2
+
+
+KINDS = ["Stypendium", "Nagroda", "Wyróżnienie"]
+
+
+def kinds_spec(*sections):
+    choice = FieldSpec(label="Rodzaj wniosku", kind=Kind.SINGLE_CHOICE, options=KINDS)
+    first = PageSpec(title="Rodzaj", sections=[SectionSpec(title="Rodzaj", fields=[choice])])
+    return FormSpec(
+        title="Wniosek",
+        authority_name="Urząd",
+        pages=[first, PageSpec(title="Dane", sections=list(sections))],
+    )
+
+
+def shown_for(spec, title):
+    s = next(x for p in spec.pages for x in p.sections if x.title == title)
+    if s.show_if is None:
+        return set(KINDS)
+    return set(KINDS) - {s.show_if.equals} if s.show_if.negate else {s.show_if.equals}
+
+
+def test_dedupe_merges_conditions_of_copies():
+    """Form 9: "Dyscypliny sportowe" once per kind of request; keeping the first copy left the other kinds
+    without it (the "Nagroda" form was empty)."""
+    from autoformularz.check import dedupe
+    from autoformularz.spec import Condition
+
+    def copy(title, kind):
+        return SectionSpec(
+            title=title,
+            fields=[FieldSpec(label="Dyscyplina", kind=Kind.TEXT)],
+            show_if=Condition(field="Rodzaj wniosku", equals=kind),
+        )
+
+    clean, _ = dedupe(kinds_spec(copy("Dyscypliny", "Stypendium"), copy("Dyscypliny", "Nagroda")))
+    assert shown_for(clean, "Dyscypliny") == {"Stypendium", "Nagroda"}  # Wyróżnienie excluded: negate
+    clean, _ = dedupe(kinds_spec(*(copy("Dyscypliny", k) for k in KINDS)))
+    assert clean.pages[1].sections[0].show_if is None  # all kinds: always shown
+    always = SectionSpec(title="Dyscypliny", fields=[FieldSpec(label="Dyscyplina", kind=Kind.TEXT)])
+    clean, _ = dedupe(kinds_spec(copy("Dyscypliny", "Nagroda"), always))
+    assert clean.pages[1].sections[0].show_if is None

@@ -19,8 +19,9 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 
-from autoformularz.document import Block, Document
-from autoformularz.spec import BlockRole, FormSpec, Role
+from autoformularz.check import merge_conditions, options_of
+from autoformularz.document import FILL_LINE, Block, Document
+from autoformularz.spec import BlockRole, Condition, FormSpec, Role
 
 
 def fold(text: str) -> str:
@@ -74,6 +75,23 @@ GDPR_WORDS = re.compile(
 # A consent or statement the applicant gives is not part of the information clause: the model handles it.
 GDPR_STOP = re.compile(r"\b(wyrazam zgode|oswiadczam|zgoda na|ja nizej podpisan)")
 GDPR_GAP = 4  # lines of a broken sentence ("Piłsudskiego 52/54, 81-382 Gdynia.") between clause lines
+# A longer passage without clause words inside one clause (form 8: legal bases and ePUAP, 9 lines) is still
+# the clause when clause text follows it and nothing in it is filled in, consented to or a new section.
+GDPR_HOLE = 12
+
+
+def depth(no: str) -> int:
+    """ "4" -> 1, "5.1" -> 2, "b.3" -> 2."""
+    return no.count(".") + 1
+
+
+def section_break(block: Block) -> bool:
+    """A heading that starts a new part of the form ("G. INFORMACJA O ZAŁĄCZNIKACH")."""
+    t = cell(block.text)
+    # Upper case alone is not enough: some forms are written all in capitals, clause lines included. A
+    # heading is short and is not the end or middle of a sentence ("KOMUNALNYMI ZE ZMIANAMI.").
+    heading_like = t.isupper() and 2 <= len(words(t)) <= 10 and not re.search(r"[.,;:]$", t)
+    return block.kind == "heading" or heading_like
 
 
 def gdpr_blocks(blocks: list[Block]) -> set[str]:
@@ -84,11 +102,20 @@ def gdpr_blocks(blocks: list[Block]) -> set[str]:
         if not GDPR_START.search(t) or GDPR_STOP.search(t) or has_fill_in(blocks[i].text):
             i += 1
             continue
+        # "4. Klauzula informacyjna": the clause is the whole numbered section, up to "5. Zgody".
+        head_no = numbering(blocks[i].text) if is_heading(blocks[i]) else None
         run, j = [blocks[i].id], i + 1
         while j < len(blocks):
             nxt = fold(blocks[j].text)
             if GDPR_STOP.search(nxt) or has_fill_in(blocks[j].text):
                 break
+            if head_no:
+                no = numbering(blocks[j].text)
+                if (no and depth(no) <= depth(head_no)) or section_break(blocks[j]):
+                    break
+                run.append(blocks[j].id)
+                j += 1
+                continue
             if GDPR_WORDS.search(nxt):
                 run.append(blocks[j].id)
                 j += 1
@@ -111,6 +138,20 @@ def gdpr_blocks(blocks: list[Block]) -> set[str]:
             j += k + 2
         out.update(run)
         i = j
+    return out | gdpr_holes(blocks, out)
+
+
+def gdpr_holes(blocks: list[Block], found: set[str]) -> set[str]:
+    """Blocks between two parts of the clause (see GDPR_HOLE)."""
+    at = [n for n, b in enumerate(blocks) if b.id in found]
+    out: set[str] = set()
+    for a, b in zip(at, at[1:], strict=False):
+        hole = blocks[a + 1 : b]
+        if not hole or len(hole) > GDPR_HOLE:
+            continue
+        if any(GDPR_STOP.search(fold(h.text)) or has_fill_in(h.text) or section_break(h) for h in hole):
+            continue
+        out.update(h.id for h in hole)
     return out
 
 
@@ -228,6 +269,7 @@ STANDARD_PART = re.compile(
     r"numer dowodu( osobistego)?|obywatelstwo|adres|adres zamieszkania|adres siedziby|adres do korespondencji|"
     r"miejsce zamieszkania|miejsca zamieszkania|siedziba firmy|siedziba|siedziby|zamieszkania|kraj|wojewodztwo|powiat|gmina|miejscowosc|ulica|"
     r"nr domu|numer domu|nr budynku|numer budynku|nr lokalu|numer lokalu|nr mieszkania|kod pocztowy|kod|poczta|"
+    r"(nr|numer) nieruchomosci(/domu)?|"
     r"telefon|nr telefonu|numer telefonu|telefon kontaktowy|nr tel|tel|e-mail|email|adres e-mail|"
     r"adres poczty elektronicznej|poczty elektronicznej|adres skrzynki epuap|faks|fax|nr faksu)$"
 )
@@ -239,7 +281,9 @@ ROLE_WORDS = re.compile(
 def is_standard_label(text: str) -> bool:
     """Every label in the line is template data: numbered labels ("3. PESEL 4. NIP/REGON") and table
     cells ("| Ulica: | Nr domu: | Nr lokalu: |") are checked one by one."""
-    cells = [c for c in text.split("|") if c.strip()] if "|" in text else [text]
+    cells = (
+        [c for c in text.split("|") if c.strip() and not is_placeholder(c)] if "|" in text else [text]
+    )  # "| Nr domu | Nr lokalu | Kod pocztowy | - |": the "-" cell is a separator
     parts = [
         p
         for c in cells
@@ -266,17 +310,47 @@ def _standard_label(text: str) -> bool:
     return all(STANDARD_PART.match(p) for p in parts)
 
 
+def cell(text: str) -> str:
+    """A spreadsheet row with one cell ("| 2. Dane wnioskodawcy |") reads like the same line in a DOCX."""
+    t = text.strip()
+    if t.startswith("|") and t.endswith("|") and t.count("|") == 2:
+        return t[1:-1].strip()
+    return t
+
+
 def numbering(text: str) -> str | None:
-    m = re.match(r"\s*((?:[A-Za-z]\.)?\d+(?:\.\d+)*)[.)]?\s", text)
+    m = re.match(r"\s*((?:[A-Za-z]\.)?\d+(?:\.\d+)*)[.)]?\s", cell(text))
     return m.group(1).lower() if m else None
 
 
 def is_heading(block: Block) -> bool:
-    t = block.text.strip()
-    w = words(t)
+    t = cell(block.text)
+    bare = re.sub(r"\([^)]*(\)|$)", " ", t)  # "(dane kontaktowe nie są obowiązkowe, …)" is a note
+    w = words(bare)
     if not w or len(w) > 14 or has_fill_in(t):
         return False
-    return bool(numbering(t)) or t.isupper() or block.kind == "heading"
+    return bool(numbering(t)) or bare.isupper() or block.kind == "heading"
+
+
+# Sub-sections with only the applicant's address or contact under a generic title: the same titles the
+# canon drops after the model (check.STANDARD_TITLE). "Adres do korespondencji" and "Osoba do kontaktu w
+# sprawie …" stay with the model.
+STANDARD_HEADING = {
+    "adres zamieszkania",
+    "adres siedziby",
+    "adres zamieszkania siedziby",
+    "adres siedziby zamieszkania",
+    "dane kontaktowe",
+    "dane do kontaktu",
+    "kontakt",
+}
+
+
+def is_standard_heading(block: Block) -> bool:
+    if not is_heading(block):
+        return False
+    t = re.sub(r"\([^)]*(\)|$)", " ", norm(cell(block.text)))
+    return " ".join(re.sub(r"[/,:]", " ", t).split()) in STANDARD_HEADING
 
 
 def applicant_blocks(blocks: list[Block]) -> tuple[dict[str, Role], set[str]]:
@@ -289,7 +363,18 @@ def applicant_blocks(blocks: list[Block]) -> tuple[dict[str, Role], set[str]]:
 
     def applicant_heading(b: Block) -> bool:
         t = norm(b.text)
-        return is_heading(b) and bool(APPLICANT_HEADING.search(t)) and not NOT_APPLICANT.search(t)
+        if NOT_APPLICANT.search(t):
+            return False
+        return is_standard_heading(b) or (is_heading(b) and bool(APPLICANT_HEADING.search(t)))
+
+    def split_label(n: int) -> bool:
+        """A label broken over two lines: "13. Numer" + "nieruchomości/domu"."""
+        if n + 1 >= len(blocks):
+            return False
+        a, b = blocks[n], blocks[n + 1]
+        if has_fill_in(a.text) or numbering(b.text) or len(words(b.text)) > 3:
+            return False
+        return is_standard_label(f"{cell(a.text)} {cell(b.text)}")
 
     i = 0
     while i < len(blocks):
@@ -308,6 +393,9 @@ def applicant_blocks(blocks: list[Block]) -> tuple[dict[str, Role], set[str]]:
             open_paren = prev.text.count("(") > prev.text.count(")")
             if is_standard_label(nb.text) or is_placeholder(nb.text):
                 content.append(nb)
+            elif split_label(j):
+                content += [nb, blocks[j + 1]]
+                j += 1
             elif open_paren and prev in headings and ")" in nb.text:
                 headings.append(nb)  # "2.3. Dane kontaktowe (… nie są obowiązkowe," + "ale ułatwią …)"
             elif is_heading(nb) and (
@@ -363,6 +451,9 @@ class Presorted:
     entity: bool = False  # the applicant may be a company (NIP/REGON/KRS/name of firm among dropped labels)
     nip_only: bool = False
     counts: dict[str, int] = field(default_factory=dict)  # dropped blocks per role (prompt note, report)
+    repeats: list = field(
+        default_factory=list
+    )  # Repeat: runs shortened for the model (versions of a request)
 
 
 def presort(doc: Document) -> Presorted:
@@ -383,7 +474,7 @@ def presort(doc: Document) -> Presorted:
         after = next((blocks[k] for k in range(n + 1, len(blocks)) if not is_tiny(blocks[k].text)), None)
         if before and after and roles.get(before.id) and roles.get(before.id) == roles.get(after.id):
             roles[b.id] = roles[before.id]
-    kept = [b for b in blocks if b.id not in roles]
+    kept, repeated, repeats = collapse_repeats([b for b in blocks if b.id not in roles])
     kept_ids = {b.id for b in kept}
     model_doc = Document(
         blocks=kept,
@@ -394,7 +485,7 @@ def presort(doc: Document) -> Presorted:
     ids = " ".join(labels)
     found = set(re.findall(r"\b(nip|regon|krs)\b", ids))
     entity = bool(found) or bool(re.search(r"\bnazwa\b", ids))  # "Nazwa firmy", "Nazwa /Imię i nazwisko"
-    counts: dict[str, int] = {}
+    counts: dict[str, int] = {"REPEAT": repeated} if repeated else {}
     for role in roles.values():
         counts[role.value] = counts.get(role.value, 0) + 1
     out = Presorted(
@@ -403,6 +494,7 @@ def presort(doc: Document) -> Presorted:
         entity=entity,
         nip_only=found == {"nip"},
         counts=counts,
+        repeats=repeats,
     )
     model_doc.hint = prompt_note(out)
     return out
@@ -433,19 +525,150 @@ def prompt_note(p: Presorted) -> str:
         "HEADING": None,
     }
     parts = [labels[k] for k in ("FIELD_LABEL", "GDPR", "SKIP") if p.counts.get(k)]
-    if not parts:
-        return ""
-    note = "Kod już rozpoznał i pominął na liście bloków: " + "; ".join(parts) + "."
+    notes = []
+    if parts:
+        notes.append("Kod już rozpoznał i pominął na liście bloków: " + "; ".join(parts) + ".")
+    if p.counts.get("REPEAT"):
+        notes.append(
+            "Fragmenty kolejnych wersji wniosku, identyczne z wcześniejszymi, są skrócone do dopisku „dalej bloki "
+            "… takie same jak …”: to ta sama część, opisz ją raz (różnice między wersjami przez `show_if`)."
+        )
     if p.entity:
-        note += " Formularz pyta o dane firmy (NIP/REGON/KRS lub nazwa): wnioskodawcą może być firma."
-    return note
+        notes.append("Formularz pyta o dane firmy (NIP/REGON/KRS lub nazwa): wnioskodawcą może być firma.")
+    return " ".join(notes) if parts or p.counts.get("REPEAT") else ""
+
+
+# ---------------------------------------------------------------- repeated versions of the request
+
+# Form 9 holds three versions of one request: each later version repeats runs of 7-31 blocks of the first
+# (applicant, consents, attachments), 43% of the prompt. The model then listed every field once per version
+# and ran past the answer limit. A run of at least REPEAT_RUN blocks identical to an earlier run (with real
+# text, not only lines to fill in) is shortened to its first block and a note. Shorter runs stay: form 8
+# repeats 2-4 lines between its two rate tables E.1/E.2, which are separate fields.
+REPEAT_RUN = 6
+REPEAT_TEXT = 3  # blocks with at least two words among them (six dotted lines are not a repeated part)
+# Bounds for unknown documents: a run starts at a block with text, only the latest REPEAT_SOURCES earlier
+# copies of that block are tried, and a run is followed for at most REPEAT_MAX blocks. Without them a page of
+# empty table rows took seconds (every row equals every other one); now any document stays linear.
+REPEAT_SOURCES = 8
+REPEAT_MAX = 300
+
+
+@dataclass
+class Repeat:
+    """Blocks source_first..source_last appear again from copy_first on (a later version of the request)."""
+
+    source_first: str
+    source_last: str
+    copy_first: str
+
+
+def collapse_repeats(blocks: list[Block]) -> tuple[list[Block], int, list[Repeat]]:
+    """Blocks for the model with long repeated runs shortened, how many blocks were left out, and the runs."""
+    keys = [fold(FILL_LINE.sub("..", b.text)) for b in blocks]  # dotted lines differ in length only
+    seen: dict[str, list[int]] = {}  # key -> earlier positions
+    out: list[Block] = []
+    repeats: list[Repeat] = []
+    left_out = 0
+    i = 0
+    while i < len(blocks):
+        best, src = 0, 0
+        if re.search(r"[a-z]", keys[i]):
+            for j in seen.get(keys[i], [])[-REPEAT_SOURCES:]:
+                n = 0
+                while n < REPEAT_MAX and i + n < len(blocks) and j + n < i and keys[j + n] == keys[i + n]:
+                    n += 1
+                if n > best:
+                    best, src = n, j
+        seen.setdefault(keys[i], []).append(i)
+        run = blocks[i : i + best]
+        if best >= REPEAT_RUN and sum(len(words(b.text)) >= 2 for b in run) >= REPEAT_TEXT:
+            first, last = blocks[i], blocks[i + best - 1]
+            note = (
+                f" (dalej bloki {blocks[i + 1].id}–{last.id} takie same jak "
+                f"{blocks[src + 1].id}–{blocks[src + best - 1].id}, pominięte)"
+            )
+            out.append(Block(id=first.id, text=first.text + note, kind=first.kind, page=first.page))
+            repeats.append(Repeat(blocks[src].id, blocks[src + best - 1].id, first.id))
+            left_out += best - 1
+            i += best
+        else:
+            out.append(blocks[i])
+            i += 1
+    return out, left_out, repeats
+
+
+def _number(block_id: str) -> int | None:
+    return int(block_id[1:]) if block_id[:1] == "b" and block_id[1:].isdigit() else None
+
+
+def widen_to_versions(spec: FormSpec, p: Presorted) -> list:
+    """A section shown only for one kind of request whose source blocks are repeated in another version of
+    the request (shortened for the model, `collapse_repeats`) belongs to that version too: its condition
+    is widened. Form 9: the club's data (b11-b35) is in all three versions, the model saw it once and
+    showed it only for the scholarship. The version is the request title before the copy: the option of
+    the controlling field with that text ("Wniosek o przyznanie nagrody sportowej …")."""
+    if not p.repeats:
+        return spec.pages
+    titles = [(_number(b.id), fold(b.text)) for b in p.model_doc.blocks]
+
+    def version(copy_first: str, options: list[str]) -> str | None:
+        start = _number(copy_first) or 0
+        for n, text in reversed(titles):
+            if n is None or n >= start:
+                continue
+            for option in options:
+                if text and (text == fold(option) or text.startswith(fold(option))):
+                    return option
+        return None
+
+    pages = []
+    for page in spec.pages:
+        sections = []
+        for s in page.sections:
+            cond = s.show_if
+            options = options_of(spec, cond.field) if cond else []
+            used = [_number(b) for b in [*s.blocks, *(b for f in s.fields for b in f.blocks)]]
+            used = [n for n in used if n is not None]
+            if cond and options and used:
+                for r in p.repeats:
+                    lo, hi = _number(r.source_first), _number(r.source_last)
+                    if lo is not None and hi is not None and all(lo <= n <= hi for n in used):
+                        other = version(r.copy_first, options)
+                        if other:
+                            cond = merge_conditions(cond, Condition(field=cond.field, equals=other), spec)
+                            if cond is None:
+                                break
+                s = s.model_copy(update={"show_if": cond})
+            sections.append(s)
+        pages.append(page.model_copy(update={"sections": sections}))
+    return pages
+
+
+def _next(block_id: str) -> str:
+    return f"b{int(block_id[1:]) + 1}" if block_id[1:].isdigit() else ""
 
 
 def apply(spec: FormSpec, p: Presorted) -> FormSpec:
     """Add the code's roles to the model's FormSpec (code wins for blocks it recognised) and the entity hint."""
     code = {bid for r in p.roles for bid in r.ids()}
-    model_roles = [r for r in spec.block_roles if not set(r.ids()) & code]
-    update: dict = {"block_roles": [*p.roles, *model_roles]}
+    # The model sees "b104" next to "b111" and may write one range b100..b120 over blocks the code took:
+    # only those blocks leave the range, the model's role stays for the rest.
+    model_roles: list[BlockRole] = []
+    for r in spec.block_roles:
+        ids = r.ids()
+        if not set(ids) & code:
+            model_roles.append(r.model_copy())  # a copy: a split range below may extend it
+            continue
+        for bid in ids:
+            if bid in code:
+                continue
+            last = model_roles[-1] if model_roles else None
+            if last and last.role is r.role and _next(last.to or last.block) == bid:
+                last.to = bid
+            else:
+                model_roles.append(BlockRole(block=bid, role=r.role))
+    update: dict = {"block_roles": [*p.roles, *model_roles], "pages": widen_to_versions(spec, p)}
     if p.entity and not spec.applicant.entity:
         update["applicant"] = spec.applicant.model_copy(
             update={"entity": True, "entity_nip_only": p.nip_only}

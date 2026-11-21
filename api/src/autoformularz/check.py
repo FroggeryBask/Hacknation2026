@@ -51,17 +51,58 @@ def coverage(spec: FormSpec, doc: Document) -> Coverage:
     )
 
 
+def options_of(spec: FormSpec, label: str) -> list[str]:
+    """Options of the choice field with this label (the field a condition points to)."""
+    return next(
+        (
+            f.options
+            for p in spec.pages
+            for s in p.sections
+            for f in s.fields
+            if f.label == label and f.options
+        ),
+        [],
+    )
+
+
+def merge_conditions(a: Condition | None, b: Condition | None, spec: FormSpec) -> Condition | None:
+    """One condition that shows the element whenever `a` or `b` would. None = always shown: also when the
+    union cannot be written as one condition (never hide a section that applies to some answer)."""
+    if a is None or b is None or a.field != b.field:
+        return None
+    options = options_of(spec, a.field)
+    if not options:
+        return a if a == b else None
+
+    def allowed(c: Condition) -> set[str]:
+        return set(options) - {c.equals} if c.negate else {c.equals}
+
+    shown = allowed(a) | allowed(b)
+    hidden = set(options) - shown
+    if not hidden:
+        return None
+    if len(shown) == 1:
+        return Condition(field=a.field, equals=next(iter(shown)))
+    if len(hidden) == 1:
+        return Condition(field=a.field, equals=next(iter(hidden)), negate=True)
+    return None
+
+
 def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
     """Canon, first rule: drop what a model repeated (a repetition loop writes the same page, section or
     field again and again). Deterministic, keeps the first occurrence and the order:
     - a page with the same title and the same content as an earlier page,
-    - a section with the same title and field labels as an earlier section (anywhere in the form),
+    - a section with the same title and field labels as an earlier section (anywhere in the form); when
+      the copies have different `show_if`, the kept one gets the union of their conditions (see
+      `merge_conditions`): form 9's model wrote "Dyscypliny sportowe" once per kind of request, each with
+      its own condition, and keeping only the first copy left the other kinds without the section,
     - a field with the same label as an earlier field in its section, unless it points to other source
       blocks (another row of a table).
     Returns a new spec and notes about what was dropped."""
     notes: list[str] = []
     seen_pages: set[str] = set()
-    seen_sections: set[tuple[str, tuple[str, ...]]] = set()
+    # section key -> (list holding the kept copy, its index): the kept copy may get a wider condition
+    seen_sections: dict[tuple[str, tuple[str, ...]], tuple[list, int]] = {}
     pages = []
     for page in spec.pages:
         key = page.model_dump_json()
@@ -86,9 +127,15 @@ def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
                 fields.append(f)
             skey = (section.title, tuple(labels))
             if skey in seen_sections:
+                where, i = seen_sections[skey]
+                kept = where[i]
+                if kept.show_if != section.show_if:
+                    where[i] = kept.model_copy(
+                        update={"show_if": merge_conditions(kept.show_if, section.show_if, spec)}
+                    )
                 notes.append(f"Pominięto powtórzoną sekcję „{section.title}”.")
                 continue
-            seen_sections.add(skey)
+            seen_sections[skey] = (sections, len(sections))
             sections.append(section.model_copy(update={"fields": fields}))
         if sections:
             pages.append(page.model_copy(update={"sections": sections}))

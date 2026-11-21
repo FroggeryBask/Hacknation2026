@@ -2,7 +2,7 @@
 
 Usługa REST, która zamienia plik formularza urzędowego (PDF, DOC, DOCX, ODS, XLSX, JPG, JPEG, PNG) na konfigurację formularza e-usługi w formacie JSON, gotową do importu w Generatorze Formularzy. Zadanie COI, HackNation 2026.
 
-Docelowo działa w całości lokalnie: model językowy (Qwen3-VL, Apache-2.0) jest uruchamiany przez Ollama, bez zewnętrznych API. Na czas demo (uzgodnione z mentorami COI) zamiast lokalnego modelu można użyć modelu open-weight z Eden AI udostępnionego przez organizatorów.
+Model językowy to domyślnie model open-weight (Qwen3-VL) na Eden AI, udostępniony przez organizatorów. Ten sam rodzaj modelu (Qwen3-VL, Apache-2.0) można uruchomić w całości lokalnie przez Ollamę, bez zewnętrznych API (tryb offline).
 
 ## Jak to działa
 
@@ -36,23 +36,25 @@ docker run --rm python:3.14.10-slim-trixie python -c "import secrets; print(secr
 
 Zapisz `.env` jako UTF-8 bez BOM (domyślnie tak robią VS Code i Notatnik w Windows 11).
 
-### 2a. Demo z Eden AI (na czas hackatonu)
+### 2a. Eden AI (domyślnie)
 
 Model open-weight w chmurze organizatorów (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.eden.yml up --build
+docker compose up --build
 ```
 
-- Startują tylko `api` i `web`; nakładka `docker-compose.eden.yml` wyłącza `ollama` i `model`. Klucz dostaje tylko `api`, nigdy `web`.
+- Startują tylko `api` i `web`; `ollama` i `model` są w profilu `ollama` i bez niego się nie uruchamiają. Klucz dostaje tylko `api`, nigdy `web`.
 - `GET /health` pokazuje `"provider": "eden"`, `"configured"` (czy jest klucz i model) i `"usage"`: liczbę zapytań i koszt w USD od startu kontenera.
 - Każde zapytanie kosztuje (wspólny budżet zespołu, [docs/eden-budzet.md](docs/eden-budzet.md)). Bez klucza żądania kończą się błędem `LLM_MISCONFIGURED` i nic nie jest wysyłane.
 
-### 2b. W pełni lokalnie (Ollama, wersja docelowa)
+### 2b. W pełni lokalnie (Ollama, offline)
 
 ```bash
-docker compose up --build
+AUTOFORMULARZ_LLM_PROVIDER=ollama docker compose --profile ollama up --build      # macOS, Linux
 ```
+
+Na Windows (PowerShell) ustaw w `.env` `AUTOFORMULARZ_LLM_PROVIDER=ollama`, potem `docker compose --profile ollama up --build`.
 
 - Usługa `model` przy pierwszym starcie pobiera model (~6 GB) do wolumenu `ollama`; `api` startuje dopiero po pobraniu.
 - Wymagania pamięci: patrz [Wymagania sprzętowe i czasy](#wymagania-sprzętowe-i-czasy).
@@ -62,7 +64,7 @@ docker compose up --build
 
 - API: http://localhost:8000 (dokumentacja OpenAPI: http://localhost:8000/docs)
 - Frontend: http://localhost:3000
-- Zatrzymanie: `docker compose down` (z tymi samymi `-f`, jeśli startowało z Eden). `docker compose down -v` usuwa też pobrany model.
+- Zatrzymanie: `docker compose down` (z `--profile ollama`, jeśli startowało z Ollamą). `docker compose down -v` usuwa też pobrany model.
 
 ### Wymagania sprzętowe i czasy
 
@@ -92,7 +94,7 @@ Zmierzone czasy (laptop AMD Ryzen 7 4800H, 16 GB RAM, Docker Desktop na WSL2, Wi
 | Formularz 2 (DOCX) | 80 s, 0 błędów lintera, 0,0017 USD | nie zmierzone w Dockerze |
 | Formularz 8 (DOCX, największy) | 122 s, 0 błędów lintera, 0,0063 USD | nie zmierzone w Dockerze |
 
-Na CPU bez GPU model 8B pisze kilka tokenów na sekundę, a duży formularz to do 8000 tokenów odpowiedzi, czyli 15–25 min. Dlatego limit czasu to 30 min (`AUTOFORMULARZ_LLM_TIMEOUT_S=1800`). Z GPU NVIDIA zostaje kilkadziesiąt sekund.
+Na CPU bez GPU model 8B pisze kilka tokenów na sekundę, a duży formularz to kilka tysięcy tokenów odpowiedzi (limit 12000), czyli 15–25 min. Dlatego limit czasu to 30 min (`AUTOFORMULARZ_LLM_TIMEOUT_S=1800`). Z GPU NVIDIA zostaje kilkadziesiąt sekund.
 
 ### Budowanie obrazów osobno
 
@@ -135,11 +137,11 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_MAX_UPLOAD_MB` | `20` | Maksymalny rozmiar pliku |
 | `AUTOFORMULARZ_OLLAMA_URL` | `http://localhost:11434` | Adres serwera modelu |
 | `AUTOFORMULARZ_LLM_MODEL` | `qwen3-vl:8b` | Model (dowolny model wizyjny z Ollama) |
-| `AUTOFORMULARZ_LLM_PROVIDER` | `ollama` | `eden` włącza Eden AI (lokalnie albo w Dockerze przez `docker-compose.eden.yml`, patrz [Model językowy](#model-językowy-ollama-domyślnie-albo-eden-ai-opcjonalnie)) |
-| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | brak | Model i klucz Eden AI, potrzebne tylko przy `eden` |
+| `AUTOFORMULARZ_LLM_PROVIDER` | `eden` | `ollama` uruchamia model lokalnie (offline, w Dockerze z `--profile ollama`), patrz [Model językowy](#model-językowy-eden-ai-domyślnie-albo-ollama-offline) |
+| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `1800` | Limit czasu odpowiedzi modelu (Ollama na CPU potrzebuje do ~25 min na duży formularz) |
 | `AUTOFORMULARZ_LLM_NUM_CTX` | `24576` | Okno kontekstu modelu w Ollamie: prompt + odpowiedź (więcej = więcej pamięci RAM/VRAM; 16384 nie mieści formularza 8) |
-| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `8000` | Maksymalna długość odpowiedzi modelu; dłuższa (zwykle zapętlenie) kończy się błędem `LLM_TRUNCATED` bez ponawiania |
+| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Maksymalna długość odpowiedzi modelu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
 | `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron skanu (PDF lub obraz) przekazać modelowi jako obrazy; OCR czyta wszystkie strony (do 30) |
 | `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc; .ods jest czytany bez niego) |
 | `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |
@@ -222,13 +224,11 @@ Pliki `.env*` są poza gitem (oprócz `.env.example`). Nie commituj ich.
 | `npm run smoke [url]` | Sprawdza, czy kluczowe strony frontendu odpowiadają |
 | `npx shadcn@latest add <name>` | Dodaje komponent UI |
 
-### Model językowy: Ollama (domyślnie) albo Eden AI (opcjonalnie)
+### Model językowy: Eden AI (domyślnie) albo Ollama (offline)
 
-Domyślnie API używa lokalnego modelu przez Ollamę (`AUTOFORMULARZ_LLM_PROVIDER=ollama`). Tak działa oddawane rozwiązanie i nie trzeba nic ustawiać.
+Domyślnie API używa modelu open-weight na Eden AI (`AUTOFORMULARZ_LLM_PROVIDER=eden`, decyzja zespołu z 2026-11-21): odpowiada w 1–3 minuty, a lokalna Ollama na CPU potrzebuje kilkunastu minut. W Dockerze: [2a. Eden AI](#2a-eden-ai-domyślnie).
 
-Na czas hackatonu można włączyć Eden AI: model open-weight w chmurze organizatorów odpowiada w kilka sekund, a lokalna Ollama na CPU potrzebuje kilku minut. Tryb do pracy lokalnej i do demo (uzgodnione z mentorami COI). W Dockerze: [2a. Demo z Eden AI](#2a-demo-z-eden-ai-na-czas-hackatonu).
-
-**Włączenie.** Dopisz do `api/.env` albo do `.env.local` w katalogu głównym:
+**Konfiguracja.** W `api/.env` albo w `.env.local` w katalogu głównym:
 
 ```bash
 AUTOFORMULARZ_LLM_PROVIDER=eden
@@ -238,9 +238,9 @@ EDENAI_API_KEY=...                                          # klucz zespołu, ty
 
 Uruchom API (`cd api && uv run uvicorn autoformularz.main:app --reload`). `GET /health` pokaże `"provider": "eden"` i `"configured": true`, a w logu pojawi się ostrzeżenie o trybie demo i kosztach. Bez klucza lub modelu żądania kończą się błędem `LLM_MISCONFIGURED`.
 
-**Wyłączenie.** Usuń `AUTOFORMULARZ_LLM_PROVIDER` albo ustaw go na `ollama` i zrestartuj API. Potrzebny jest wtedy model w Ollamie: `ollama pull qwen3-vl:8b`.
+**Tryb offline.** Ustaw `AUTOFORMULARZ_LLM_PROVIDER=ollama` i zrestartuj API. Potrzebny jest wtedy model w Ollamie: `ollama pull qwen3-vl:8b`.
 
-Kolejność: `api/.env` nadpisuje `.env.local`, a zmienne środowiskowe nadpisują oba pliki. Sam `docker-compose.yml` wymusza Ollamę (`AUTOFORMULARZ_LLM_PROVIDER=ollama` i pusty `EDENAI_API_KEY`); Eden w Dockerze włącza tylko jawna nakładka `docker-compose.eden.yml`. Przez Eden używaj wyłącznie modeli open-weight, które da się uruchomić w Ollamie (bez GPT, Gemini, Claude).
+Kolejność: `api/.env` nadpisuje `.env.local`, a zmienne środowiskowe nadpisują oba pliki. `docker-compose.yml` domyślnie używa Eden (klucz tylko w kontenerze `api`); Ollamę włącza `AUTOFORMULARZ_LLM_PROVIDER=ollama` z `--profile ollama`. Przez Eden używaj wyłącznie modeli open-weight, które da się uruchomić w Ollamie (bez GPT, Gemini, Claude).
 
 Struktura repozytorium:
 - `api/`: rozwiązanie (Python 3.14, FastAPI),
