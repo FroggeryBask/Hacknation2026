@@ -42,8 +42,11 @@ export async function POST(req: Request) {
       method: "POST",
       body: out,
       headers: jwt ? { Authorization: `Bearer ${jwt}` } : undefined,
+      // Cancelling in the browser also drops the upstream request.
+      signal: req.signal,
     });
   } catch {
+    if (req.signal.aborted) return fail(499, "Anulowano.");
     return fail(
       502,
       "Usługa konwersji nie odpowiada. Sprawdź, czy API działa, i spróbuj ponownie.",

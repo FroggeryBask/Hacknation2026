@@ -700,14 +700,17 @@ export function TextBlock({
 /** Highlighted information (the only content allowed on the FINISH page). */
 export function InfoSection({
   title,
+  icon,
   children,
 }: {
   title?: string;
+  /** Replaces the default info icon (decorative, 20px). */
+  icon?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <div className="flex gap-3 rounded-sm border-l-4 border-primary bg-info p-4 text-sm text-info-foreground">
-      <Info className="mt-0.5 size-5 shrink-0" aria-hidden />
+      {icon ?? <Info className="mt-0.5 size-5 shrink-0" aria-hidden />}
       <div className="flex flex-col gap-1">
         {title && <p className="font-bold">{title}</p>}
         <div className="leading-relaxed">{children}</div>

@@ -117,20 +117,28 @@ export function RepeatingSection({
 /* Stepper (page navigation)                                           */
 /* ------------------------------------------------------------------ */
 
+export type Step = string | { label: string; icon: ReactNode };
+
 export function Stepper({
   steps,
   current,
+  label = "Kroki formularza",
 }: {
-  steps: string[];
+  steps: Step[];
   current: number;
+  label?: string;
 }) {
+  const items = steps.map((s) =>
+    typeof s === "string" ? { label: s, icon: undefined } : s,
+  );
   return (
-    <nav aria-label="Kroki formularza">
-      <p className="mb-2 text-sm text-muted-foreground sm:hidden">
-        Krok {current + 1} z {steps.length}: {steps[current]}
+    <nav aria-label={label}>
+      <p className="mb-2 flex items-center gap-1.5 text-sm text-muted-foreground sm:hidden">
+        Krok {current + 1} z {items.length}: {items[current].label}
+        {items[current].icon}
       </p>
       <ol className="flex gap-1.5 sm:gap-2">
-        {steps.map((s, i) => {
+        {items.map(({ label: s, icon }, i) => {
           const done = i < current;
           const active = i === current;
           return (
@@ -147,18 +155,23 @@ export function Stepper({
               />
               <span
                 className={cn(
-                  "hidden items-center gap-1.5 text-xs sm:flex",
+                  "hidden items-start gap-1.5 text-xs leading-snug sm:flex",
                   active
                     ? "font-bold text-foreground"
                     : "text-muted-foreground",
                 )}
               >
                 {done ? (
-                  <Check className="size-3.5 text-primary" aria-hidden />
+                  <Check
+                    className="size-3.5 shrink-0 text-primary"
+                    aria-hidden
+                  />
                 ) : (
                   <span aria-hidden>{i + 1}.</span>
                 )}
-                <span className="truncate">{s}</span>
+                {/* Wrap, don't truncate: cut-off step names hide information. */}
+                <span className="min-w-0 break-words">{s}</span>
+                {icon}
                 {done && <span className="sr-only">(ukończony)</span>}
               </span>
             </li>

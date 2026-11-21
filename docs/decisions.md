@@ -30,3 +30,4 @@
 - [ui] Start page `/` uploads the file through the Next route `/api/forms`, which signs a short-lived JWT with `AUTOFORMULARZ_JWT_SECRET` (node:crypto, no new dependency) and forwards to `POST /api/v1/forms?details=true`; the secret and API address never reach the browser
 - [ui] JSON `description` HTML is converted to React through an allowlist (no innerHTML, inline styles dropped, so only design-system tokens)
 - [ui] Biome linter off for `src/components/ui/**` (generated shadcn code, kept as upstream); still formatted
+- [ui] Start page is a 3-step flow (file → creating → check) with the form `Stepper`; AI output marked with the EU icon for AI-generated content (AI Act art. 50 Code of Practice, free use, `src/components/form/ai-icon.tsx`): no official COI or mObywatel AI icon found
