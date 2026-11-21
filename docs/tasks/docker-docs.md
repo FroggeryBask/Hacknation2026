@@ -29,8 +29,13 @@ Branch: `feat/compiler-lint` (razem z kompilatorem i linterem).
 
 ## Stan
 - Zrobione: kolejność startu w `docker-compose.yml`, `docs/architektura.md`, wymagania i licencje w README.
-- Pomiar przerwany na budowaniu obrazów (łącze ok. 100 kB/s): czasy odpowiedzi modelu w Dockerze **do zmierzenia**
-  na szybszym łączu i z limitem RAM dla Dockera ≥ 10 GB.
+- Pomiar przerwany na budowaniu obrazów (łącze ok. 100 kB/s). Drugi pomiar (2026-11-21, Ryzen 7 4800H, 16 GB RAM,
+  Docker 8 GB): stack z nakładką Eden wstaje w 1 min 45 s (`api` z cache), formularz 2 przez API w kontenerze 80 s,
+  formularz 8 122 s, oba 0 błędów lintera, razem 0,008 USD. Ollama w Dockerze na CPU **nie zmierzona** (Docker ma
+  7,7 GB, model z kontekstem 24576 zajmuje 9,4 GB; potrzebny `.wslconfig` z `memory=12GB`).
+- Ustawione po pomiarze: `llm_num_ctx=24576` (formularz 8: prompt ~9–10 tys. + odpowiedź do 8 tys. > 16384),
+  `llm_timeout_s=1800` (8B na CPU kilka tok/s), domyślnie zostaje `qwen3-vl:8b` (30B-A3B potrzebuje ~20 GB RAM,
+  opisany w README jako opcja dla maszyn z ≥ 32 GB).
 - Demo na Eden AI (uzgodnione z mentorami): nakładka `docker-compose.eden.yml` (bez `ollama` i `model`, klucz tylko
   w `api`). Domyślny `docker-compose.yml` dalej uruchamia model lokalnie. Koszty: `llm.EDEN_USAGE` (Ewelina), suma
   w `GET /health` (`usage`). Żadne zapytanie do Eden nie zostało wysłane (brak klucza).

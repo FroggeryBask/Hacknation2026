@@ -1,9 +1,9 @@
 """LLM step: extracted form content -> FormSpec.
 
 Default: local Ollama with the FormSpec JSON Schema as `format`, so decoding is constrained to valid JSON of
-the right shape (task rule: no models available only through external APIs). For local development only,
-AUTOFORMULARZ_LLM_PROVIDER=eden sends the same prompt to an open-weight model on Eden AI (OpenAI Chat Completions);
-docker-compose forces Ollama for the delivered solution."""
+the right shape (task rule: no models available only through external APIs). For local development and the
+hackathon demo, AUTOFORMULARZ_LLM_PROVIDER=eden sends the same prompt to an open-weight model on Eden AI (OpenAI
+Chat Completions); docker-compose.yml alone forces Ollama, only the docker-compose.eden.yml overlay enables Eden."""
 
 import base64
 import contextlib
