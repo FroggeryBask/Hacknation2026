@@ -14,3 +14,7 @@
 | 2026-11-21 | Ewelina | diagnoza zapętlenia (`max_tokens=6000`) | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0042 |
 | 2026-11-21 | Ewelina | wyniki formularz 2 po poprawce zapętlenia | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0022 |
 | 2026-11-21 | Ewelina | wyniki formularze 3,4,6,7 (ok) oraz 8,9 (ucięte na limicie 8000 tokenów) | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 6 | 0.0199 |
+| 2026-11-21 | Ewelina | wyniki formularze 8 (znów ucięty: zapętlenie na objaśnieniach), 9 (ok) po poprawce odczytu DOCX | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 2 | 0.0117 |
+| 2026-11-21 | Ewelina | wyniki formularze 8 (ok), 9 (gorszy niż poprzedni, zostaje spec z poprzedniej serii) po zakresach ról | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 2 | 0.0115 |
+| 2026-11-21 | Ewelina | wyniki formularz 8 z regułami o polach nieobowiązkowych w prompcie: ucięty (role HEADING dla każdego bloku), zostaje poprzedni spec | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0066 |
+| 2026-11-21 | Ewelina | wyniki formularz 8 ze schematem dla modelu (tylko dozwolone role, `required` obowiązkowe): ok | deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct | 1 | 0.0060 |

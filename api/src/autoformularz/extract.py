@@ -16,6 +16,7 @@ import subprocess
 import tempfile
 import zipfile
 from collections.abc import Iterator
+from dataclasses import dataclass
 from itertools import pairwise
 from pathlib import Path
 from xml.etree import ElementTree
@@ -127,21 +128,60 @@ def split_pages(img: Image.Image) -> list[Image.Image]:
 
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+WP = "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}"
 MC_FALLBACK = "{http://schemas.openxmlformats.org/markup-compatibility/2006}Fallback"
 CHECKBOX_GLYPHS = {"F0A8", "F06F", "F071", "F0FE", "F0FD", "F0A3"}  # Wingdings boxes used as tick fields
 
 
+@dataclass
+class Placed:
+    """Text of a text box anchored to the PAGE: its position on the page in EMU (top-left) and height."""
+
+    text: str
+    x: int
+    y: int
+    height: int
+
+
 def docx_text(data: bytes) -> str:
     """Reads paragraphs, tables AND text boxes in document order (many office forms are built from
-    floating text boxes, which python-docx's high-level API skips). VML fallback copies are ignored."""
+    floating text boxes, which python-docx's high-level API skips). VML fallback copies are ignored.
+
+    A PDF converted to DOCX may put every word in its own text box anchored to the page (material 8:
+    651 boxes). Such boxes that follow each other at the same height are joined into one line, left to
+    right (`_join_placed`), so the model gets lines of text instead of single words."""
     body = docx.Document(io.BytesIO(data)).element.body
-    lines: list[str] = []
+    items: list[str | Placed] = []
     for el in body:
         if el.tag == f"{W}p":
-            lines.extend(_paragraph_lines(el))
+            items.extend(_paragraph_lines(el))
         elif el.tag == f"{W}tbl":
-            lines.extend(_table_rows(el))
-    return "\n".join(_dedupe(lines))
+            items.extend(_table_rows(el))
+    return "\n".join(_dedupe(_join_placed(items)))
+
+
+def _join_placed(items: list[str | Placed]) -> list[str]:
+    """Consecutive page-anchored boxes whose tops differ by at most half the first box's height form one
+    line, ordered by x. Deterministic: depends only on the order and positions in the file."""
+    out: list[str] = []
+    line: list[Placed] = []
+
+    def flush() -> None:
+        if line:
+            out.append(" ".join(p.text for p in sorted(line, key=lambda p: p.x)))
+            line.clear()
+
+    for item in items:
+        if isinstance(item, str):
+            flush()
+            out.append(item)
+        elif line and abs(item.y - line[0].y) <= line[0].height // 2:
+            line.append(item)
+        else:
+            flush()
+            line.append(item)
+    flush()
+    return out
 
 
 def _own_text(el) -> str:
@@ -168,17 +208,43 @@ def _inside(node, root, tags: tuple[str, ...]) -> bool:
     return False
 
 
-def _paragraph_lines(p) -> list[str]:
-    lines = [t] if (t := _own_text(p)) else []
+def _paragraph_lines(p) -> list[str | Placed]:
+    lines: list[str | Placed] = [t] if (t := _own_text(p)) else []
     for box in p.iter(f"{W}txbxContent"):
         if _inside(box, p, (MC_FALLBACK, f"{W}txbxContent")):
             continue
+        inner: list[str | Placed] = []
         for child in box:
             if child.tag == f"{W}p":
-                lines.extend(_paragraph_lines(child))
+                inner.extend(_paragraph_lines(child))
             elif child.tag == f"{W}tbl":
-                lines.extend(_table_rows(child))
+                inner.extend(_table_rows(child))
+        if (pos := _page_position(box)) and inner and all(isinstance(i, str) for i in inner):
+            lines.append(Placed(" ".join(str(i) for i in inner), *pos))
+        else:
+            lines.extend(inner)
     return lines
+
+
+def _page_position(box) -> tuple[int, int, int] | None:
+    """(x, y, height) in EMU of the box's anchor when it is positioned relative to the page, else None."""
+    anchor = box.getparent()
+    while anchor is not None and anchor.tag != f"{WP}anchor":
+        anchor = anchor.getparent()
+    if anchor is None:
+        return None
+    h, v, extent = anchor.find(f"{WP}positionH"), anchor.find(f"{WP}positionV"), anchor.find(f"{WP}extent")
+    if h is None or v is None or extent is None or v.get("relativeFrom") != "page":
+        return None
+    x, y = h.find(f"{WP}posOffset"), v.find(f"{WP}posOffset")
+    try:
+        return int(x.text), int(y.text), int(extent.get("cy"))  # type: ignore[union-attr]
+    except AttributeError, TypeError, ValueError:  # missing offset (e.g. align="center")
+        return None
+
+
+def _text_lines(items: list[str | Placed]) -> list[str]:
+    return [i if isinstance(i, str) else i.text for i in items]
 
 
 def _table_rows(tbl) -> list[str]:
@@ -189,7 +255,7 @@ def _table_rows(tbl) -> list[str]:
             parts = []
             for child in tc:
                 if child.tag == f"{W}p":
-                    parts.extend(_paragraph_lines(child))
+                    parts.extend(_text_lines(_paragraph_lines(child)))
                 elif child.tag == f"{W}tbl":
                     parts.append(" / ".join(_table_rows(child)))
             text = " ".join(parts).strip()

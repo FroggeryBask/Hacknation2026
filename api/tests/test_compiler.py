@@ -216,3 +216,56 @@ def test_without_document_output_is_unchanged(nadplata_spec):
     spec = nadplata_spec.model_copy(update={"block_roles": [BlockRole(block="b1", role=Role.LEGAL_BASIS)]})
     assert compile_form(spec)[0] == compile_form(nadplata_spec)[0]
     assert compile_form(nadplata_spec, build([("art. 1", None)]))[0] == compile_form(nadplata_spec)[0]
+
+
+def test_instruction_range_copies_every_block_in_it(nadplata_spec):
+    from autoformularz.document import build
+    from autoformularz.spec import BlockRole, Role
+
+    doc = build([("Objaśnienia:", None), ("1. Pierwsze.", None), ("2. Drugie.", None), ("Koniec", None)])
+    spec = nadplata_spec.model_copy(
+        update={"block_roles": [BlockRole(block="b1", to="b3", role=Role.INSTRUCTION)]}
+    )
+    texts = _finish_texts(compile_form(spec, doc)[0])
+    assert all(t in texts["pouczenie"] for t in ("Objaśnienia:", "1. Pierwsze.", "2. Drugie."))
+    assert "Koniec" not in texts["pouczenie"]
+
+
+def _choice_spec(equals: str) -> FormSpec:
+    return FormSpec(
+        title="Wniosek testowy",
+        authority_name="Urząd",
+        pages=[
+            PageSpec(
+                title="Sprawa",
+                sections=[
+                    SectionSpec(
+                        title="Sprawa",
+                        fields=[
+                            FieldSpec(label="Dyscyplina", kind=Kind.SINGLE_CHOICE, options=["hokej", "Inna"]),
+                            FieldSpec(
+                                label="Inna dyscyplina",
+                                kind=Kind.TEXT,
+                                show_if=Condition(field="Dyscyplina", equals=equals),
+                            ),
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+
+
+def test_condition_option_matched_regardless_of_case():
+    form, warnings = compile_form(_choice_spec("INNA"))
+    query = children(sections(form, "Sprawa")["sprawa"])["inna_dyscyplina"]["states"][0]["query"]
+    assert '"Inna"' in query and not warnings
+    assert not [i for i in lint(form) if i.level == "error"]
+
+
+def test_condition_on_missing_option_is_dropped_with_warning():
+    # Material 9: the model pointed to "Inna dyscyplina", which was not among the options (lint error).
+    form, warnings = compile_form(_choice_spec("Inna dyscyplina"))
+    assert children(sections(form, "Sprawa")["sprawa"])["inna_dyscyplina"]["states"] == []
+    assert warnings and "Inna dyscyplina" in warnings[0]
+    assert not [i for i in lint(form) if i.level == "error"]

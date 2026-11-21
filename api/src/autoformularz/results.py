@@ -71,7 +71,12 @@ def run(n: int, settings: Settings, *, compile_only: bool, force: bool) -> str:
         return f"{n:02d}: pominięty (brak {spec_path.name}, --compile nie pyta modelu)"
     else:
         start = len(llm.EDEN_USAGE)
-        spec = llm.generate_spec(document, settings)
+        try:
+            spec = llm.generate_spec(document, settings)
+        except llm.LLMError as e:
+            if e.partial:  # paid for: keep it to see where the model got stuck (not committed)
+                (OUT / f"{n:02d}.truncated.txt").write_text(e.partial, encoding="utf-8", newline="\n")
+            raise
         write(spec_path, spec.model_dump(mode="json"))
         usage = usage_since(start)
         model = settings.eden_model if settings.llm_provider == "eden" else settings.llm_model

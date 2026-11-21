@@ -10,7 +10,7 @@ from autoformularz import llm
 from autoformularz.config import Settings
 from autoformularz.document import Document, build
 from autoformularz.llm import LLMError, generate_spec, llm_status
-from autoformularz.spec import FormSpec
+from autoformularz.spec import FormSpec, model_schema
 
 KEY = "sk-test-secret-123"
 PNG = b"\x89PNG\r\n\x1a\nfake"
@@ -82,7 +82,7 @@ def test_eden_request_shape(post, nadplata_spec):
     assert body["model"] == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
     assert body["temperature"] == 0
     assert body["response_format"]["type"] == "json_schema"
-    assert body["response_format"]["json_schema"]["schema"] == FormSpec.model_json_schema()
+    assert body["response_format"]["json_schema"]["schema"] == model_schema()
     parts = body["messages"][1]["content"]
     assert parts[0] == {"type": "text", "text": parts[0]["text"]} and "Wniosek" in parts[0]["text"]
     assert parts[1]["type"] == "image_url"
@@ -130,7 +130,7 @@ def test_ollama_retry_and_payload(post, nadplata_spec):
     assert generate_spec(doc(text="x", images=[PNG]), s) == nadplata_spec
     body = rec.calls[0]["json"]
     assert rec.calls[0]["url"].endswith("/api/chat")
-    assert body["format"] == FormSpec.model_json_schema()
+    assert body["format"] == model_schema()
     assert body["messages"][1]["images"]
     assert "Authorization" not in rec.calls[0]["headers"]
 
@@ -220,10 +220,11 @@ def test_eden_truncated_answer_fails_without_retry(post, monkeypatch):
         generate_spec(doc(text="x"), eden())
     assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1
     assert llm.EDEN_USAGE[0]["cost"] == 0.0054
+    assert e.value.partial == '{"title": "x", "pages": [{"ti'
 
 
 def test_ollama_truncated_answer_fails_without_retry(post):
     rec = post(httpx.Response(200, json={"message": {"content": "{"}, "done_reason": "length"}))
     with pytest.raises(LLMError) as e:
         generate_spec(doc(text="x"), Settings(_env_file=None, llm_provider="ollama"))
-    assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1
+    assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1 and e.value.partial == "{"

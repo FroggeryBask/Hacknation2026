@@ -46,3 +46,6 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+
+# cut model answers kept by `autoformularz.results` for diagnosis
+/wyniki/*.truncated.txt

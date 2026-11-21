@@ -1,0 +1,1363 @@
+{
+  "title": "Wniosek o przyznanie stypendium, nagrody lub wyróżnienia sportowego Rady Miasta Zgierza",
+  "authority_kind": "organ",
+  "authority_name": "Prezydent Miasta Zgierza",
+  "applicant": {
+    "other_person": true,
+    "entity": true,
+    "entity_nip_only": false
+  },
+  "pages": [
+    {
+      "title": "Rodzaj wniosku",
+      "sections": [
+        {
+          "title": "Wybierz rodzaj wniosku",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Rodzaj wniosku",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "Wniosek o przyznanie stypendium sportowego Rady Miasta Zgierza",
+                "Wniosek o przyznanie nagrody sportowej Rady Miasta Zgierza",
+                "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b5",
+                "b6",
+                "b7",
+                "b8",
+                "b9"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Dane wnioskodawcy",
+      "sections": [
+        {
+          "title": "Dane klubu sportowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Nazwa klubu sportowego",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b25"
+              ]
+            },
+            {
+              "label": "Telefon kontaktowy",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b26"
+              ]
+            },
+            {
+              "label": "Adres siedziby",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b27"
+              ]
+            },
+            {
+              "label": "Preferowany sposób korespondencji z urzędem",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "Poczta tradycyjna - adres siedziby klubu",
+                "Poczta tradycyjna - inny adres korespondencyjny",
+                "Skrzynka ePUAP",
+                "eDoręczenia"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b28",
+                "b29",
+                "b30",
+                "b31",
+                "b32"
+              ]
+            },
+            {
+              "label": "Adres korespondencyjny (jeśli inny niż siedziba)",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Preferowany sposób korespondencji z urzędem",
+                "equals": "Poczta tradycyjna - inny adres korespondencyjny",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b30"
+              ]
+            },
+            {
+              "label": "Adres skrzynki ePUAP",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Preferowany sposób korespondencji z urzędem",
+                "equals": "Skrzynka ePUAP",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b31"
+              ]
+            },
+            {
+              "label": "Adres skrzynki eDoręczenia",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Preferowany sposób korespondencji z urzędem",
+                "equals": "eDoręczenia",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b32"
+              ]
+            },
+            {
+              "label": "Odpis danych z KRS lub innego właściwego rejestru",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b33",
+                "b34"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dane reprezentanta klubu",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "Tak",
+                "Nie"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b14"
+              ]
+            },
+            {
+              "label": "Imię reprezentanta",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b15"
+              ]
+            },
+            {
+              "label": "Nazwisko reprezentanta",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Numer telefonu reprezentanta",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b17"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dane pełnomocnika klubu",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Dane pełnomocnika klubu sportowego",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "Tak",
+                "Nie"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b18"
+              ]
+            },
+            {
+              "label": "Imię pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b19"
+              ]
+            },
+            {
+              "label": "Nazwisko pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b20"
+              ]
+            },
+            {
+              "label": "Seria i numer dowodu osobistego pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21"
+              ]
+            },
+            {
+              "label": "Numer telefonu pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b22"
+              ]
+            },
+            {
+              "label": "Pełnomocnictwo z potwierdzeniem uiszczenia opłaty skarbowej",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b23"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Dane sportowca",
+      "sections": [
+        {
+          "title": "Dane kandydata",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b37"
+              ]
+            },
+            {
+              "label": "Nazwisko",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b38"
+              ]
+            },
+            {
+              "label": "Data urodzenia",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b39"
+              ]
+            },
+            {
+              "label": "Adres zameldowania",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b40"
+              ]
+            },
+            {
+              "label": "Adres do korespondencji (jeśli inny niż adres zameldowania)",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b42"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dyscypliny sportowe",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Rodzaj dyscypliny sportowej",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "zespołowa",
+                "indywidualna – inna",
+                "indywidualna – lekkoatletyka"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b44",
+                "b45",
+                "b46",
+                "b47"
+              ]
+            },
+            {
+              "label": "Dyscypliny sportowe",
+              "kind": "MULTI_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "gimnastyka artystyczna",
+                "hokej",
+                "karate",
+                "kolarstwo",
+                "koszykówka",
+                "lekkoatletyka",
+                "łucznictwo",
+                "łyżwiarstwo",
+                "narciarstwo klasyczne",
+                "piłka nożna",
+                "piłka ręczna",
+                "piłka siatkowa",
+                "piłka wodna",
+                "sport motocyklowy",
+                "sporty walki",
+                "sporty wodne",
+                "tenis stołowy",
+                "tenis ziemny",
+                "unihokej",
+                "zapasy"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b49",
+                "b50",
+                "b51",
+                "b52",
+                "b53",
+                "b54",
+                "b55",
+                "b56",
+                "b57",
+                "b58",
+                "b59",
+                "b60",
+                "b61",
+                "b62",
+                "b63",
+                "b64",
+                "b65",
+                "b66",
+                "b67",
+                "b68",
+                "b69"
+              ]
+            },
+            {
+              "label": "Inna dyscyplina sportowa",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dyscypliny sportowe",
+                "equals": "Inna dyscyplina",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b70"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Osiągnięcia sportowe",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Opis najważniejszych osiągnięć sportowych",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b72"
+              ]
+            },
+            {
+              "label": "Dokumenty potwierdzające osiągnięcia sportowe",
+              "kind": "FILE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b74"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Opinia macierzystego klubu sportowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Opinia macierzystego klubu sportowego",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b75",
+                "b76"
+              ]
+            },
+            {
+              "label": "Dokument z opinią klubu",
+              "kind": "FILE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b78"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Wymagane zaświadczenia",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Zaświadczenia potwierdzające osiągnięcia sportowe",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b80"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dodatkowe informacje",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Ewentualne dodatkowe informacje o kandydacie",
+              "kind": "LONG_TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b82"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Dane trenera (dla wniosku o wyróżnienie)",
+      "sections": [
+        {
+          "title": "Dane kandydata do wyróżnienia",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b200"
+              ]
+            },
+            {
+              "label": "Nazwisko",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b201"
+              ]
+            },
+            {
+              "label": "Data urodzenia",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b202"
+              ]
+            },
+            {
+              "label": "Adres zameldowania",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b203"
+              ]
+            },
+            {
+              "label": "Adres do korespondencji (jeśli inny niż adres zameldowania)",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b205"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Opinia macierzystego klubu sportowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Opinia macierzystego klubu sportowego",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b207",
+                "b208"
+              ]
+            },
+            {
+              "label": "Dokument z opinią klubu",
+              "kind": "FILE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b210"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dane podopiecznych trenera",
+          "repeating": true,
+          "description": null,
+          "fields": [
+            {
+              "label": "Imię i nazwisko zawodniczki/zawodnika",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b217",
+                "b222",
+                "b227",
+                "b233"
+              ]
+            },
+            {
+              "label": "Osiągnięcia sportowe podopiecznego",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b219",
+                "b224",
+                "b229",
+                "b235"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Wymagane zaświadczenia podopiecznych",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Zaświadczenia potwierdzające osiągnięcia sportowe podopiecznych",
+              "kind": "FILE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b238"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dodatkowe informacje",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Ewentualne dodatkowe informacje o kandydacie",
+              "kind": "LONG_TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Rodzaj wniosku",
+                "equals": "Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b212"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    }
+  ],
+  "consents": [
+    "Znam warunki przyznawania stypendiów, nagród i wyróżnień sportowych Rady Miasta Zgierza.",
+    "Dane w formularzu są zgodne z prawdą."
+  ],
+  "summary": null,
+  "signed": true,
+  "block_roles": [
+    {
+      "block": "b1",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b2",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b3",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b4",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b13",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b23",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b34",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b74",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b78",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b80",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b118",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b129",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b142",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b146",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b148",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b171",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b186",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b197",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b239",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b241",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b247",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b254",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b267",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b85",
+      "role": "SKIP"
+    },
+    {
+      "block": "b153",
+      "role": "SKIP"
+    },
+    {
+      "block": "b241",
+      "role": "SKIP"
+    },
+    {
+      "block": "b91",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b92",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b93",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b94",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b95",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b96",
+      "role": "SKIP"
+    },
+    {
+      "block": "b97",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b98",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b99",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b100",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b101",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b102",
+      "role": "SKIP"
+    },
+    {
+      "block": "b159",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b160",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b161",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b162",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b163",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b164",
+      "role": "SKIP"
+    },
+    {
+      "block": "b165",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b166",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b167",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b168",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b169",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b170",
+      "role": "SKIP"
+    },
+    {
+      "block": "b247",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b248",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b249",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b250",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b251",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b252",
+      "role": "SKIP"
+    },
+    {
+      "block": "b255",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b256",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b257",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b258",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b259",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b260",
+      "role": "SKIP"
+    },
+    {
+      "block": "b261",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b262",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b263",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b264",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b265",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b266",
+      "role": "SKIP"
+    },
+    {
+      "block": "b87",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b88",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b89",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b155",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b156",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b157",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b242",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b243",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b244",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b245",
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b103",
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b171",
+      "role": "STATEMENT"
+    }
+  ]
+}

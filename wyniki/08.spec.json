@@ -1,0 +1,1721 @@
+{
+  "title": "Deklaracja o wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi",
+  "authority_kind": "organ",
+  "authority_name": "Prezydent Miasta Gdyni",
+  "applicant": {
+    "other_person": true,
+    "entity": true,
+    "entity_nip_only": false
+  },
+  "block_roles": [
+    {
+      "block": "b4",
+      "to": null,
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b5",
+      "to": "b7",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b8",
+      "to": "b11",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b12",
+      "to": "b15",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b16",
+      "to": "b21",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b22",
+      "to": "b23",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b24",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b25",
+      "to": "b28",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b37",
+      "to": "b40",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b41",
+      "to": "b56",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b57",
+      "to": "b65",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b66",
+      "to": "b67",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b68",
+      "to": "b76",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b77",
+      "to": "b81",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b82",
+      "to": "b84",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b85",
+      "to": "b135",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b136",
+      "to": "b187",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b188",
+      "to": "b192",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b193",
+      "to": "b194",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b195",
+      "to": "b198",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b199",
+      "to": "b204",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b205",
+      "to": "b207",
+      "role": "SKIP"
+    },
+    {
+      "block": "b208",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b209",
+      "to": "b211",
+      "role": "SKIP"
+    },
+    {
+      "block": "b212",
+      "to": "b224",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b225",
+      "to": "b233",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b234",
+      "to": "b245",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b246",
+      "to": "b252",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b253",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b254",
+      "to": "b256",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b257",
+      "to": "b290",
+      "role": "GDPR"
+    },
+    {
+      "block": "b291",
+      "to": "b296",
+      "role": "GDPR"
+    },
+    {
+      "block": "b297",
+      "to": "b308",
+      "role": "GDPR"
+    },
+    {
+      "block": "b309",
+      "to": "b317",
+      "role": "GDPR"
+    }
+  ],
+  "pages": [
+    {
+      "title": "Dane podmiotu zobowiązane do złożenia deklaracji",
+      "sections": [
+        {
+          "title": "Dane identyfikacyjne składającego deklarację",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Składający deklarację",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "właściciel/współwłaściciel",
+                "współwłaściciel (wspólność majątkowa)",
+                "najemca/dzierżawca",
+                "wspólnota mieszkaniowa",
+                "spółdzielnia mieszkaniowa",
+                "inny podmiot posiadający nieruchomość w zarządzie lub użytkowaniu"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b18",
+                "b19",
+                "b20",
+                "b21"
+              ]
+            },
+            {
+              "label": "Nazwisko, imię / Nazwa pełna",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b23"
+              ]
+            },
+            {
+              "label": "PESEL",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "PESEL"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b24"
+              ]
+            },
+            {
+              "label": "NIP/REGON",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "NIP",
+                "REGON"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b24"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dane identyfikacyjne współmałżonka",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Nazwisko, imię",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b26"
+              ]
+            },
+            {
+              "label": "Adres zamieszkania",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b27"
+              ]
+            },
+            {
+              "label": "PESEL",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "PESEL"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b28"
+              ]
+            }
+          ],
+          "show_if": {
+            "field": "Składający deklarację",
+            "equals": "właściciel/współwłaściciel",
+            "negate": false
+          },
+          "blocks": []
+        },
+        {
+          "title": "Adres zamieszkania / siedziby",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Kraj",
+              "kind": "SELECT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": "Kraje",
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b30"
+              ]
+            },
+            {
+              "label": "Województwo",
+              "kind": "SELECT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": "TERYT_4G_DOWODOWY",
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b31"
+              ]
+            },
+            {
+              "label": "Gmina",
+              "kind": "SELECT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": "TERYT_4G_DOWODOWY",
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b31"
+              ]
+            },
+            {
+              "label": "Miejscowość",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b32"
+              ]
+            },
+            {
+              "label": "Ulica",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b33"
+              ]
+            },
+            {
+              "label": "Numer nieruchomości/domu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b34"
+              ]
+            },
+            {
+              "label": "Numer lokalu",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b35"
+              ]
+            },
+            {
+              "label": "Kod pocztowy",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "ZIP_CODE"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b36"
+              ]
+            },
+            {
+              "label": "Numer/y działki/działek",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b37"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Adres do korespondencji",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Kraj",
+              "kind": "SELECT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": "Kraje",
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b38"
+              ]
+            },
+            {
+              "label": "Województwo",
+              "kind": "SELECT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": "TERYT_4G_DOWODOWY",
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b39"
+              ]
+            },
+            {
+              "label": "Gmina",
+              "kind": "SELECT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": "TERYT_4G_DOWODOWY",
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b39"
+              ]
+            },
+            {
+              "label": "Miejscowość",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b40"
+              ]
+            },
+            {
+              "label": "Ulica",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b41"
+              ]
+            },
+            {
+              "label": "Numer nieruchomości/domu",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b42"
+              ]
+            },
+            {
+              "label": "Numer lokalu",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b43"
+              ]
+            },
+            {
+              "label": "Kod pocztowy",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "ZIP_CODE"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b44"
+              ]
+            }
+          ],
+          "show_if": {
+            "field": "Adres do korespondencji",
+            "equals": "Adres do korespondencji",
+            "negate": true
+          },
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Okoliczności uzasadniające złożenie deklaracji",
+      "sections": [
+        {
+          "title": "Okoliczności",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Pierwsza deklaracja - data zdarzenia powodującego powstanie obowiązku opłaty",
+              "kind": "DATE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b45"
+              ]
+            },
+            {
+              "label": "Ustanie obowiązku uiszczania opłaty – data zdarzenia powodującego ustanie obowiązku opłaty",
+              "kind": "DATE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b47"
+              ]
+            },
+            {
+              "label": "Nowa deklaracja składana ze względu na zmianę danych będących podstawą ustalenia wysokości należnej opłaty",
+              "kind": "DATE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b52"
+              ]
+            },
+            {
+              "label": "Korekta złożonej, obowiązującej deklaracji - data wystąpienia zmiany danych",
+              "kind": "DATE",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b55"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Dane adresowe nieruchomości",
+      "sections": [
+        {
+          "title": "Adres nieruchomości",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Miejscowość",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b59"
+              ]
+            },
+            {
+              "label": "Kod pocztowy",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "ZIP_CODE"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b60"
+              ]
+            },
+            {
+              "label": "Ulica",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b61"
+              ]
+            },
+            {
+              "label": "Numer nieruchomości/domu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b62"
+              ]
+            },
+            {
+              "label": "Numer lokalu",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b63"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Miejsce gromadzenia odpadów",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Adres lub opis miejsca lokalizacji pojemników",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b66"
+              ]
+            },
+            {
+              "label": "Numer/y działki/działek geodezyjnych",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b67"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Dane identyfikacyjne nieruchomości",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Rodzaj nieruchomości",
+              "kind": "SINGLE_CHOICE",
+              "required": true,
+              "description": null,
+              "options": [
+                "Nieruchomość zabudowana budynkiem mieszkalnym jednorodzinnym",
+                "Nieruchomość zabudowana budynkiem mieszkalnym wielolokalowym"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b69",
+                "b70",
+                "b71"
+              ]
+            },
+            {
+              "label": "Nieruchomość zaznaczona w poz. 33 jest nieruchomością, która w części stanowi nieruchomość na której zamieszkują mieszkańcy, a w części nieruchomość na której nie zamieszkują mieszkańcy, a powstają na niej odpady komunalne",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "TAK",
+                "NIE"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b73",
+                "b74"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Oświadczenie o wysokości opłaty",
+      "sections": [
+        {
+          "title": "Obliczenie wysokości opłaty dla nieruchomości",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej nie przekraczającej 45 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b87",
+                "b88",
+                "b89",
+                "b90"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "38 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b91",
+                "b92",
+                "b93"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b94",
+                "b95"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej przekraczającej 45 m² jednak nie większej niż 60 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b96",
+                "b97",
+                "b98",
+                "b99"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "69 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b100",
+                "b101",
+                "b102"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b103",
+                "b104"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej przekraczającej 60 m² jednak nie większej niż 80 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b105",
+                "b106",
+                "b107",
+                "b108"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "81 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b109",
+                "b110",
+                "b111"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b112",
+                "b113"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej przekraczającej 80 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b114",
+                "b115",
+                "b116",
+                "b117"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "101 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b118",
+                "b119",
+                "b120"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b121",
+                "b122"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych objętych zwolnieniem dochodowym",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b123",
+                "b124",
+                "b125"
+              ]
+            },
+            {
+              "label": "Stawka zwolnienia od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "- 15 zł 00 gr",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b126",
+                "b127",
+                "b128"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznego zwolnienia",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b129",
+                "b130",
+                "b131"
+              ]
+            },
+            {
+              "label": "Suma poz. 38, 41, 44 i 47 pomniejszona o kwotę z poz. 50",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b132",
+                "b133",
+                "b134",
+                "b135"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Obliczenie wysokości opłaty dla właścicieli nieruchomości zabudowanych budynkami mieszkalnymi jednorodzinnymi zwolnionych z części opłaty",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej nie przekraczającej 45 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b139",
+                "b140",
+                "b141",
+                "b142"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "28 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b143",
+                "b144"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b145",
+                "b146"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej przekraczającej 45 m² jednak nie większej niż 60 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b147",
+                "b148",
+                "b149",
+                "b150"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "59 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b151",
+                "b152",
+                "b153"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b154",
+                "b155"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej przekraczającej 60 m² jednak nie większej niż 80 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b156",
+                "b157",
+                "b158",
+                "b159"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "71 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b160",
+                "b161",
+                "b162"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b163",
+                "b164"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych zajmujących lokale mieszkalne o powierzchni użytkowej przekraczającej 80 m²",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b165",
+                "b166",
+                "b167",
+                "b168"
+              ]
+            },
+            {
+              "label": "Stawka opłaty od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "91 zł",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b169",
+                "b170",
+                "b171"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznej opłaty",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b172",
+                "b173"
+              ]
+            },
+            {
+              "label": "Liczba gospodarstw domowych objętych zwolnieniem dochodowym",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b174",
+                "b175",
+                "b176"
+              ]
+            },
+            {
+              "label": "Stawka zwolnienia od gospodarstwa domowego",
+              "kind": "TEXT",
+              "required": false,
+              "description": "- 15 zł 00 gr",
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b177",
+                "b178",
+                "b179"
+              ]
+            },
+            {
+              "label": "Wysokość miesięcznego zwolnienia",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b180",
+                "b181",
+                "b182"
+              ]
+            },
+            {
+              "label": "Suma poz. 54, 57, 60 i 63 pomniejszona o kwotę z poz. 66",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b184",
+                "b185",
+                "b186",
+                "b187"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Wysokość opłaty dla części nieruchomości na której nie zamieszkują mieszkańcy, a powstają odpady komunalne",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Kwota z poz. 29 załącznika A lub B do deklaracji",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b190",
+                "b191",
+                "b192"
+              ]
+            }
+          ],
+          "show_if": {
+            "field": "Nieruchomość zaznaczona w poz. 33 jest nieruchomością, która w części stanowi nieruchomość na której zamieszkują mieszkańcy, a w części nieruchomość na której nie zamieszkują mieszkańcy, a powstają na niej odpady komunalne",
+            "equals": "TAK",
+            "negate": false
+          },
+          "blocks": []
+        },
+        {
+          "title": "Razem wysokość miesięcznej opłaty",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Suma poz. 51 lub 67 oraz 68",
+              "kind": "NUMBER",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b193",
+                "b194"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Dane do kontaktu",
+      "sections": [
+        {
+          "title": "Kontakt",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Nr tel./fax",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "EPUAP"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b196"
+              ]
+            },
+            {
+              "label": "Adres e-mail",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [
+                "EMAIL"
+              ],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b197"
+              ]
+            },
+            {
+              "label": "Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej wskazanego w poz. 71",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "TAK",
+                "NIE"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b198"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "title": "Informacja o załącznikach",
+      "sections": [
+        {
+          "title": "Załączniki",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Załącznik A",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "TAK",
+                "NIE"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b201"
+              ]
+            },
+            {
+              "label": "Załącznik B",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "TAK",
+                "NIE"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b202"
+              ]
+            },
+            {
+              "label": "Dokumenty upoważniające do złożenia deklaracji",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "TAK",
+                "NIE"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b203"
+              ]
+            },
+            {
+              "label": "Inne: (podać jakie)",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b204"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        }
+      ]
+    }
+  ],
+  "consents": [
+    "Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są wytworzone na jej terenie bioodpady stanowiące odpady komunalne."
+  ],
+  "summary": "Po złożeniu deklaracji, Prezydent Miasta Gdyni weryfikuje prawidłowość wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi. W przypadku niewykonania zobowiązania, deklaracja stanowi podstawę do wystawienia tytułu wykonawczego.",
+  "signed": true
+}

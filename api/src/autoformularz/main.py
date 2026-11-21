@@ -96,6 +96,8 @@ def validate(_: Auth, form: dict[str, Any]) -> dict:
 
 @app.get("/api/v1/spec/schema", summary="Schemat JSON modelu pośredniego FormSpec")
 def spec_schema() -> dict:
+    # What /api/v1/forms/compile accepts (UI editor contract). The stricter model_schema() is only for the
+    # model: saved specs (e.g. wyniki/02, 07, 09) have more than 40 roles or FIELD_LABEL/HEADING roles.
     return FormSpec.model_json_schema()
 
 
