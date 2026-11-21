@@ -79,6 +79,41 @@ Obecne reguły z „Reguł technicznych”, a do tego:
 - Kompilator bierze tekst z Document, nie z FormSpec.
 - Kontrakt `?details=true` dostaje `document.blocks` i `coverage`.
 
+## Kontrakt
+
+Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Zmiany tylko po uzgodnieniu
+(Ewelina ↔ Konrad: `Document`, Konrad ↔ Gabrysia: `?details=true`).
+
+**`Document`** (`api/src/autoformularz/document.py`, wynik `extract.py`):
+- `blocks`: `{id, text, kind, page}`. `id` = `b1`, `b2`, … w kolejności czytania. `kind` = `paragraph`,
+  `table_row` (cały wiersz tabeli jako `| a | b |`), `heading`. `page` od 1 dla PDF, `null` dla DOCX/XLSX.
+- `candidates`: `{block, kind, text}`, miejsca do wypełnienia. `kind` = `blank` (`____`), `dots` (`......`),
+  `checkbox` (`☐ opcja`), `colon` („Etykieta:” bez wartości).
+- `images`: obrazy stron skanów (nie trafiają do odpowiedzi API). Skany nie mają jeszcze bloków.
+
+**FormSpec** (`spec.py`), pola z wartościami domyślnymi, więc stare FormSpec są poprawne:
+- `FieldSpec.blocks`, `SectionSpec.blocks`: ID bloków, z których pochodzi element (etykieta, opcje).
+- `FormSpec.block_roles`: `{block, role}`, rola = `FIELD_LABEL`, `OPTION`, `HEADING`, `INSTRUCTION`
+  (pouczenie), `LEGAL_BASIS` (podstawa prawna), `STATEMENT` (oświadczenie), `GDPR` (RODO), `SKIP` (tylko na papierze).
+  Model podaje role **tylko** dla `INSTRUCTION`, `LEGAL_BASIS`, `STATEMENT`, `GDPR` i `SKIP`. Role dla wszystkich
+  bloków nie mieszczą się w oknie modelu: formularz 8 (DOCX) ma 631 bloków, czyli ok. 8 tys. tokenów samych ról
+  przy `num_ctx=16384`. Pozostałe role są dozwolone, ale nie wymagane. Bloki bez roli to nie błąd: trafiają do
+  `coverage.unreferenced`, a krok check zamieni je później na `TEXT_BLOCK` z ostrzeżeniem.
+
+**`?details=true`** dostaje dwa klucze (`null` dla `/compile`, bo nie ma pliku źródłowego):
+```json
+"document": {"blocks": [{"id": "b1", "text": "…", "kind": "paragraph", "page": null}],
+             "candidates": [{"block": "b7", "kind": "blank", "text": "Imię: ____"}]},
+"coverage": {"blocks": 63, "referenced": 58, "unreferenced": ["b4"], "candidates": 12,
+             "candidatesWithoutField": ["b31"], "unknownRefs": []}
+```
+- `unreferenced`: bloki bez pola, sekcji ani roli (tytuły i zwykły tekst; do sprawdzenia, czy nic nie znika).
+- `candidatesWithoutField`: bloki z kandydatem na pole bez pola i bez `SKIP`.
+- `unknownRefs`: ID z FormSpec, których nie ma w dokumencie (halucynacje).
+
+Pierwsza wersja: jeden blok na wiersz tekstu, kandydaci z wzorców w tekście (formularze z pól tekstowych
+bez `____`, np. nr 2, nie mają jeszcze kandydatów). Kompilator jeszcze nie korzysta z bloków.
+
 ## Weryfikacja
 - Testy migawkowe na formularzach z `materialy/`: każdy uruchomiony kilka razy, JSON-y identyczne.
 - Pokrycie i precyzja pól względem ręcznie spisanej listy pól dla każdego formularza.

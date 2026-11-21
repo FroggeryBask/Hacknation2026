@@ -14,7 +14,7 @@ import httpx
 from pydantic import ValidationError
 
 from autoformularz.config import Settings
-from autoformularz.extract import Extracted
+from autoformularz.document import Document
 from autoformularz.spec import FormSpec
 
 SYSTEM_PROMPT = """\
@@ -49,6 +49,14 @@ adnotacje urzędu („wypełnia urząd”, „data wpływu”), pouczenia o spos
 działać w imieniu innej osoby (domyślnie tak dla osób fizycznych).
 `title`: zaczyna się od „Wniosek”, „Zgłoszenie”, „Deklaracja” lub „Oświadczenie”, bez odwołań do przepisów.
 `authority_kind`: „organ”, gdy wniosek jest kierowany do osoby (Wójt, Burmistrz, Prezydent, Starosta).
+
+Bloki: treść formularza dostajesz jako bloki z identyfikatorami, np. `[b12] Imię i nazwisko: ____`.
+- Odwołuj się do bloków po ID, nie przepisuj ich treści.
+- W polu i sekcji wpisz w `blocks` ID bloków, z których pochodzą (etykieta, opcje).
+- W `block_roles` podaj rolę TYLKO dla bloków z tekstem do przeniesienia lub pominięcia: INSTRUCTION
+  (pouczenie), LEGAL_BASIS (podstawa prawna), STATEMENT (oświadczenie), GDPR (RODO), SKIP (tylko na papierze:
+  podpis, pieczątka, „wypełnia urząd”, miejscowość i data). Nie podawaj ról dla etykiet pól, opcji ani tytułów.
+- Używaj wyłącznie ID z listy bloków.
 """
 
 
@@ -64,11 +72,12 @@ class LLMError(Exception):
         self.code, self.message, self.status = code, message, status
 
 
-def build_user_prompt(ex: Extracted) -> str:
+def build_user_prompt(ex: Document) -> str:
     parts = ["Przeanalizuj formularz i zwróć FormSpec."]
-    if ex.text:
+    if ex.blocks:
+        listing = "\n".join(f"[{b.id}] {b.text}" for b in ex.blocks)
         parts.append(
-            "Treść formularza (kolejność jak w dokumencie, wiersze tabel jako | komórka |):\n\n" + ex.text
+            "Bloki formularza (kolejność jak w dokumencie, wiersze tabel jako | komórka |):\n\n" + listing
         )
     if ex.images:
         parts.append(f"Formularz jest też na załączonych obrazach ({len(ex.images)}).")
@@ -171,7 +180,7 @@ def parse_spec(content: str) -> FormSpec:
     return FormSpec.model_validate(json.loads(text))
 
 
-def generate_spec(ex: Extracted, settings: Settings) -> FormSpec:
+def generate_spec(ex: Document, settings: Settings) -> FormSpec:
     eden = settings.llm_provider == "eden"
     call = _call_eden if eden else _call_ollama
     system = SYSTEM_PROMPT

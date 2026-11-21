@@ -14,6 +14,7 @@
 - [format] Element ids are UUIDv5 from form title + path (same input gives the same JSON, readable diffs)
 - [format] `validation` lists REQUIRED + validators (PESEL, NIP, REGON, ZIP_CODE, EMAIL...); validators also inferred from labels (reference leaves it empty; validation is an extra-points item)
 - [extract] DOCX read from XML incl. text boxes (forms 2 and 8 are built from text boxes); .doc/.ods via LibreOffice headless (MPL-2.0 external process, not linked; confirm with COI mentors); scanned PDF pages rendered with pypdfium2 (PyMuPDF is AGPL)
+- [api] Contract for parallel work: `extract` returns a `Document` (blocks `b1…` + field candidates), FormSpec points to block IDs (`blocks`, `block_roles`), `?details=true` adds `document` and `coverage` (model classifies, code keeps the text; see docs/pipeline.md "Kontrakt")
 - [api] `POST /api/v1/forms` returns the importable JSON as-is; `?details=true` adds FormSpec, lint issues and notes for the UI
 - [api] JWT HS256 with shared secret from env; `AUTOFORMULARZ_AUTH_ENABLED=false` only for local dev
 - [docker] Debian slim, not Alpine (LibreOffice and PDF/imaging wheels need glibc); LibreOffice optional via build arg

@@ -59,6 +59,8 @@ def respond(result: pipeline.Result, details: bool) -> JSONResponse:
         "issues": as_dicts(result.issues),
         "notes": result.notes,
         "sourceFormat": result.source_format,
+        "document": result.document.as_dict() if result.document else None,
+        "coverage": result.coverage.as_dict() if result.coverage else None,
     }
     return JSONResponse(body, headers=headers)
 

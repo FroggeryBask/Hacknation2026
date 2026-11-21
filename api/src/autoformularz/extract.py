@@ -1,21 +1,24 @@
-"""Turns an uploaded file into what the model reads: ordered text and/or page images.
+"""Turns an uploaded file into a Document: text blocks with IDs in reading order and/or page images.
 
 Text formats keep reading order (paragraphs and table rows), so the model sees the paper layout.
 Images and scanned PDFs are passed as pictures to the vision model. Legacy .doc/.ods are converted
-with LibreOffice (headless, separate process). Everything happens in memory or a temp dir."""
+with LibreOffice (headless, separate process). Everything happens in memory or a temp dir.
+
+For now one block = one line of the text below (a paragraph or a whole table row); finer blocks
+(cells, options) and scan transcription come later without changing the Document shape."""
 
 import io
 import re
 import shutil
 import subprocess
 import tempfile
-from dataclasses import dataclass, field
 from pathlib import Path
 
-from docx import Document
+import docx
 from openpyxl import load_workbook
 from PIL import Image
 
+from autoformularz.document import Document, build
 from autoformularz.upload import Kind, UploadError
 
 MAX_IMAGE_SIDE = 1600
@@ -23,27 +26,24 @@ SCANNED_CHARS_PER_PAGE = 80
 WINDOWS_SOFFICE = Path("C:/Program Files/LibreOffice/program/soffice.exe")
 
 
-@dataclass
-class Extracted:
-    text: str = ""
-    images: list[bytes] = field(default_factory=list)  # PNG/JPEG bytes, already downscaled
-    notes: list[str] = field(default_factory=list)
+def _lines(text: str, page: int | None = None) -> list[tuple[str, int | None]]:
+    return [(line, page) for line in text.splitlines()]
 
 
-def extract(kind: Kind, data: bytes, *, soffice: str = "soffice", max_pages: int = 6) -> Extracted:
+def extract(kind: Kind, data: bytes, *, soffice: str = "soffice", max_pages: int = 6) -> Document:
     match kind:
         case Kind.DOCX:
-            return Extracted(text=docx_text(data))
+            return build(_lines(docx_text(data)))
         case Kind.DOC:
-            return Extracted(text=docx_text(convert(data, "doc", "docx", soffice)))
+            return build(_lines(docx_text(convert(data, "doc", "docx", soffice))))
         case Kind.XLSX:
-            return Extracted(text=xlsx_text(data))
+            return build(_lines(xlsx_text(data)))
         case Kind.ODS:
-            return Extracted(text=xlsx_text(convert(data, "ods", "xlsx", soffice)))
+            return build(_lines(xlsx_text(convert(data, "ods", "xlsx", soffice))))
         case Kind.PDF:
             return pdf(data, max_pages)
         case Kind.JPEG | Kind.PNG:
-            return Extracted(images=[downscale(data)])
+            return Document(images=[downscale(data)])
     raise UploadError("UNSUPPORTED_FORMAT", f"Nieobsługiwany format: {kind}.", 415)
 
 
@@ -55,7 +55,7 @@ CHECKBOX_GLYPHS = {"F0A8", "F06F", "F071", "F0FE", "F0FD", "F0A3"}  # Wingdings 
 def docx_text(data: bytes) -> str:
     """Reads paragraphs, tables AND text boxes in document order (many office forms are built from
     floating text boxes, which python-docx's high-level API skips). VML fallback copies are ignored."""
-    body = Document(io.BytesIO(data)).element.body
+    body = docx.Document(io.BytesIO(data)).element.body
     lines: list[str] = []
     for el in body:
         if el.tag == f"{W}p":
@@ -136,19 +136,20 @@ def xlsx_text(data: bytes) -> str:
         if len(wb.worksheets) > 1:
             lines.append(f"## Arkusz: {ws.title}")
         for row in ws.iter_rows(values_only=True):
-            cells = [str(c).strip() for c in row if c is not None and str(c).strip()]
+            # Whitespace collapsed like in DOCX: a multi-line cell stays inside its row (one block per row).
+            cells = [" ".join(str(c).split()) for c in row if c is not None and str(c).strip()]
             if cells:
                 lines.append("| " + " | ".join(cells) + " |")
     return "\n".join(lines)
 
 
-def pdf(data: bytes, max_pages: int) -> Extracted:
+def pdf(data: bytes, max_pages: int) -> Document:
     from pypdf import PdfReader
 
     reader = PdfReader(io.BytesIO(data))
     texts = [(p.extract_text() or "").strip() for p in reader.pages]
-    out = Extracted(text="\n\n".join(t for t in texts if t))
-    if len(out.text) < SCANNED_CHARS_PER_PAGE * max(1, len(texts)):
+    out = build([line for page, t in enumerate(texts, 1) for line in _lines(t, page)])
+    if sum(len(t) for t in texts) < SCANNED_CHARS_PER_PAGE * max(1, len(texts)):
         out.images = render_pdf(data, max_pages)
         out.notes.append("PDF bez warstwy tekstowej: przekazano obrazy stron.")
     if len(reader.pages) > max_pages and out.images:
