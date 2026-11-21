@@ -1684,13 +1684,13 @@
         {
           "x": 0,
           "y": 6,
-          "rows": 2,
+          "rows": 7,
           "cols": 3,
           "field": {
-            "id": "c931f098-cbaa-545c-a20a-362feb034d50",
+            "id": "7a7a3ce6-0b1e-51f8-b84f-c3706b884c01",
             "type": "SECTION",
-            "techName": "adres_zamieszkania_siedziby",
-            "title": "Adres zamieszkania / siedziby",
+            "techName": "dane_adresowe_nieruchomosci",
+            "title": "Dane adresowe nieruchomości",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -1699,6 +1699,115 @@
               {
                 "x": 0,
                 "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "cac2c3bf-244e-5e15-b9fd-eba4a8802b2c",
+                  "type": "TEXT_FIELD",
+                  "techName": "miejscowosc",
+                  "title": "Miejscowość",
+                  "description": "",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "ad70789b-6941-5411-80a8-b77ae93a5cf5",
+                  "type": "TEXT_FIELD",
+                  "techName": "kod_pocztowy_2",
+                  "title": "Kod pocztowy",
+                  "description": "",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED",
+                    "ZIP_CODE"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 1,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "bccaded8-300a-562b-903b-6aa53050fabc",
+                  "type": "TEXT_FIELD",
+                  "techName": "ulica_2",
+                  "title": "Ulica",
+                  "description": "",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 2,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 3,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "a2edf24e-3b37-539b-99b0-e69789f699c4",
+                  "type": "TEXT_FIELD",
+                  "techName": "numer_nieruchomosci_domu",
+                  "title": "Numer nieruchomości/domu",
+                  "description": "",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 3,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 4,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "e1ac2075-bb51-5e1e-a44f-de289e5bc24e",
+                  "type": "TEXT_FIELD",
+                  "techName": "numer_lokalu_2",
+                  "title": "Numer lokalu",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 4,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 5,
                 "rows": 1,
                 "cols": 3,
                 "field": {
@@ -1712,7 +1821,7 @@
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
-                  "questionOrder": 0,
+                  "questionOrder": 5,
                   "tooltipMessage": ""
                 }
               }
@@ -1724,7 +1833,7 @@
         },
         {
           "x": 0,
-          "y": 8,
+          "y": 13,
           "rows": 9,
           "cols": 3,
           "field": {
@@ -1812,9 +1921,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "cac2c3bf-244e-5e15-b9fd-eba4a8802b2c",
+                  "id": "58811e39-7c54-5eac-8ccd-178829c203db",
                   "type": "TEXT_FIELD",
-                  "techName": "miejscowosc",
+                  "techName": "miejscowosc_2",
                   "title": "Miejscowość",
                   "description": "",
                   "options": [],
@@ -1832,9 +1941,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bccaded8-300a-562b-903b-6aa53050fabc",
+                  "id": "566a9ef3-d316-5e22-bd9d-f1a47e713d1a",
                   "type": "TEXT_FIELD",
-                  "techName": "ulica_2",
+                  "techName": "ulica_3",
                   "title": "Ulica",
                   "description": "",
                   "options": [],
@@ -1852,9 +1961,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a2edf24e-3b37-539b-99b0-e69789f699c4",
+                  "id": "bba2dd7b-499a-5ca5-b5f3-706328e50b58",
                   "type": "TEXT_FIELD",
-                  "techName": "numer_nieruchomosci_domu",
+                  "techName": "numer_nieruchomosci_domu_2",
                   "title": "Numer nieruchomości/domu",
                   "description": "",
                   "options": [],
@@ -1872,9 +1981,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e1ac2075-bb51-5e1e-a44f-de289e5bc24e",
+                  "id": "6b92d127-83d2-5180-ac84-24342596816c",
                   "type": "TEXT_FIELD",
-                  "techName": "numer_lokalu_2",
+                  "techName": "numer_lokalu_3",
                   "title": "Numer lokalu",
                   "description": "",
                   "options": [],
@@ -1892,9 +2001,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ad70789b-6941-5411-80a8-b77ae93a5cf5",
+                  "id": "15819f32-3193-5ecc-8299-867cfb726ac2",
                   "type": "TEXT_FIELD",
-                  "techName": "kod_pocztowy_2",
+                  "techName": "kod_pocztowy_3",
                   "title": "Kod pocztowy",
                   "description": "",
                   "options": [],
@@ -2032,7 +2141,7 @@
         {
           "x": 0,
           "y": 0,
-          "rows": 6,
+          "rows": 7,
           "cols": 3,
           "field": {
             "id": "e8d931fe-87fd-5902-8677-866040f13fa9",
@@ -2050,9 +2159,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "58811e39-7c54-5eac-8ccd-178829c203db",
+                  "id": "bb39d7be-f36b-551e-be1a-05111d4adece",
                   "type": "TEXT_FIELD",
-                  "techName": "miejscowosc_2",
+                  "techName": "miejscowosc_3",
                   "title": "Miejscowość",
                   "description": "",
                   "options": [],
@@ -2072,9 +2181,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "15819f32-3193-5ecc-8299-867cfb726ac2",
+                  "id": "97a871ad-1a1a-5b9d-80b3-07d4595744eb",
                   "type": "TEXT_FIELD",
-                  "techName": "kod_pocztowy_3",
+                  "techName": "kod_pocztowy_4",
                   "title": "Kod pocztowy",
                   "description": "",
                   "options": [],
@@ -2095,9 +2204,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "566a9ef3-d316-5e22-bd9d-f1a47e713d1a",
+                  "id": "a35f13e9-ee22-51b2-8426-a70af7c5d7c4",
                   "type": "TEXT_FIELD",
-                  "techName": "ulica_3",
+                  "techName": "ulica_4",
                   "title": "Ulica",
                   "description": "",
                   "options": [],
@@ -2117,9 +2226,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bba2dd7b-499a-5ca5-b5f3-706328e50b58",
+                  "id": "8f1b8cbc-0308-51e3-b206-fafd06094866",
                   "type": "TEXT_FIELD",
-                  "techName": "numer_nieruchomosci_domu_2",
+                  "techName": "numer_nieruchomosci_domu_3",
                   "title": "Numer nieruchomości/domu",
                   "description": "",
                   "options": [],
@@ -2139,9 +2248,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "6b92d127-83d2-5180-ac84-24342596816c",
+                  "id": "f1f42a72-a963-58a5-b205-b0f99661345d",
                   "type": "TEXT_FIELD",
-                  "techName": "numer_lokalu_3",
+                  "techName": "numer_lokalu_4",
                   "title": "Numer lokalu",
                   "description": "",
                   "options": [],
@@ -2150,6 +2259,26 @@
                   "repeatingSectionGrid": [],
                   "states": [],
                   "questionOrder": 4,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 5,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "25bba7c5-d83b-5c7b-af91-776da2c04795",
+                  "type": "TEXT_FIELD",
+                  "techName": "numer_y_dzialki_dzialek_geodezyjnych",
+                  "title": "Numer/y działki/działek geodezyjnych",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 5,
                   "tooltipMessage": ""
                 }
               }
@@ -2161,8 +2290,8 @@
         },
         {
           "x": 0,
-          "y": 6,
-          "rows": 3,
+          "y": 7,
+          "rows": 2,
           "cols": 3,
           "field": {
             "id": "d27161ad-cc9a-53ab-8e6b-cdb61b4cea87",
@@ -2191,26 +2320,6 @@
                   "repeatingSectionGrid": [],
                   "states": [],
                   "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "25bba7c5-d83b-5c7b-af91-776da2c04795",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_y_dzialki_dzialek_geodezyjnych",
-                  "title": "Numer/y działki/działek geodezyjnych",
-                  "description": "",
-                  "options": [],
-                  "validation": [],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 1,
                   "tooltipMessage": ""
                 }
               }
@@ -3030,12 +3139,7 @@
                 }
               }
             ],
-            "states": [
-              {
-                "type": "SHOW",
-                "query": "(\"TAK\" in tabs['Dane adresowe nieruchomości' in title].questions['dane_identyfikacyjne_nieruchomosci' in field.techName].field.repeatingSectionGrid['nieruchomosc_zaznaczona_w_poz_33_jest_nieruchomoscia_ktora_w' in field.techName].field.__userAnswer)"
-              }
-            ],
+            "states": [],
             "questionOrder": 2,
             "tooltipMessage": ""
           }
@@ -3084,8 +3188,8 @@
       ]
     },
     {
-      "id": "a2de5e9d-600c-5a8a-934a-37226bdbb808",
-      "title": "Dane do kontaktu",
+      "id": "9bf7fbe0-e622-5d4d-8ae3-f5714badec37",
+      "title": "Oświadczenie",
       "type": "MAIN",
       "questions": [
         {
@@ -3094,10 +3198,10 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "0ddcf206-41ed-525a-a050-e46df7263d6b",
+            "id": "3bd0b050-fc3d-5528-abbe-7f2c99297c8a",
             "type": "SECTION",
-            "techName": "kontakt",
-            "title": "Kontakt",
+            "techName": "oswiadczenie",
+            "title": "Oświadczenie",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -3109,10 +3213,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b0e08bb0-9be4-5b1f-9354-d9fb0b82e801",
+                  "id": "0d288fe1-376f-5b2b-8248-4a663760fe55",
                   "type": "RADIO",
-                  "techName": "wyrazam_zgode_na_otrzymywanie_korespondencji_za_posrednictwe",
-                  "title": "Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej wskazanego w poz. 71",
+                  "techName": "oswiadczam_ze_nieruchomosc_wyposazona_jest_w_przydomowy_komp",
+                  "title": "Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są wytworzone na jej terenie bioodpady stanowiące odpady komunalne",
                   "description": "",
                   "options": [
                     {
@@ -3143,8 +3247,8 @@
       ]
     },
     {
-      "id": "0a2778e5-08fd-587e-8f5f-06719976b054",
-      "title": "Informacja o załącznikach",
+      "id": "cf611da0-6f47-5085-bba0-3a8e8467e73f",
+      "title": "Załączniki",
       "type": "MAIN",
       "questions": [
         {
@@ -3153,10 +3257,10 @@
           "rows": 5,
           "cols": 3,
           "field": {
-            "id": "9f074a27-e414-52e9-b113-c8b22f796e77",
+            "id": "ac7b2fae-0370-5b97-881e-25e7a169cd50",
             "type": "SECTION",
-            "techName": "zalaczniki",
-            "title": "Załączniki",
+            "techName": "rodzaje_zalacznikow",
+            "title": "Rodzaje załączników",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -3261,10 +3365,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bf2463af-fc97-5cec-9ccf-ba76bde8f37b",
+                  "id": "30b76e76-c0b8-5c0a-954d-eceefcb20be4",
                   "type": "TEXT_FIELD",
-                  "techName": "inne_podac_jakie",
-                  "title": "Inne: (podać jakie)",
+                  "techName": "inne",
+                  "title": "Inne",
                   "description": "",
                   "options": [],
                   "validation": [],
@@ -3391,8 +3495,8 @@
                   "consentSectionConfig": {
                     "consents": [
                       {
-                        "description": "<html><head></head><body><p>Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są wytworzone na jej terenie bioodpady stanowiące odpady komunalne.</p></body></html>",
-                        "required": true
+                        "description": "<html><head></head><body><p>Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej</p></body></html>",
+                        "required": false
                       },
                       {
                         "description": "<html><head></head><body><p>Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z <a href=\"#klauzula-informacyjna\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Link otwiera się w nowej karcie\">klauzulą informacyjną</a></p></body></html>",
@@ -3444,7 +3548,7 @@
                   "type": "INFO_SECTION",
                   "techName": "podsumowanie_info",
                   "title": "",
-                  "description": "<html><head></head><body><p>Po złożeniu deklaracji, Prezydent Miasta Gdyni weryfikuje prawidłowość wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi. W przypadku niewykonania zobowiązania, deklaracja stanowi podstawę do wystawienia tytułu wykonawczego.</p></body></html>",
+                  "description": "<html><head></head><body><p>Po złożeniu deklaracji, organ sprawdzi jej zgodność z przepisami i ustali wysokość miesięcznej opłaty za gospodarowanie odpadami komunalnymi. W przypadku niewykonania zobowiązania, deklaracja może być podstawą do wystawienia tytułu wykonawczego.</p></body></html>",
                   "options": [],
                   "validation": [],
                   "readOnly": false,
@@ -3529,16 +3633,16 @@
       {
         "id": "b0384865",
         "source": "d26bcd2d-5b03-5b0e-920e-6b55d0b034dc",
-        "target": "a2de5e9d-600c-5a8a-934a-37226bdbb808"
+        "target": "9bf7fbe0-e622-5d4d-8ae3-f5714badec37"
       },
       {
         "id": "41f9aa6c",
-        "source": "a2de5e9d-600c-5a8a-934a-37226bdbb808",
-        "target": "0a2778e5-08fd-587e-8f5f-06719976b054"
+        "source": "9bf7fbe0-e622-5d4d-8ae3-f5714badec37",
+        "target": "cf611da0-6f47-5085-bba0-3a8e8467e73f"
       },
       {
         "id": "ec8ef271",
-        "source": "0a2778e5-08fd-587e-8f5f-06719976b054",
+        "source": "cf611da0-6f47-5085-bba0-3a8e8467e73f",
         "target": "98913242-e51a-5954-8258-bb532cd77038"
       },
       {

@@ -4,10 +4,75 @@
   "authority_name": "Prezydent Miasta Gdyni",
   "applicant": {
     "other_person": true,
-    "entity": true,
+    "entity": false,
     "entity_nip_only": false
   },
   "block_roles": [
+    {
+      "block": "b1",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b29",
+      "to": null,
+      "role": "HEADING"
+    },
+    {
+      "block": "b30",
+      "to": "b34",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b36",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b86",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b183",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b195",
+      "to": null,
+      "role": "HEADING"
+    },
+    {
+      "block": "b196",
+      "to": null,
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b205",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b207",
+      "to": "b211",
+      "role": "SKIP"
+    },
+    {
+      "block": "b217",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b224",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b257",
+      "to": "b318",
+      "role": "GDPR"
+    },
     {
       "block": "b4",
       "to": null,
@@ -24,23 +89,8 @@
       "role": "INSTRUCTION"
     },
     {
-      "block": "b12",
-      "to": "b15",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b16",
-      "to": "b21",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b22",
-      "to": "b23",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b24",
-      "to": null,
+      "block": "b21",
+      "to": "b22",
       "role": "INSTRUCTION"
     },
     {
@@ -49,27 +99,17 @@
       "role": "INSTRUCTION"
     },
     {
-      "block": "b37",
-      "to": "b40",
+      "block": "b35",
+      "to": null,
       "role": "INSTRUCTION"
     },
     {
-      "block": "b41",
+      "block": "b42",
       "to": "b56",
       "role": "INSTRUCTION"
     },
     {
       "block": "b57",
-      "to": "b65",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b66",
-      "to": "b67",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b68",
       "to": "b76",
       "role": "INSTRUCTION"
     },
@@ -79,58 +119,23 @@
       "role": "INSTRUCTION"
     },
     {
-      "block": "b82",
-      "to": "b84",
+      "block": "b83",
+      "to": "b85",
       "role": "INSTRUCTION"
     },
     {
-      "block": "b85",
-      "to": "b135",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b136",
-      "to": "b187",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b188",
-      "to": "b192",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b193",
-      "to": "b194",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b195",
+      "block": "b197",
       "to": "b198",
       "role": "INSTRUCTION"
     },
     {
-      "block": "b199",
-      "to": "b204",
+      "block": "b212",
+      "to": "b216",
       "role": "INSTRUCTION"
     },
     {
-      "block": "b205",
-      "to": "b207",
-      "role": "SKIP"
-    },
-    {
-      "block": "b208",
-      "to": null,
-      "role": "SKIP"
-    },
-    {
-      "block": "b209",
-      "to": "b211",
-      "role": "SKIP"
-    },
-    {
-      "block": "b212",
-      "to": "b224",
+      "block": "b218",
+      "to": "b223",
       "role": "INSTRUCTION"
     },
     {
@@ -140,43 +145,43 @@
     },
     {
       "block": "b234",
+      "to": "b235",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b236",
+      "to": "b237",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b238",
+      "to": "b241",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b242",
       "to": "b245",
       "role": "INSTRUCTION"
     },
     {
       "block": "b246",
+      "to": "b249",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b250",
       "to": "b252",
       "role": "INSTRUCTION"
     },
     {
       "block": "b253",
+      "to": "b255",
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b256",
       "to": null,
       "role": "INSTRUCTION"
-    },
-    {
-      "block": "b254",
-      "to": "b256",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b257",
-      "to": "b290",
-      "role": "GDPR"
-    },
-    {
-      "block": "b291",
-      "to": "b296",
-      "role": "GDPR"
-    },
-    {
-      "block": "b297",
-      "to": "b308",
-      "role": "GDPR"
-    },
-    {
-      "block": "b309",
-      "to": "b317",
-      "role": "GDPR"
     }
   ],
   "pages": [
@@ -335,58 +340,10 @@
           "blocks": []
         },
         {
-          "title": "Adres zamieszkania / siedziby",
+          "title": "Dane adresowe nieruchomości",
           "repeating": false,
           "description": null,
           "fields": [
-            {
-              "label": "Kraj",
-              "kind": "SELECT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": "Kraje",
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b30"
-              ]
-            },
-            {
-              "label": "Województwo",
-              "kind": "SELECT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": "TERYT_4G_DOWODOWY",
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b31"
-              ]
-            },
-            {
-              "label": "Gmina",
-              "kind": "SELECT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": "TERYT_4G_DOWODOWY",
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b31"
-              ]
-            },
             {
               "label": "Miejscowość",
               "kind": "TEXT",
@@ -400,55 +357,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b32"
-              ]
-            },
-            {
-              "label": "Ulica",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b33"
-              ]
-            },
-            {
-              "label": "Numer nieruchomości/domu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b34"
-              ]
-            },
-            {
-              "label": "Numer lokalu",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b35"
+                "b59"
               ]
             },
             {
@@ -466,7 +375,55 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b36"
+                "b61"
+              ]
+            },
+            {
+              "label": "Ulica",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b62"
+              ]
+            },
+            {
+              "label": "Numer nieruchomości/domu",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b63"
+              ]
+            },
+            {
+              "label": "Numer lokalu",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b64"
               ]
             },
             {
@@ -482,7 +439,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b37"
+                "b35"
               ]
             }
           ],
@@ -625,11 +582,7 @@
               ]
             }
           ],
-          "show_if": {
-            "field": "Adres do korespondencji",
-            "equals": "Adres do korespondencji",
-            "negate": true
-          },
+          "show_if": null,
           "blocks": []
         }
       ]
@@ -655,7 +608,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b45"
+                "b44"
               ]
             },
             {
@@ -671,7 +624,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b47"
+                "b46"
               ]
             },
             {
@@ -703,7 +656,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b55"
+                "b56"
               ]
             }
           ],
@@ -751,7 +704,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b60"
+                "b61"
               ]
             },
             {
@@ -767,7 +720,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b61"
+                "b62"
               ]
             },
             {
@@ -783,7 +736,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b62"
+                "b63"
               ]
             },
             {
@@ -799,7 +752,23 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b63"
+                "b64"
+              ]
+            },
+            {
+              "label": "Numer/y działki/działek geodezyjnych",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b66"
               ]
             }
           ],
@@ -825,22 +794,6 @@
               "max_files": null,
               "blocks": [
                 "b66"
-              ]
-            },
-            {
-              "label": "Numer/y działki/działek geodezyjnych",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b67"
               ]
             }
           ],
@@ -1521,11 +1474,7 @@
               ]
             }
           ],
-          "show_if": {
-            "field": "Nieruchomość zaznaczona w poz. 33 jest nieruchomością, która w części stanowi nieruchomość na której zamieszkują mieszkańcy, a w części nieruchomość na której nie zamieszkują mieszkańcy, a powstają na niej odpady komunalne",
-            "equals": "TAK",
-            "negate": false
-          },
+          "show_if": null,
           "blocks": []
         },
         {
@@ -1557,51 +1506,15 @@
       ]
     },
     {
-      "title": "Dane do kontaktu",
+      "title": "Oświadczenie",
       "sections": [
         {
-          "title": "Kontakt",
+          "title": "Oświadczenie",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Nr tel./fax",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "EPUAP"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b196"
-              ]
-            },
-            {
-              "label": "Adres e-mail",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "EMAIL"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b197"
-              ]
-            },
-            {
-              "label": "Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej wskazanego w poz. 71",
+              "label": "Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są wytworzone na jej terenie bioodpady stanowiące odpady komunalne",
               "kind": "SINGLE_CHOICE",
               "required": false,
               "description": null,
@@ -1616,7 +1529,8 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b198"
+                "b80",
+                "b81"
               ]
             }
           ],
@@ -1626,10 +1540,10 @@
       ]
     },
     {
-      "title": "Informacja o załącznikach",
+      "title": "Załączniki",
       "sections": [
         {
-          "title": "Załączniki",
+          "title": "Rodzaje załączników",
           "repeating": false,
           "description": null,
           "fields": [
@@ -1691,7 +1605,7 @@
               ]
             },
             {
-              "label": "Inne: (podać jakie)",
+              "label": "Inne",
               "kind": "TEXT",
               "required": false,
               "description": null,
@@ -1714,8 +1628,8 @@
     }
   ],
   "consents": [
-    "Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są wytworzone na jej terenie bioodpady stanowiące odpady komunalne."
+    "Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej wskazanego w poz. 71"
   ],
-  "summary": "Po złożeniu deklaracji, Prezydent Miasta Gdyni weryfikuje prawidłowość wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi. W przypadku niewykonania zobowiązania, deklaracja stanowi podstawę do wystawienia tytułu wykonawczego.",
+  "summary": "Po złożeniu deklaracji, organ sprawdzi jej zgodność z przepisami i ustali wysokość miesięcznej opłaty za gospodarowanie odpadami komunalnymi. W przypadku niewykonania zobowiązania, deklaracja może być podstawą do wystawienia tytułu wykonawczego.",
   "signed": true
 }
