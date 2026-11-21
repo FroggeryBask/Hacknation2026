@@ -11,7 +11,7 @@ from formgen import pipeline
 from formgen.auth import require_jwt
 from formgen.config import Settings, get_settings
 from formgen.lint import as_dicts, lint
-from formgen.llm import LLMError, llm_status
+from formgen.llm import LLMError, llm_status, warn_if_dev_provider
 from formgen.spec import FormSpec
 from formgen.upload import UploadError
 
@@ -28,6 +28,8 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
     expose_headers=["X-Formgen-Errors", "X-Formgen-Warnings"],
 )
+
+warn_if_dev_provider(get_settings())
 
 Auth = Annotated[dict | None, Depends(require_jwt)]
 Cfg = Annotated[Settings, Depends(get_settings)]

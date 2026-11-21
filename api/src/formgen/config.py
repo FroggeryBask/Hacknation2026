@@ -2,13 +2,21 @@
 so secrets are only supplied when the container starts (task requirement)."""
 
 from functools import lru_cache
+from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="FORMGEN_", env_file=".env", extra="ignore")
+    # Later env files win: api/.env overrides the repo-root .env.local (when run from api/).
+    # Real environment variables override both.
+    model_config = SettingsConfigDict(
+        env_prefix="FORMGEN_",
+        env_file=("../.env.local", ".env"),
+        extra="ignore",
+        populate_by_name=True,
+    )
 
     # Upload limits
     max_upload_mb: float = 20.0
@@ -25,6 +33,14 @@ class Settings(BaseSettings):
     llm_timeout_s: float = 600.0
     llm_num_ctx: int = 16384
     max_pdf_pages: int = 6
+
+    # LLM provider. "eden" (Eden AI, open-weight models only) is for local development and tests only;
+    # docker-compose forces "ollama" for the delivered solution.
+    llm_provider: Literal["ollama", "eden"] = "ollama"
+    eden_base_url: str = "https://api.edenai.run/v3"
+    # Read from EDENAI_API_KEY (no prefix: the organizers' name, already in .env.local)
+    eden_api_key: SecretStr | None = Field(default=None, validation_alias="EDENAI_API_KEY")
+    eden_model: str | None = None
 
     # LibreOffice binary for legacy formats (.doc, .ods)
     soffice_bin: str = "soffice"

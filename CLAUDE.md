@@ -18,7 +18,7 @@ The task also bans LLMs available only through an API, so through Eden use ONLY 
 - Docker: official base images, pinned tags (never `latest`), non-root user, secrets only via env at runtime.
 
 ## Architecture (api/src/formgen)
-`upload.py` (name/size/MIME checks) → `extract.py` (text in reading order, or page images) → `llm.py` (Ollama, output constrained to the `FormSpec` JSON Schema) → `compiler.py` (deterministic FormSpec → COI JSON: predefined sections from the design standard, techNames, jsonata `states`, flow) → `lint.py` (rules from "Reguły techniczne"). The LLM only fills the small `spec.py` model; anything rule-based belongs in the compiler or linter, not in the prompt.
+`upload.py` (name/size/MIME checks) → `extract.py` (text in reading order, or page images) → `llm.py` (Ollama; Eden AI only in local dev; output constrained to the `FormSpec` JSON Schema) → `compiler.py` (deterministic FormSpec → COI JSON: predefined sections from the design standard, techNames, jsonata `states`, flow) → `lint.py` (rules from "Reguły techniczne"). The LLM only fills the small `spec.py` model; anything rule-based belongs in the compiler or linter, not in the prompt.
 
 ## Commands
 - `npm run check`: everything (biome, tsc, ruff + pytest for api and scripts). Add `-- --build` for a full Next build. Must pass before commit.

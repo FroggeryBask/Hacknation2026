@@ -28,6 +28,9 @@ services:
     env_file: .env
     environment:
       FORMGEN_OLLAMA_URL: http://ollama:11434
+      # Delivered solution always uses the local model; Eden AI is for local development only.
+      FORMGEN_LLM_PROVIDER: ollama
+      EDENAI_API_KEY: ""
     ports:
       - "8000:8000"
     depends_on:
@@ -40,6 +43,7 @@ services:
     env_file: .env
     environment:
       FORMGEN_API_URL: http://api:8000
+      EDENAI_API_KEY: ""
     ports:
       - "3000:3000"
     depends_on:

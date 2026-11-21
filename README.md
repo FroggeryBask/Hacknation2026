@@ -53,6 +53,8 @@ Zmienne środowiskowe API (prefiks `FORMGEN_`). Pełna lista z wartościami domy
 | `FORMGEN_MAX_UPLOAD_MB` | `20` | Maksymalny rozmiar pliku |
 | `FORMGEN_OLLAMA_URL` | `http://localhost:11434` | Adres serwera modelu |
 | `FORMGEN_LLM_MODEL` | `qwen3-vl:8b` | Model (dowolny model wizyjny z Ollama) |
+| `FORMGEN_LLM_PROVIDER` | `ollama` | `eden` włącza Eden AI, tylko lokalnie (patrz [Model językowy](#model-językowy-ollama-domyślnie-albo-eden-ai-opcjonalnie)) |
+| `FORMGEN_EDEN_MODEL` / `EDENAI_API_KEY` | brak | Model i klucz Eden AI, potrzebne tylko przy `eden` |
 | `FORMGEN_LLM_TIMEOUT_S` | `600` | Limit czasu odpowiedzi modelu |
 | `FORMGEN_MAX_PDF_PAGES` | `6` | Ile stron zeskanowanego PDF przekazać modelowi |
 | `FORMGEN_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc i .ods) |
@@ -87,19 +89,44 @@ Błędy mają postać `{"error": {"code": "...", "message": "..."}}`:
 | `415 UNSUPPORTED_FORMAT`, `MIME_MISMATCH`, `UNSUPPORTED_CONTENT` | Zły format lub zawartość niezgodna z rozszerzeniem |
 | `422 FILENAME_*` | Nazwa dłuższa niż 250 znaków albo zawiera `; : > < / \ \| ' * % $` |
 | `503 LLM_UNAVAILABLE`, `CONVERTER_MISSING` | Brak modelu albo brak LibreOffice |
+| `500 LLM_MISCONFIGURED` | `FORMGEN_LLM_PROVIDER=eden` bez `EDENAI_API_KEY` lub `FORMGEN_EDEN_MODEL` (tylko dev) |
 
 ## Development
 
-Wymagane: Node.js 22+, [uv](https://docs.astral.sh/uv/), [Ollama](https://ollama.com) i LibreOffice (do plików .doc i .ods).
+Wymagane: Node.js 22+, [uv](https://docs.astral.sh/uv/) i LibreOffice (do plików .doc i .ods). [Ollama](https://ollama.com) jest potrzebna tylko wtedy, gdy nie używasz Eden AI.
 
-```bash
-npm install
-cp .env.example .env.local          # frontend
-cp .env.example api/.env            # API (FORMGEN_AUTH_ENABLED=false do testów lokalnych)
-ollama pull qwen3-vl:8b
-cd api && uv sync && uv run uvicorn formgen.main:app --reload   # http://localhost:8000/docs
-npm run dev                                                      # http://localhost:3000
-```
+#### Pliki konfiguracyjne
+
+| Plik | Kto go czyta | Do czego |
+|---|---|---|
+| `.env.local` (katalog główny) | `npm run dev` i API uruchomione z `api/` | praca lokalna: jeden plik dla frontendu i API |
+| `.env` (katalog główny) | `docker compose` | Docker: wystarczy `FORMGEN_JWT_SECRET` |
+| `api/.env` | API uruchomione z `api/` | opcjonalnie: nadpisuje `.env.local`, trzymaj tam tylko świadome nadpisania |
+
+Pliki `.env*` są poza gitem (oprócz `.env.example`). Nie commituj ich.
+
+#### Uruchomienie lokalne
+
+1. Zainstaluj zależności:
+   ```bash
+   npm install
+   cd api && uv sync && cd ..
+   ```
+2. Skopiuj konfigurację: `cp .env.example .env.local`. W `.env.local` ustaw `FORMGEN_AUTH_ENABLED=false`, żeby testować bez tokenów.
+3. Wybierz model:
+   - **Ollama (domyślnie):** `ollama pull qwen3-vl:8b` i zostaw `FORMGEN_LLM_PROVIDER=ollama`;
+   - **Eden AI (szybciej):** w `.env.local` ustaw `FORMGEN_LLM_PROVIDER=eden`, `FORMGEN_EDEN_MODEL` i `EDENAI_API_KEY` (patrz [Model językowy](#model-językowy-ollama-domyślnie-albo-eden-ai-opcjonalnie)).
+4. Uruchom API **z katalogu `api/`** (ścieżka `../.env.local` jest liczona od bieżącego katalogu):
+   ```bash
+   cd api && uv run uvicorn formgen.main:app --reload   # http://localhost:8000/docs
+   ```
+5. Sprawdź stan: `curl http://localhost:8000/health`. Pole `llm.provider` pokazuje, który model jest używany.
+6. Opcjonalnie uruchom frontend (w drugim terminalu, z katalogu głównego): `npm run dev` (http://localhost:3000).
+7. Wyślij formularz:
+   ```bash
+   curl -i -F "file=@materialy/<katalog>/<plik>.docx" "http://localhost:8000/api/v1/forms?details=true"
+   ```
+   Przy włączonym JWT dodaj `-H "Authorization: Bearer $(cd api && uv run formgen-token)"`. Nagłówek `X-Formgen-Errors: 0` oznacza, że wynik przeszedł walidację reguł.
 
 | Polecenie | Co robi |
 |---|---|
@@ -107,6 +134,26 @@ npm run dev                                                      # http://localh
 | `cd api && uv run pytest` | Testy API, w tym porównanie z referencyjnymi JSON-ami COI |
 | `npm run smoke [url]` | Sprawdza, czy kluczowe strony frontendu odpowiadają |
 | `npx shadcn@latest add <name>` | Dodaje komponent UI |
+
+### Model językowy: Ollama (domyślnie) albo Eden AI (opcjonalnie)
+
+Domyślnie API używa lokalnego modelu przez Ollamę (`FORMGEN_LLM_PROVIDER=ollama`). Tak działa oddawane rozwiązanie i nie trzeba nic ustawiać.
+
+Na czas hackatonu można włączyć Eden AI: model open-weight w chmurze organizatorów odpowiada w kilka sekund, a lokalna Ollama na CPU potrzebuje kilku minut. To tylko tryb do pracy lokalnej.
+
+**Włączenie.** Dopisz do `api/.env` albo do `.env.local` w katalogu głównym:
+
+```bash
+FORMGEN_LLM_PROVIDER=eden
+FORMGEN_EDEN_MODEL=deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct  # odpowiednik w Ollamie: qwen3-vl:30b
+EDENAI_API_KEY=...                                          # klucz zespołu, tylko po stronie serwera
+```
+
+Uruchom API (`cd api && uv run uvicorn formgen.main:app --reload`). `GET /health` pokaże `"provider": "eden"` i `"configured": true`, a w logu pojawi się ostrzeżenie o trybie deweloperskim. Bez klucza lub modelu żądania kończą się błędem `LLM_MISCONFIGURED`.
+
+**Wyłączenie.** Usuń `FORMGEN_LLM_PROVIDER` albo ustaw go na `ollama` i zrestartuj API. Potrzebny jest wtedy model w Ollamie: `ollama pull qwen3-vl:8b`.
+
+Kolejność: `api/.env` nadpisuje `.env.local`, a zmienne środowiskowe nadpisują oba pliki. `docker compose` zawsze wymusza Ollamę (`FORMGEN_LLM_PROVIDER=ollama` i pusty `EDENAI_API_KEY`), więc Eden nie trafi do oddawanego rozwiązania. Przez Eden używaj wyłącznie modeli open-weight, które da się uruchomić w Ollamie (bez GPT, Gemini, Claude).
 
 Struktura repozytorium:
 - `api/`: rozwiązanie (Python 3.14, FastAPI),
