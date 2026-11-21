@@ -97,21 +97,39 @@ STANDARD_SECTION = re.compile(
 )
 
 
+ENTITY_ID = re.compile(r"\b(NIP|REGON|KRS)\b")
+
+
 def drop_standard_sections(spec: FormSpec) -> tuple[FormSpec, list[str]]:
     """Canon, second rule: sections about the applicant, proxy or contact data are left to the compiler's
-    predefined sections. Deterministic (by page and section title); a page left empty is dropped too."""
+    predefined sections. Deterministic (by page and section title); a page left empty is dropped too.
+
+    What they asked for still matters: NIP/REGON/KRS among the applicant's fields means the applicant may be
+    a company or institution, so `applicant.entity` is set (and `entity_nip_only` when only NIP is asked,
+    like reference form 5), whatever the model said."""
     notes: list[str] = []
     pages = []
+    dropped_labels: list[str] = []
     for page in spec.pages:
         if STANDARD_SECTION.search(page.title):
             notes.append(f"Strona „{page.title}” jest w części standardowej formularza (pominięta).")
+            dropped_labels += [f.label for s in page.sections for f in s.fields]
             continue
         sections = []
         for section in page.sections:
             if STANDARD_SECTION.search(section.title):
                 notes.append(f"Sekcja „{section.title}” jest w części standardowej formularza (pominięta).")
+                dropped_labels += [f.label for f in section.fields]
             else:
                 sections.append(section)
         if sections:
             pages.append(page.model_copy(update={"sections": sections}))
-    return spec.model_copy(update={"pages": pages}), notes
+    update: dict = {"pages": pages}
+    ids = {m.group(1) for label in dropped_labels for m in ENTITY_ID.finditer(label)}
+    if ids and not spec.applicant.entity:
+        nip_only = ids == {"NIP"}
+        update["applicant"] = spec.applicant.model_copy(update={"entity": True, "entity_nip_only": nip_only})
+        notes.append(
+            f"Formularz pyta o {', '.join(sorted(ids))} wnioskodawcy: wnioskodawcą może być firma lub instytucja."
+        )
+    return spec.model_copy(update=update), notes

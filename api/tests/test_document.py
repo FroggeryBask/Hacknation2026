@@ -153,3 +153,27 @@ def test_standard_sections_are_left_to_the_compiler(nadplata_spec):
     assert notes[0] == "Strona „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
     assert len(notes) == 2
     assert drop_standard_sections(nadplata_spec) == (nadplata_spec, [])
+
+
+def test_applicant_ids_mean_a_company_may_apply():
+    """Form 2: 'Nazwa / Imię i nazwisko' + NIP in the applicant section, model said entity=false."""
+    from autoformularz.check import drop_standard_sections
+
+    def spec_with(*labels):
+        fields = [FieldSpec(label=label, kind=Kind.TEXT) for label in labels]
+        page = PageSpec(
+            title="Dane wnioskodawcy", sections=[SectionSpec(title="Dane identyfikacyjne", fields=fields)]
+        )
+        rest = PageSpec(
+            title="Opłata",
+            sections=[SectionSpec(title="Opłata", fields=[FieldSpec(label="Kwota", kind=Kind.NUMBER)])],
+        )
+        return FormSpec(title="Wniosek", authority_name="Urząd", pages=[page, rest])
+
+    clean, notes = drop_standard_sections(spec_with("Nazwa / Imię i nazwisko", "NIP"))
+    assert (clean.applicant.entity, clean.applicant.entity_nip_only) == (True, True)
+    assert notes[-1] == "Formularz pyta o NIP wnioskodawcy: wnioskodawcą może być firma lub instytucja."
+    clean, _ = drop_standard_sections(spec_with("Nazwa", "NIP", "REGON", "Numer KRS"))
+    assert (clean.applicant.entity, clean.applicant.entity_nip_only) == (True, False)
+    clean, _ = drop_standard_sections(spec_with("Imię i nazwisko", "PESEL"))
+    assert clean.applicant.entity is False
