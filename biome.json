@@ -14,7 +14,8 @@
       "!dist",
       "!build",
       "!materialy",
-      "!api"
+      "!api",
+      "!wyniki"
     ]
   },
   "formatter": {

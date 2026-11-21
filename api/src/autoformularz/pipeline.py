@@ -26,11 +26,12 @@ class Result:
     coverage: Coverage | None = None
 
 
-def from_spec(spec: FormSpec) -> Result:
+def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
+    """Canon, then compile. `document` (the source file) adds verbatim legal text; None for /compile."""
     # Canon: a model's repetitions and copies of the predefined part never reach the form.
     spec, repeated = dedupe(spec)
     spec, standard = drop_standard_sections(spec)
-    form, warnings = compile_form(spec)
+    form, warnings = compile_form(spec, document)
     return Result(form=form, spec=spec, issues=lint(form), notes=repeated + standard + warnings)
 
 
@@ -39,7 +40,7 @@ def from_file(name: str | None, data: bytes, settings: Settings, llm=generate_sp
     ocr = ocr_from(settings.ocr_bin, settings.ocr_lang, settings.tessdata_dir)
     document = extract(kind, data, soffice=settings.soffice_bin, max_pages=settings.max_pdf_pages, ocr=ocr)
     spec = llm(document, settings)
-    result = from_spec(spec)
+    result = from_spec(spec, document if settings.copy_source_text else None)
     result.notes = document.notes + result.notes
     result.source_format = kind.value
     result.document = document
