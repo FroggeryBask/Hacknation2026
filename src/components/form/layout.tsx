@@ -3,9 +3,8 @@
 import { cn } from "cn";
 import { Check, Plus, Trash2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import Link from "next/link";
 import { type ReactNode, useState } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { FormProvider, useForm, useFormApi } from "./form-context";
 
 /* ------------------------------------------------------------------ */
@@ -121,10 +120,13 @@ export function Stepper({
   steps,
   current,
   label = "Kroki formularza",
+  onSelect,
 }: {
   steps: string[];
   current: number;
   label?: string;
+  /** Makes every step a button that opens it (structure preview). */
+  onSelect?: (index: number) => void;
 }) {
   return (
     <nav aria-label={label}>
@@ -135,12 +137,8 @@ export function Stepper({
         {steps.map((s, i) => {
           const done = i < current;
           const active = i === current;
-          return (
-            <li
-              key={s}
-              aria-current={active ? "step" : undefined}
-              className="flex min-w-0 flex-1 flex-col gap-2"
-            >
+          const body = (
+            <>
               <span
                 className={cn(
                   "h-1 rounded-full bg-border",
@@ -167,6 +165,26 @@ export function Stepper({
                 <span className="min-w-0 break-words">{s}</span>
                 {done && <span className="sr-only">(ukończony)</span>}
               </span>
+            </>
+          );
+          return (
+            <li
+              key={s}
+              aria-current={active ? "step" : undefined}
+              className="flex min-w-0 flex-1"
+            >
+              {onSelect ? (
+                <button
+                  type="button"
+                  onClick={() => onSelect(i)}
+                  aria-label={`Krok ${i + 1}: ${s}`}
+                  className="group flex min-w-0 flex-1 cursor-pointer flex-col gap-2 rounded-xs pb-1 text-left outline-none hover:[&>span:last-child]:underline focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  {body}
+                </button>
+              ) : (
+                <div className="flex min-w-0 flex-1 flex-col gap-2">{body}</div>
+              )}
             </li>
           );
         })}
@@ -176,25 +194,20 @@ export function Stepper({
 }
 
 /* ------------------------------------------------------------------ */
-/* Bottom navigation: Przerwij wypełnianie | Wstecz | Dalej            */
+/* Bottom navigation: Wstecz | Dalej                                  */
 /* ------------------------------------------------------------------ */
 
 export function FormNav({
   onBack,
   onNext,
   nextLabel = "Dalej",
-  abortHref = "/design-system",
 }: {
   onBack?: () => void;
   onNext: () => void;
   nextLabel?: string;
-  abortHref?: string;
 }) {
   return (
-    <div className="flex flex-wrap-reverse items-center justify-between gap-3 pt-2">
-      <Link href={abortHref} className={buttonVariants({ variant: "link" })}>
-        Przerwij wypełnianie
-      </Link>
+    <div className="flex items-center justify-end gap-3 pt-2">
       <div className="flex gap-3">
         {onBack && (
           <Button variant="outline" onClick={onBack}>
@@ -222,12 +235,12 @@ function PagedForm({
   title,
   pages,
   submitLabel,
-  abortHref,
+  freeNavigation,
 }: {
   title: string;
   pages: FormPage[];
   submitLabel: string;
-  abortHref?: string;
+  freeNavigation?: boolean;
 }) {
   const form = useFormApi();
   const [page, setPage] = useState(0);
@@ -273,7 +286,11 @@ function PagedForm({
       <h1 id="form-title" className="text-2xl font-bold leading-tight">
         {title}
       </h1>
-      <Stepper steps={pages.map((p) => p.title)} current={page} />
+      <Stepper
+        steps={pages.map((p) => p.title)}
+        current={page}
+        onSelect={freeNavigation ? go : undefined}
+      />
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={page}
@@ -289,11 +306,10 @@ function PagedForm({
         </motion.div>
       </AnimatePresence>
       <FormNav
-        abortHref={abortHref}
         onBack={page > 0 ? () => go(page - 1) : undefined}
         nextLabel={last ? submitLabel : "Dalej"}
         onNext={() => {
-          if (!form.validate()) return;
+          if (!freeNavigation && !form.validate()) return;
           if (last) setSent(true);
           else go(page + 1);
         }}
@@ -307,13 +323,14 @@ export function FormShell({
   pages,
   submitLabel = "Przejdź do podpisu",
   initialValues,
-  abortHref,
+  freeNavigation,
 }: {
   title: string;
   pages: FormPage[];
   submitLabel?: string;
   initialValues?: Parameters<typeof useForm>[0];
-  abortHref?: string;
+  /** Any step can be opened and "Dalej" does not check required fields (structure preview). */
+  freeNavigation?: boolean;
 }) {
   const form = useForm(initialValues);
   return (
@@ -324,7 +341,7 @@ export function FormShell({
             title={title}
             pages={pages}
             submitLabel={submitLabel}
-            abortHref={abortHref}
+            freeNavigation={freeNavigation}
           />
         </FormProvider>
       </div>

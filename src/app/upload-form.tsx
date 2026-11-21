@@ -615,9 +615,36 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                         <Download data-icon="inline-start" aria-hidden />
                         Pobierz JSON
                       </Button>
-                      <Button variant="outline" onClick={reset}>
-                        Dodaj inny plik
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger
+                          render={
+                            <Button variant="destructive">
+                              Przeanalizuj inny formularz
+                            </Button>
+                          }
+                        />
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Czy na pewno chcesz przeanalizować inny formularz?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Utworzony formularz i jego podgląd zostaną
+                              utracone. Jeśli chcesz go zachować, najpierw
+                              pobierz JSON.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Nie, wróć</AlertDialogCancel>
+                            <AlertDialogAction
+                              variant="destructive"
+                              onClick={reset}
+                            >
+                              Tak, przeanalizuj inny
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </FormSection>
                 </StepPanel>
@@ -637,7 +664,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
             <p className="mx-auto w-full max-w-2xl px-4 pt-8 text-sm font-bold uppercase tracking-wide text-muted-foreground">
               Podgląd e-formularza
             </p>
-            <CoiFormView key={run} form={result.form} abortHref="/" />
+            <CoiFormView key={run} form={result.form} />
           </motion.div>
         )}
       </div>

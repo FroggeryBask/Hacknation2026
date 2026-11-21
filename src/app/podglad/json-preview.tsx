@@ -82,7 +82,7 @@ export function JsonPreview({ samples }: { samples: Sample[] }) {
           )}
         </div>
       </div>
-      <CoiFormView key={current.key} form={current.form} abortHref="/podglad" />
+      <CoiFormView key={current.key} form={current.form} />
     </div>
   );
 }
