@@ -380,6 +380,41 @@ predefiniowane („Dane”, „Kontakt i zgody”, „Strona końcowa”), a sek
 z formularza (sekcje standardowe dodaje kompilator). Skaner bezpieczeństwa nie zgłosił nic w żadnym wyniku.
 Propozycje słowników: rasy psów (7) i dyscypliny sportowe (9).
 
+## Dowód spełnienia wymagań
+
+`api/tests/test_wymagania.py` zawiera 13 testów. Każdy odpowiada jednemu punktowi treści zadania i jest nazwany
+jego numerem. Testy nie wołają modelu ani sieci: sprawdzają materiały COI, wyniki powyżej i kod usługi, więc
+trwają kilka sekund i nic nie kosztują.
+
+```bash
+npm run proof    # albo: cd api && uv run pytest tests/test_wymagania.py -v
+```
+
+### Test wszystkich wymagań na żywo
+
+```bash
+npm run proof:live:all
+```
+
+Ta komenda najpierw przetwarza usługą z prawdziwym modelem wszystkie 9 materiałów, z tych samych plików
+i w tych samych formatach co `wyniki/`. Wyniki zapisuje w katalogu tymczasowym i na nich, zamiast na
+zapisanych plikach, uruchamia te same 13 testów. Trwa kilkadziesiąt sekund, bo przetwarza kilka plików
+(3 naraz). Potrzebuje `EDENAI_API_KEY` w `.env` i kosztuje ok. 0,01 USD. Przebieg z 2026-11-22: 13/13
+w 40 s.
+
+Test na żywo (`api/tests/test_na_zywo.py`) wysyła dowolny plik przez całą usługę z prawdziwym modelem, tak
+jak przy sprawdzaniu na nowych plikach (pkt 6 zadania). Sprawdza klucze jak w referencjach COI, 0 błędów reguł,
+stronę o sprawie, odwołania tylko do fragmentów dokumentu i czysty skan bezpieczeństwa, a potem wypisuje
+podsumowanie i ścieżkę wynikowego JSON. Jedno wywołanie modelu (materiał 1: ok. 3 s, 0,0002 USD); bez opcji
+`--na-zywo` jest pomijany.
+
+```bash
+npm run proof:live                                   # materiał 1
+npm run proof:live -- --plik "ścieżka/do/wniosku.pdf"  # dowolny plik
+```
+
+Pozostałe testy w `api/tests/` (ok. 240) sprawdzają szczegóły każdego etapu.
+
 ## Co jeszcze robi rozwiązanie
 
 Rozszerzenia z punktu 3.3 treści zadania:

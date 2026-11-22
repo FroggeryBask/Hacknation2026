@@ -10,8 +10,11 @@
     "format": "biome check --write .",
     "check": "uv run --project scripts python scripts/check.py",
     "smoke": "uv run --project scripts python scripts/smoke_test.py",
+    "proof": "uv run --project api pytest api/tests/test_wymagania.py -v --no-header -p no:warnings",
+    "proof:live": "uv run --project api pytest api/tests/test_na_zywo.py -v -s --no-header -p no:warnings --na-zywo",
+    "proof:live:all": "uv run --project api pytest api/tests/test_wymagania.py -v -s --no-header -p no:warnings --na-zywo-wszystko",
     "prepare": "lefthook install || true",
-    "slides": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --pdf --allow-local-files -o docs/prezentacja.pdf",
+    "slides": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --pdf --allow-local-files -o docs/prezentacja-tryglow.pdf",
     "slides:png": "npx -y @marp-team/marp-cli@4.5.1 docs/prezentacja.md --images png --allow-local-files -o docs/slajdy/slajd.png"
   },
   "dependencies": {

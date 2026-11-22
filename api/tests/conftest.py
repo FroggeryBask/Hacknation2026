@@ -67,3 +67,14 @@ def nadplata_spec() -> FormSpec:
             )
         ],
     )
+
+
+def pytest_addoption(parser):
+    """Test na żywo (tests/test_na_zywo.py): prawdziwy model, płatne wywołanie. Bez tych opcji jest pomijany."""
+    parser.addoption("--na-zywo", action="store_true", help="uruchom test z prawdziwym modelem")
+    parser.addoption("--plik", default=None, help="plik formularza do testu na żywo (domyślnie materiał 1)")
+    parser.addoption(
+        "--na-zywo-wszystko",
+        action="store_true",
+        help="test_wymagania.py na świeżych wynikach: 9 materiałów przez model (płatne), nie na wyniki/",
+    )
