@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from autoformularz import dictionaries, metrics, progress
+from autoformularz import dictionaries, metrics, progress, safety
 from autoformularz import llm as llm_module
 from autoformularz import presort as presort_step
 from autoformularz.check import (
@@ -58,7 +58,7 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     spec, small = merge_small_pages(spec)  # last: dropped fields may leave a page almost empty
     form, warnings = compile_form(spec, document)
     progress.stage("Sprawdzanie reguł technicznych")
-    issues = lint(form)
+    issues = lint(form) + safety.scan(form)  # SAFETY_* warnings: content smuggled in by the document
     errors = sum(i.level == "error" for i in issues)
     progress.item(f"Błędy: {errors}, ostrzeżenia: {len(issues) - errors}")
     return Result(

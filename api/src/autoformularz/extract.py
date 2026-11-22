@@ -159,6 +159,7 @@ def docx_text(data: bytes) -> str:
     Footnote and endnote marks get their numbers and the notes' text comes at the end, as on a printed
     page (`_number_note_references`, `_note_lines`)."""
     body = docx.Document(io.BytesIO(data)).element.body
+    _drop_hidden_runs(body)
     notes = _number_note_references(body)
     items: list[str | Placed] = []
     for el in body:
@@ -167,6 +168,18 @@ def docx_text(data: bytes) -> str:
         elif el.tag == f"{W}tbl":
             items.extend(_table_rows(el))
     return "\n".join(_dedupe(_join_placed(items)) + _note_lines(data, notes))
+
+
+def _drop_hidden_runs(body) -> None:
+    """Hidden text (Word "Ukryty", `w:vanish`) is not on the printed form, so nobody filling it in sees it;
+    it is also a way to slip instructions to the model (prompt injection). It is removed before reading."""
+    for vanish in list(body.iter(f"{W}vanish")):
+        if (vanish.get(f"{W}val") or "true").lower() in ("0", "false", "off"):
+            continue
+        props = vanish.getparent()
+        run = props.getparent() if props is not None else None
+        if props is not None and props.tag == f"{W}rPr" and run is not None and run.tag == f"{W}r":
+            run.getparent().remove(run)
 
 
 NOTE_PARTS = {f"{W}footnoteReference": "word/footnotes.xml", f"{W}endnoteReference": "word/endnotes.xml"}

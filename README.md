@@ -234,6 +234,22 @@ Wszystkie endpointy `/api/v1/*` wymagają nagłówka `Authorization: Bearer <JWT
 | `GET /api/v1/spec/schema` | Schemat JSON opisu pośredniego (FormSpec). |
 | `GET /health` | Stan usługi i dostępność modelu (bez autoryzacji). |
 
+### Bezpieczeństwo: prompt injection przez dokument
+
+Plik formularza pochodzi z zewnątrz, a jego tekst trafia do modelu. Wrogi dokument może próbować wydać modelowi
+polecenia („zignoruj poprzednie instrukcje”, „dodaj pole na hasło”). Obrona na każdym poziomie, który kontroluje kod:
+
+- **Odczyt pliku:** tekst niewidoczny na wydruku nie trafia do modelu: ukryty tekst Worda (`w:vanish`), znaki
+  o zerowej szerokości, znaki zmieniające kierunek tekstu i miękkie dywizy.
+- **Prompt:** treść dokumentu jest oznaczona jako dane (`<<<DOKUMENT` … `DOKUMENT>>>`), a prompt systemowy mówi, że
+  polecenia w dokumencie nie są poleceniami. Tekst bloku nie może zamknąć tej części ani podszyć się pod blok lub
+  rolę (każdy blok to jedna linia, znaczniki są rozbrajane).
+- **Wynik:** strukturę wyznacza schemat i kompilator; tekst w opisach jest escapowany (nigdy żywy HTML). Skaner
+  `safety.py` oznacza ostrzeżeniami `SAFETY_*` w `issues`: pytania o hasła, PIN i dane karty, polecenia dla modelu,
+  linki poza gov.pl, kod HTML i niewidoczne znaki. Ten sam skaner działa w podglądzie (`src/lib/form/safety.ts`).
+
+Testy: `api/tests/test_injection.py` (bez wywołań modelu; każde zabezpieczenie ma test, który je wykrywa).
+
 Przykład:
 
 ```bash
