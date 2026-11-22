@@ -385,6 +385,7 @@ def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) 
       condition refers to it.
     A section left without fields is dropped."""
     title = _words(spec.title)
+    consent_words = [_words(c) for c in spec.consents]
     referred = {
         _key(c.field)
         for p in spec.pages
@@ -397,6 +398,13 @@ def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) 
     def drop(f: FieldSpec, section: str) -> bool:
         if f.blocks and all(b in paper for b in f.blocks):
             notes.append(f"Pominięto pole „{f.label}” w sekcji „{section}”: z tekstu tylko na papierze.")
+            return True
+        # A statement written both as a consent and as a field (form 7: "Oświadczam, że psy nie będą
+        # wykorzystywane do polowań" twice; the field's condition pointed to itself).
+        label_words = _words(f.label)
+        choice = f.kind in (Kind.SINGLE_CHOICE, Kind.MULTI_CHOICE) and len(label_words) >= 3
+        if choice and any(len(label_words & c) >= 0.8 * len(label_words) for c in consent_words):
+            notes.append(f"Pominięto pole „{f.label}”: to oświadczenie jest w sekcji zgód.")
             return True
         if f.kind is Kind.SINGLE_CHOICE and len(f.options) == 1 and _key(f.label) not in referred:
             option = _words(f.options[0])

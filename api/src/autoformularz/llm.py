@@ -202,7 +202,7 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
         "think": False,
         "keep_alive": settings.llm_keep_alive,
         "options": {
-            "temperature": 0,
+            "temperature": settings.llm_temperature,
             "num_ctx": settings.llm_num_ctx,
             "num_predict": settings.llm_max_tokens,
         },
@@ -368,7 +368,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
     url = f"{settings.eden_base_url.rstrip('/')}/chat/completions"
     payload = {
         "model": settings.eden_model,
-        "temperature": 0,
+        "temperature": settings.llm_temperature,
         "max_tokens": settings.llm_max_tokens,
         "messages": _eden_messages(messages, images),
         "stream": True,

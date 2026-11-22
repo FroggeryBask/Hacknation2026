@@ -319,6 +319,19 @@ def footnotes(blocks: list[Block]) -> Footnotes:
         body = fold(FOOTNOTE_DEF.sub("", plain(" ".join(b.text for b in run)), count=1))
         defs.append((m.group(1), run, body))
         n = k
+    # OCR reads a small raised "1)" as a closing quote glued to the word ("przy ulicy”", "e-mail)""). With
+    # an optional-data footnote whose number has no mark in the text, such quotes are taken as its marks
+    # (a quote opened on the same line, „Nazwa”, is a real quote).
+    optional_numbers = [d[0] for d in defs if FOOTNOTE_OPTIONAL.match(d[2])]
+    if len(optional_numbers) == 1 and optional_numbers[0] not in marks:
+        for b in blocks:
+            text = plain(b.text)
+            if FOOTNOTE_DEF.match(text) or "„" in text:
+                continue
+            for cell in b.text.split("|"):
+                for quote in re.finditer(r"(?<=[^\W\d_)])[”\"]|(?<=\))[”\"]", cell):
+                    before = re.split(r"[_…]{2,}|\.{3,}", cell[: quote.start()])[-1]
+                    marks.setdefault(optional_numbers[0], []).append((b, before))
     for number, run, body in defs:
         optional = bool(FOOTNOTE_OPTIONAL.match(body)) and number in marks
         if optional:
@@ -382,7 +395,7 @@ def _standard_label(text: str) -> bool:
     t = re.sub(r"[_…]{2,}|\.{3,}", " ", text)  # "Imię ………": the label with its hand-written line
     t = re.sub(r"\([^)]*(dot\.|dotyczy|opcjonaln|nieobowiazk)[^)]*\)", " ", t)  # "(dot. tylko osób prawnych)"
     t = ROLE_WORDS.sub(" ", norm(t))
-    t = re.sub(r"[()\[\]:;*|]|\.(?=\s|$)", " ", t)
+    t = re.sub(r"[()\[\]:;*|”\"]|\.(?=\s|$)", " ", t)  # ”: OCR's reading of a raised "1)"
     parts = [p.strip(" ,.-") for p in re.split(r"/|,| i (?=[a-z])| lub | albo | oraz ", t)]
     parts = [p for p in parts if p]
     if not parts:
@@ -831,6 +844,9 @@ def apply(spec: FormSpec, p: Presorted) -> FormSpec:
     pages = drop_paper_only_fields(spec.model_copy(update={"pages": pages}), paper)[0].pages
     pages = drop_ungrounded(pages, p.texts)
     update: dict = {"block_roles": [*p.roles, *model_roles], "pages": pages}
+    consents = grounded_consents(spec.consents, p.texts)
+    if consents != spec.consents:
+        update["consents"] = consents
     applicant: dict = {}
     if p.entity and not spec.applicant.entity:
         applicant.update(entity=True, entity_nip_only=p.nip_only)
@@ -888,6 +904,23 @@ def drop_ungrounded(pages: list[PageSpec], texts: dict[str, str]) -> list[PageSp
         ]
         if sections:
             out.append(page.model_copy(update={"sections": sections}))
+    return out
+
+
+def grounded_consents(consents: list[str], texts: dict[str, str]) -> list[str]:
+    """Statements the paper has. The model wrote the prompt's example "Dane w formularzu są zgodne z
+    prawdą" for forms without any statement (forms 2, 3). A statement stays when most of its words (first
+    4 letters, words from 4 letters) occur in the document; with no document text (scan without OCR)
+    nothing can be told, so all stay."""
+    if not texts:
+        return consents
+    source = set().union(*(set(re.findall(r"[a-z]{4,}", fold(t))) for t in texts.values()))
+    source = {w[:4] for w in source}
+    out = []
+    for c in consents:
+        words = {w[:4] for w in re.findall(r"[a-z]{4,}", fold(c))} - {"oswi", "wyra", "zgod"}
+        if not words or len(words & source) >= 0.6 * len(words):
+            out.append(c)
     return out
 
 

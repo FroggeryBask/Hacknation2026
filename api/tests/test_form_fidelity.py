@@ -294,3 +294,28 @@ def test_template_sections_after_the_form_stop_the_stream():
     out, _ = drop_paper_only_fields(spec)
     titles = [s.title for p in out.pages for s in p.sections]
     assert titles[:2] == ["Opłata skarbowa", "Uzasadnienie"] and "Podpis" not in titles
+
+
+def test_scan_of_material_1_keeps_street_and_precinct():
+    """OCR's second (sparse) pass restores the words after dotted leaders, as the PDF reads them."""
+    import subprocess
+
+    import pytest
+
+    from autoformularz.config import Settings
+    from autoformularz.ocr import ocr_from
+
+    s = Settings()
+    ocr = ocr_from(s.ocr_bin, s.ocr_lang, s.tessdata_dir)
+    if ocr is None:
+        pytest.skip("brak Tesseracta")
+    langs = [ocr.binary, "--list-langs"] + (["--tessdata-dir", ocr.tessdata_dir] if ocr.tessdata_dir else [])
+    if "pol" not in subprocess.run(langs, capture_output=True, text=True).stdout.split():
+        pytest.skip("brak polskiego modelu Tesseracta (pol.traineddata)")
+    path = material("1. */Wniosek o ustalenie numeru porządkowego nieruchomości.jpg")
+    data = path.read_bytes()
+    p = presort(extract(validate_upload(path.name, data, 50 * 2**20), data, ocr=ocr))
+    seen = " ".join(b.text for b in p.model_doc.blocks)
+    assert "przy ulicy" in seen and "w obrębie" in seen
+    assert p.entity
+    assert ["przy ulicy"] in p.optional.values()  # OCR's quote for the raised "1)"
