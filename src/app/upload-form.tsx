@@ -16,6 +16,7 @@ import {
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { AiIcon } from "@/components/form/ai-icon";
+import { ClauseContext, clauseLines } from "@/components/form/clause";
 import { CoiFormView } from "@/components/form/coi-form";
 import { FieldError, InfoSection } from "@/components/form/fields";
 import { FormSection, Stepper } from "@/components/form/layout";
@@ -52,7 +53,16 @@ type Issue = {
   message: string;
   path: string;
 };
-type Result = { form: CoiForm; issues: Issue[]; notes: string[] };
+type Result = {
+  form: CoiForm;
+  issues: Issue[];
+  notes: string[];
+  // `?details=true`: source blocks and the model's spec (roles mark the GDPR clause).
+  document?: { blocks: { id: string; text: string }[] };
+  spec?: {
+    block_roles?: { block: string; to?: string | null; role: string }[];
+  };
+};
 /** A pipeline stage, or what the model or the code found in it (api progress.py). */
 type Progress = { kind: "stage" | "item"; text: string };
 type Job = {
@@ -419,6 +429,11 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
   // Content the model may have copied from a hostile document (safety.ts).
   const findings = useMemo(
     () => (result ? scanForm(result.form) : []),
+    [result],
+  );
+  // The information clause cut from the document: shown behind the consent's link.
+  const clause = useMemo(
+    () => clauseLines(result?.document?.blocks, result?.spec?.block_roles),
     [result],
   );
   const errors = result?.issues.filter((i) => i.level === "error") ?? [];
@@ -788,7 +803,9 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
               </Button>
             </fieldset>
             {view === "form" ? (
-              <CoiFormView key={run} form={result.form} />
+              <ClauseContext.Provider value={clause}>
+                <CoiFormView key={run} form={result.form} />
+              </ClauseContext.Provider>
             ) : (
               <div className="mx-auto w-full max-w-2xl px-4 py-6">
                 <JsonView data={result.form} />
