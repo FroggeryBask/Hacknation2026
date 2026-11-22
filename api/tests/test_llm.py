@@ -25,7 +25,7 @@ def eden(**kw) -> Settings:
     base = {
         "llm_provider": "eden",
         "eden_api_key": KEY,
-        "eden_model": "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct",
+        "eden_model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
     }
     return Settings(_env_file=None, **(base | kw))
 
@@ -72,7 +72,7 @@ def test_default_provider_is_eden(monkeypatch):
         monkeypatch.delenv(name, raising=False)
     s = Settings(_env_file=None)
     assert s.llm_provider == "eden"
-    assert s.eden_model == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"  # open-weight, the team's model
+    assert s.eden_model == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash"  # open-weight, the team's model
     assert s.llm_max_tokens == 12000
 
 
@@ -90,7 +90,7 @@ def test_eden_request_shape(post, nadplata_spec):
     assert call["url"].endswith("/chat/completions")
     assert call["headers"]["Authorization"] == f"Bearer {KEY}"
     body = call["json"]
-    assert body["model"] == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+    assert body["model"] == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash"
     assert body["temperature"] == 0
     assert body["response_format"]["type"] == "json_schema"
     assert body["response_format"]["json_schema"]["schema"] == model_schema(llm.model_limits(d))
@@ -511,10 +511,13 @@ def test_cancel_stops_the_stream(post, nadplata_spec):
         generate_spec(doc(text="x"), eden())
 
 
+QWEN = "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+
+
 def test_eden_thinking_off(post, nadplata_spec):
-    """Like `think: false` for Ollama: reasoning_effort none and the Qwen3 /no_think switch."""
+    """Like `think: false` for Ollama: reasoning_effort none and, for Qwen, the Qwen3 /no_think switch."""
     rec = post(completion(spec_json(nadplata_spec)))
-    generate_spec(doc(text="Wniosek", images=[PNG]), eden())
+    generate_spec(doc(text="Wniosek", images=[PNG]), eden(eden_model=QWEN))
     body = rec.calls[0]["json"]
     assert body["reasoning_effort"] == "none"
     user = body["messages"][-1]["content"]
@@ -523,10 +526,19 @@ def test_eden_thinking_off(post, nadplata_spec):
     assert body["messages"][0]["role"] == "system" and "/no_think" not in body["messages"][0]["content"]
 
 
+def test_default_model_gets_reasoning_effort_only(post, nadplata_spec):
+    """DeepSeek has no /no_think switch: the text would only be noise in the prompt."""
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="Wniosek"), eden())
+    body = rec.calls[0]["json"]
+    assert body["model"] == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash" and body["reasoning_effort"] == "none"
+    assert "/no_think" not in body["messages"][-1]["content"]
+
+
 def test_eden_reasoning_refused_retries_without_it(post, nadplata_spec):
     refused = httpx.Response(400, json={"error": "Unsupported parameter: reasoning_effort"})
     rec = post(refused, completion(spec_json(nadplata_spec)))
-    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+    assert generate_spec(doc(text="x"), eden(eden_model=QWEN)) == nadplata_spec
     assert "reasoning_effort" in rec.calls[0]["json"] and "reasoning_effort" not in rec.calls[1]["json"]
     assert rec.calls[1]["json"]["messages"][-1]["content"].endswith("/no_think")  # the switch stays
 

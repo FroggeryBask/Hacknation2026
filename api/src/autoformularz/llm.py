@@ -49,6 +49,10 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
 
 `pages` to strony dotyczące przedmiotu sprawy. Zasady:
 - Grupuj pola tematycznie w sekcje. Strona ma krótki tytuł opisujący temat (np. „Informacje o budynku”).
+- Stron jest mało: strona to etap wypełniania z kilkoma sekcjami, nie jedna sekcja z druku. Dane kilku osób
+  (np. drugi rodzic, małżonek, inny członek rodziny) to osobne sekcje JEDNEJ strony; pojedyncze pole
+  (np. „Uwagi”) dołącz do sąsiedniej sekcji. Sekcję, którą wypełnia się tylko w pewnym przypadku
+  („jeśli występujesz o opiekę nad dzieckiem”, „nie mam małżonka”), pokaż przez `show_if`.
 - Każdą stronę, sekcję i pole wpisz tylko raz. Nie powtarzaj stron ani sekcji. Gdy opiszesz wszystkie pola
   formularza, zakończ JSON. Nie każdy blok musi trafić do `pages`: pouczenia, objaśnienia, podstawa prawna i
   klauzula RODO idą tylko do `block_roles`, nigdy jako sekcje ani pola INFO.
@@ -58,7 +62,7 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
   Tytuł wniosku i zdanie prośby („Wnoszę o…”, „Proszę o…”) nie są polami. Nie dodawaj pola na to, o co
   wnioskodawca prosi urząd (np. numer lub decyzję, którą urząd dopiero wyda), ani pól, o które druk nie pyta.
 - Typ pola: TEXT krótki tekst; LONG_TEXT opis lub uzasadnienie; NUMBER tylko liczby (kwoty, liczby osób);
-  DATE daty; SINGLE_CHOICE jedna z kilku opcji (kratki do zaznaczenia jednej odpowiedzi); MULTI_CHOICE wiele
+  DATE data; DATE_RANGE okres od–do (np. „od dnia … do dnia”, „daty od–do”); SINGLE_CHOICE jedna z kilku opcji (kratki do zaznaczenia jednej odpowiedzi); MULTI_CHOICE wiele
   opcji; SELECT jedna z wielu (>5) opcji; FILE załączniki wymienione w formularzu; INFO stała informacja.
 - Etykiety pisz prostym językiem, bez form zależnych od płci, bez dwukropków i wielokropków.
 - `required` wpisz w KAŻDYM polu: false dla danych opcjonalnych (np. „jeśli posiada”, „nr lokalu”, „uwagi”) i dla wszystkiego,
@@ -449,7 +453,12 @@ def _call_eden(
         "model": settings.eden_model,
         "temperature": 0,
         "max_tokens": settings.llm_max_tokens,
-        "messages": _eden_messages(messages, images, no_think=thinking_off(settings)),
+        # /no_think is a Qwen3 switch; other models (DeepSeek) only get reasoning_effort
+        "messages": _eden_messages(
+            messages,
+            images,
+            no_think=thinking_off(settings) and "qwen" in (settings.eden_model or "").lower(),
+        ),
         "stream": True,
         "stream_options": {"include_usage": True},
         "response_format": {

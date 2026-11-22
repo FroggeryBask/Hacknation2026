@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     # Read from EDENAI_API_KEY (no prefix: the organizers' name, already in .env.local)
     eden_api_key: SecretStr | None = Field(default=None, validation_alias="EDENAI_API_KEY")
     # The team's model on Eden (docs/eden-budzet.md: ~0.005 USD per form); its local pair is qwen3-vl.
-    eden_model: str | None = "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+    eden_model: str | None = "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash"
     # Thinking off on Eden (like `think: false` for Ollama): `reasoning_effort` in the request and the Qwen3
     # soft switch `/no_think` in the prompt. A thinking model would spend time and paid tokens on reasoning
     # before the JSON. Empty = send neither. Eden enum: none, disable, minimal, low, medium, high, ...

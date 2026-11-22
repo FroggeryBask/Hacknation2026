@@ -326,3 +326,65 @@ def test_every_saved_result_fits_its_document_limits():
         assert max(len(x.blocks) for x in [*sections, *fields]) <= lim.refs, n
         answer = spec.model_dump_json(exclude_defaults=True)
         assert len(answer) / 2.5 < llm.answer_budget(model_doc, settings), n  # ~2.5+ characters per token
+
+
+# ---------------------------------------------------------------- forms outside the materials (ZUS Z-15)
+
+
+def date_field(label: str, description: str | None = None, kind: Kind = Kind.TEXT) -> FieldSpec:
+    return FieldSpec(label=label, kind=kind, required=True, description=description)
+
+
+def test_period_from_to_is_two_dates():
+    from autoformularz.check import date_ranges
+    from autoformularz.compiler import compile_form
+
+    fields = [
+        date_field(
+            "Okres sprawowania opieki", "Podaj datę lub daty (od–do), w których będziesz sprawować opiekę"
+        ),
+        date_field("Godziny otwarcia od-do"),  # no date words: stays text
+        date_field("Okres najmu od dnia do dnia", kind=Kind.DATE),
+    ]
+    spec = FormSpec(
+        title="Wniosek o zasiłek opiekuńczy",
+        authority_name="ZUS",
+        pages=[PageSpec(title="Okres opieki", sections=[SectionSpec(title="Okres", fields=fields)])],
+    )
+    spec, notes = date_ranges(spec)
+    kinds = [f.kind for f in spec.pages[0].sections[0].fields]
+    assert kinds == [Kind.DATE_RANGE, Kind.TEXT, Kind.DATE_RANGE] and len(notes) == 2
+    form, _ = compile_form(spec)
+    text = json.dumps(form, ensure_ascii=False)
+    assert text.count('"DATEPICKER"') == 4 and "Okres sprawowania opieki – od" in text
+    assert "Okres sprawowania opieki – do" in text
+
+
+def test_small_pages_join_their_neighbour():
+    from autoformularz.check import merge_small_pages
+
+    def page(title: str, n: int) -> PageSpec:
+        fields = [FieldSpec(label=f"{title} {i}", kind=Kind.TEXT, required=True) for i in range(n)]
+        return PageSpec(title=title, sections=[SectionSpec(title=title, fields=fields)])
+
+    spec = FormSpec(
+        title="Wniosek",
+        authority_name="ZUS",
+        pages=[page("Rodzaj", 1), page("Dane osoby", 6), page("Oświadczenia", 5), page("Uwagi", 1)],
+    )
+    spec, notes = merge_small_pages(spec)
+    assert [p.title for p in spec.pages] == ["Dane osoby", "Oświadczenia"] and len(notes) == 2
+    assert [s.title for s in spec.pages[0].sections] == ["Rodzaj", "Dane osoby"]  # first page: into the next
+    assert [s.title for s in spec.pages[1].sections] == ["Oświadczenia", "Uwagi"]
+
+
+def test_natural_person_form_offers_self_and_another_person():
+    """Standard p. 10 ("Ważne"): only a natural person's data on paper (ZUS Z-15) -> "Swoim" and "Innej osoby",
+    with the other person's data, power of attorney and stamp duty, though the paper names no proxy."""
+    from autoformularz.compiler import compile_form
+
+    form, _ = compile_form(FormSpec(title="Wniosek o zasiłek opiekuńczy", authority_name="ZUS", pages=[]))
+    text = json.dumps(form, ensure_ascii=False)
+    for title in ("Podmiot wniosku", "Innej osoby", "Dane innej osoby", "Pełnomocnictwo", "Opłata skarbowa"):
+        assert title in text, title
+    assert "Osoby prawnej" not in text  # no company data on paper

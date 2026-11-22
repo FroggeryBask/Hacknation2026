@@ -16,6 +16,7 @@ class Kind(StrEnum):
     LONG_TEXT = "LONG_TEXT"  # description, justification -> TEXTAREA
     NUMBER = "NUMBER"  # numbers only (amounts, counts) -> NUMBER
     DATE = "DATE"  # -> DATEPICKER
+    DATE_RANGE = "DATE_RANGE"  # period from-to -> two DATEPICKERs, "od" and "do" (COI has no range type)
     SINGLE_CHOICE = "SINGLE_CHOICE"  # one of <=5 options -> RADIO
     MULTI_CHOICE = "MULTI_CHOICE"  # one or more options -> CHECKBOX
     SELECT = "SELECT"  # one of >5 options or a dictionary -> SELECT

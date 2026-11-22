@@ -827,8 +827,36 @@ def source_texts(spec: FormSpec, doc: Document | None) -> dict[Role, list[str]]:
     return out
 
 
+def split_date_ranges(spec: FormSpec) -> FormSpec:
+    """A DATE_RANGE field becomes two date fields, "… od" and "… do" (COI has only DATEPICKER). The "do" date
+    is optional: a period may be one day ("podaj datę lub daty od-do")."""
+
+    def split(f: FieldSpec) -> list[FieldSpec]:
+        if f.kind != Kind.DATE_RANGE:
+            return [f]
+        start = f.model_copy(update={"kind": Kind.DATE, "label": f"{f.label} – od"})
+        end = f.model_copy(update={"kind": Kind.DATE, "label": f"{f.label} – do", "required": False})
+        return [start, end.model_copy(update={"description": None})]
+
+    if not any(f.kind == Kind.DATE_RANGE for p in spec.pages for s in p.sections for f in s.fields):
+        return spec
+    pages = [
+        p.model_copy(
+            update={
+                "sections": [
+                    s.model_copy(update={"fields": [x for f in s.fields for x in split(f)]})
+                    for s in p.sections
+                ]
+            }
+        )
+        for p in spec.pages
+    ]
+    return spec.model_copy(update={"pages": pages})
+
+
 def compile_form(spec: FormSpec, doc: Document | None = None) -> tuple[Json, list[str]]:
     """Returns (form JSON, warnings). `doc` (the source) adds verbatim legal text; None keeps the spec only."""
+    spec = split_date_ranges(spec)
     b = Builder(spec.title)
     std = Standard(b, spec, source_texts(spec, doc))
     pages = SpecPages(b, spec)

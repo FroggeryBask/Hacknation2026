@@ -35,7 +35,7 @@ flowchart LR
 | `web` | `node:22.23.5-alpine3.24` + Next.js | opcjonalny frontend: upload i podgląd JSON | 3000 |
 
 Domyślnie (`docker compose up`) `ollama` i `model` się nie uruchamiają (profil `ollama`), a `api` woła
-model open-weight na Eden AI (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, odpowiednik lokalnego `qwen3-vl:30b`).
+model open-weight na Eden AI (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`; offline Ollama z `qwen3-vl:8b`).
 Koszt każdej odpowiedzi Eden trafia do `llm.EDEN_USAGE`, a suma od startu kontenera jest w `GET /health` (`usage`);
 budżet zespołu: [eden-budzet.md](eden-budzet.md).
 
@@ -119,7 +119,7 @@ linii LF (`.gitattributes`), więc checkout na Windows nie zmienia tego, co traf
 
 - **Licencje**: zero. Wszystkie komponenty są open source, nic nie wymaga zakupu licencji komercyjnej.
 - **Usługi zewnętrzne**: Eden AI (domyślnie) kosztuje ok. 0,005 USD za formularz; tryb offline (Ollama): zero.
-  Model: `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, budżet: [eden-budzet.md](eden-budzet.md).
+  Model: `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`, budżet: [eden-budzet.md](eden-budzet.md).
 - **Sprzęt**: jeden serwer z Dockerem. Model 8B działa na CPU (wolniej) albo na GPU z co najmniej 8 GB VRAM
   (szybciej). Mniejszy model (np. `qwen3-vl:4b`, `qwen3-vl:2b`) to zmiana jednej zmiennej
   `AUTOFORMULARZ_LLM_MODEL`, bez zmian w kodzie, kosztem jakości.
@@ -163,7 +163,8 @@ Kod projektu: MIT. Zależności sprawdzone na zainstalowanych pakietach (`import
 | typing_extensions | PSF-2.0 | biblioteka standardowa w backporcie |
 | certifi | MPL-2.0 | zależność httpx (lista certyfikatów), używana bez zmian |
 | Ollama | MIT | serwer modelu, osobny kontener |
-| Qwen3-VL (`qwen3-vl:8b`) | Apache-2.0 | wagi modelu |
+| Qwen3-VL (`qwen3-vl:8b`) | Apache-2.0 | wagi modelu (Ollama, offline) |
+| DeepSeek V4.1 Flash (Eden AI) | MIT | otwarte wagi, model domyślny na Eden AI |
 | LibreOffice 25.2.3 (pakiet Debiana 13 `libreoffice-writer-nogui`) | MPL-2.0 (od wersji 4.0; starsze 3.x były na LGPL-3.0) | osobny proces `soffice --headless` tylko do konwersji binarnego .doc, bez linkowania i bez zmian |
 | Tesseract 5 + model `pol` (pakiety Debiana `tesseract-ocr`, `tesseract-ocr-pol`) | Apache-2.0 | osobny proces do OCR skanów |
 | Next.js, React, motion, @base-ui/react, shadcn, tw-animate-css | MIT | frontend |
@@ -186,9 +187,8 @@ Treść zadania zakazuje licencji „wymagających upublicznienia całości lub 
   nie musi być udostępniany. Mentorzy COI zastrzegli, że LibreOffice jest dopuszczalny tylko przy takiej
   licencji, dlatego .ods czytamy wprost z XML, a LibreOffice zostało tylko dla binarnego .doc.
 - **LGPL-3.0**: pakiet `sharp` z biblioteką libvips (opcjonalna zależność Next.js do optymalizacji obrazów)
-  **trafia do obrazu `web`** (sprawdzone: `node_modules/@img`, ok. 46 MB). LGPL pozwala na dynamiczne użycie
-  bez udostępniania naszego kodu, ale to słaby copyleft, a `web` to tylko opcjonalny frontend. Do zrobienia
-  po stronie frontendu: wyłączyć optymalizację obrazów (`images.unoptimized`) i nie kopiować `sharp` do obrazu.
+  **nie trafia do obrazu `web`**: optymalizacja obrazów jest wyłączona (`images.unoptimized`), a `sharp` i `@img`
+  są wykluczone z `.next/standalone` (`outputFileTracingExcludes`; sprawdzone na buildzie 2026-11-22).
 - Nie przejrzeliśmy jeszcze licencji bibliotek systemowych Debiana, które instaluje pakiet LibreOffice.
 
 ## 8. Ograniczenia i dalsze kroki

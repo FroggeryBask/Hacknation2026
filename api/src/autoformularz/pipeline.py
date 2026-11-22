@@ -11,10 +11,12 @@ from autoformularz import presort as presort_step
 from autoformularz.check import (
     Coverage,
     coverage,
+    date_ranges,
     dedupe,
     drop_broken_conditions,
     drop_paper_only_fields,
     drop_standard_sections,
+    merge_small_pages,
     printed_amounts_as_info,
 )
 from autoformularz.compiler import compile_form
@@ -49,8 +51,10 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     spec, repeated = dedupe(spec)
     spec, standard = drop_standard_sections(spec)
     spec, amounts = printed_amounts_as_info(spec)
+    spec, ranges = date_ranges(spec)
     spec, paper = drop_paper_only_fields(spec)
-    spec, conditions = drop_broken_conditions(spec)  # last: the rules above may drop a controlling field
+    spec, conditions = drop_broken_conditions(spec)  # the rules above may drop a controlling field
+    spec, small = merge_small_pages(spec)  # last: dropped fields may leave a page almost empty
     form, warnings = compile_form(spec, document)
     progress.stage("Sprawdzanie reguł technicznych")
     issues = lint(form)
@@ -60,7 +64,7 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
         form=form,
         spec=spec,
         issues=issues,
-        notes=repeated + standard + amounts + paper + conditions + warnings,
+        notes=repeated + standard + amounts + ranges + paper + conditions + small + warnings,
     )
 
 

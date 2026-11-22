@@ -38,7 +38,7 @@ Zapisz `.env` jako UTF-8 bez BOM (domyślnie tak robią VS Code i Notatnik w Win
 
 ### 2a. Eden AI (domyślnie)
 
-Model open-weight w chmurze organizatorów (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
+Model open-weight w chmurze organizatorów (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
 
 ```bash
 docker compose up --build
@@ -123,7 +123,78 @@ docker run --rm -p 8000:8000 --add-host=host.docker.internal:host-gateway \
 
 ## Licencje
 
-Kod projektu: MIT. Wszystkie zależności są open source i nie wymagają udostępnienia naszego kodu: biblioteki MIT, BSD, Apache-2.0, ISC; model Qwen3-VL i Tesseract na Apache-2.0; Ollama na MIT. LibreOffice (MPL-2.0) działa jako osobny proces tylko do konwersji .doc, bez linkowania i bez zmian. Pełna tabela i uzasadnienie: [docs/architektura.md, „Licencje”](docs/architektura.md#7-licencje).
+Kod projektu: **MIT**. Zadanie wymaga bibliotek open source bez copyleftu (np. AGPL, GNU GPL) i bez płatnych licencji.
+Licencje sprawdzone 2026-11-22 na zainstalowanych pakietach: Python z `importlib.metadata` (tylko zależności
+uruchomieniowe, `uv export --no-dev`), JavaScript z `package-lock.json` i z tego, co faktycznie trafia do obrazu
+`web` (`.next/standalone`). Nic nie wymaga udostępnienia naszego kodu i nic nie wymaga zakupu licencji.
+
+### API (obraz `autoformularz-api`)
+
+| Biblioteka | Wersja | Licencja | Do czego |
+|---|---|---|---|
+| fastapi | 0.165.0 | MIT | REST API |
+| starlette | 1.10.0 | BSD-3-Clause | REST API (pod FastAPI) |
+| uvicorn, click, h11 | 0.54.0, 8.5.1, 0.16.0 | BSD-3-Clause, BSD-3-Clause, MIT | serwer HTTP |
+| python-multipart | 0.0.34 | Apache-2.0 | odbiór pliku |
+| pydantic, pydantic-core, pydantic-settings | 2.14.4, 2.50.5, 2.16.3 | MIT | modele danych, konfiguracja |
+| annotated-types, annotated-doc, typing-inspection | 0.8.0, 0.0.7, 0.4.5 | MIT | pomocnicze Pydantic/FastAPI |
+| typing-extensions | 4.16.0 | PSF-2.0 | pomocnicze typowanie |
+| python-dotenv | 1.2.4 | BSD-3-Clause | pliki `.env` |
+| pyjwt | 2.15.1 | MIT | tokeny JWT |
+| httpx, httpcore, anyio, idna | 0.28.1, 1.0.9, 4.16.0, 3.20 | BSD-3-Clause, BSD-3-Clause, MIT, BSD-3-Clause | wywołania modelu |
+| certifi | 2026.11.20 | MPL-2.0 | lista certyfikatów dla httpx, bez zmian (niżej) |
+| opentelemetry-api | 1.45.2 | Apache-2.0 | zależność pośrednia, bez użycia w kodzie |
+| python-docx, lxml | 1.2.0, 6.1.3 | MIT, BSD-3-Clause | odczyt DOCX i ODS (XML) |
+| openpyxl, et-xmlfile | 3.1.5, 2.0.0 | MIT | odczyt XLSX |
+| pypdf | 7.1.1 | BSD-3-Clause | tekst z PDF |
+| pypdfium2 (z PDFium) | 5.15.2 | BSD-3-Clause / Apache-2.0 | strony skanów PDF jako obrazy (zamiast PyMuPDF na AGPL) |
+| pillow | 13.0.0 | MIT-CMU (HPND) | zmniejszanie obrazów |
+| Tesseract 5 + `pol` (Debian `tesseract-ocr`, `tesseract-ocr-pol`) | 5.x | Apache-2.0 | OCR skanów, osobny proces |
+| LibreOffice (Debian `libreoffice-writer-nogui`) | 25.2 | MPL-2.0 | tylko binarny `.doc`, osobny proces `soffice --headless` (niżej) |
+| obraz bazowy `python:3.14.10-slim-trixie` | 3.14.10 | PSF-2.0 (Python) + pakiety Debiana | system w kontenerze |
+
+### Frontend (obraz `autoformularz-web`)
+
+| Biblioteka | Wersja | Licencja |
+|---|---|---|
+| next, @next/env, styled-jsx, client-only | 16.4.6, 16.4.6, 5.1.6, 0.0.1 | MIT |
+| react, react-dom, scheduler | 19.3.0, 19.3.0, 0.28.0 | MIT |
+| @swc/helpers | 0.5.23 | Apache-2.0 |
+| jsonata (warunki `states` w podglądzie) | 2.2.2 | MIT |
+| motion, @base-ui/react, shadcn, tw-animate-css, cn, server-only | 14.14.0, 1.9.0, 4.23.0, 1.4.0, 0.5.2, 0.0.1 | MIT |
+| lucide-react | 1.77.0 | ISC |
+| class-variance-authority | 0.7.1 | Apache-2.0 |
+| obraz bazowy `node:22.23.5-alpine3.24` | 22.23.5 | MIT (Node.js) + pakiety Alpine |
+
+Wszystkie pakiety produkcyjne z `package-lock.json` (293): MIT 226, Apache-2.0 20, ISC 17, BSD-3-Clause 6,
+BSD-2-Clause 4, BlueOak-1.0.0 3, 0BSD 1, MIT OR CC0-1.0 1, CC-BY-4.0 1 (`caniuse-lite`: dane o przeglądarkach,
+tylko przy budowaniu). Pozostałe 14 to opcjonalne binaria `sharp`/libvips (LGPL-3.0): **nie trafiają do obrazu**, bo
+optymalizacja obrazów Next jest wyłączona (`images.unoptimized`, `outputFileTracingExcludes` w `next.config.ts`;
+sprawdzone: w `.next/standalone/node_modules` nie ma `sharp` ani `@img`).
+
+### Modele językowe
+
+| Model | Licencja | Gdzie |
+|---|---|---|
+| DeepSeek V4.1 Flash (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`) | MIT, otwarte wagi | Eden AI (domyślnie). Wagi są publiczne, ale model jest duży (763 mld parametrów), więc lokalnie praktycznie tylko na serwerze GPU |
+| Qwen3-VL 8B (`qwen3-vl:8b`) | Apache-2.0, otwarte wagi | Ollama, tryb offline |
+| Qwen3-VL 30B-A3B (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`) | Apache-2.0, otwarte wagi | poprzedni model na Eden AI |
+| Ollama (`ollama/ollama:0.40.17`) | MIT | serwer modelu, osobny kontener (`--profile ollama`) |
+
+### Tylko przy budowaniu i w developmencie
+
+uv, ruff, pytest, Biome, TypeScript, Tailwind CSS, lefthook, Marp (slajdy przez npx): MIT lub Apache-2.0;
+lightningcss (przez Tailwind): MPL-2.0, tylko przy budowaniu CSS. Nic z tego nie trafia do obrazów.
+
+### Dlaczego MPL-2.0 nie łamie zakazu copyleft
+
+MPL-2.0 (certifi, LibreOffice, lightningcss) to copyleft na poziomie pliku: udostępnić trzeba tylko zmienione pliki
+na tej licencji, nie nasz kod. Niczego w nich nie zmieniamy, a LibreOffice działa jako osobny program, bez
+linkowania. Mentorzy COI dopuścili LibreOffice tylko przy takiej licencji, dlatego `.ods` czytamy wprost z XML, a
+LibreOffice zostało wyłącznie dla binarnego `.doc` (obraz bez niego: `--build-arg WITH_LIBREOFFICE=0`). Obrazy
+bazowe zawierają pakiety systemu (Debian, Alpine) na różnych licencjach, także GPL; to osobne programy
+dystrybuowane razem z systemem, nasz kod z nimi nie jest łączony. Licencji pakietów Debiana, które dociąga
+LibreOffice, nie przeglądaliśmy po kolei. Szczegóły i uzasadnienia: [docs/architektura.md, „Licencje”](docs/architektura.md#7-licencje).
 
 ## Konfiguracja
 
@@ -138,7 +209,7 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_OLLAMA_URL` | `http://localhost:11434` | Adres serwera modelu |
 | `AUTOFORMULARZ_LLM_MODEL` | `qwen3-vl:8b` | Model (dowolny model wizyjny z Ollama) |
 | `AUTOFORMULARZ_LLM_PROVIDER` | `eden` | `ollama` uruchamia model lokalnie (offline, w Dockerze z `--profile ollama`), patrz [Model językowy](#model-językowy-eden-ai-domyślnie-albo-ollama-offline) |
-| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
+| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
 | `AUTOFORMULARZ_EDEN_REASONING_EFFORT` | `none` | Wyłącza myślenie modelu na Eden: `reasoning_effort` w zapytaniu i przełącznik `/no_think` w prompcie (jak `think: false` w Ollamie). Gdy Eden odrzuci parametr, zapytanie idzie ponownie bez niego. Pusta wartość: nie wysyła żadnego z nich |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `1800` | Limit czasu odpowiedzi modelu (Ollama na CPU potrzebuje do ~25 min na duży formularz) |
 | `AUTOFORMULARZ_LLM_NUM_CTX` | `24576` | Okno kontekstu modelu w Ollamie: prompt + odpowiedź (więcej = więcej pamięci RAM/VRAM; 16384 nie mieści formularza 8) |
@@ -244,7 +315,7 @@ Domyślnie API używa modelu open-weight na Eden AI (`AUTOFORMULARZ_LLM_PROVIDER
 
 ```bash
 AUTOFORMULARZ_LLM_PROVIDER=eden
-AUTOFORMULARZ_EDEN_MODEL=deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct  # odpowiednik w Ollamie: qwen3-vl:30b
+AUTOFORMULARZ_EDEN_MODEL=deepinfra/deepseek-ai/DeepSeek-V4.1-Flash  # poprzednio deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct (Ollama: qwen3-vl:30b)
 EDENAI_API_KEY=...                                          # klucz zespołu, tylko po stronie serwera
 ```
 
