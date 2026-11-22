@@ -59,8 +59,8 @@ llm.py      Document → FormSpec: model klasyfikuje i wskazuje bloki po ID, nie
 check.py    pokrycie: bloki bez odwołania, kandydaci bez pola, odwołania do nieistniejących bloków
     ↓
 compiler.py FormSpec (+ Document) → JSON COI, deterministycznie: sekcje standardowe z szablonów, techNames,
-            UUIDv5, walidatory, słowniki, dane inicjalne, warunki jsonata, przejścia; opcjonalnie pouczenia
-            i podstawa prawna dosłownie z bloków (AUTOFORMULARZ_COPY_SOURCE_TEXT, domyślnie wyłączone)
+            UUIDv5, walidatory, słowniki, dane inicjalne, warunki jsonata, przejścia; pouczenia
+            i podstawa prawna dosłownie z bloków, sprawdzane w kodzie (pouczenia: AUTOFORMULARZ_COPY_SOURCE_TEXT)
     ↓
 lint.py     reguły techniczne: strony, sekcje, typy pól, walidatory, słowniki, dane inicjalne, warunki
             (pole, opcja, cykle, kolejność), przejścia

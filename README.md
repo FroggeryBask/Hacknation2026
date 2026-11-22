@@ -219,7 +219,7 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc; .ods jest czytany bez niego) |
 | `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |
 | `AUTOFORMULARZ_TESSDATA_DIR` | brak | Katalog z `pol.traineddata`, jeśli nie ma go w domyślnym `tessdata` (np. instalator na Windows) |
-| `AUTOFORMULARZ_COPY_SOURCE_TEXT` | `false` | Kopiuje pouczenia i podstawę prawną dosłownie ze źródła na stronę końcową (wyłączone, dopóki role bloków od modelu nie są wiarygodne) |
+| `AUTOFORMULARZ_COPY_SOURCE_TEXT` | `true` | Kopiuje pouczenia dosłownie ze źródła na stronę końcową (kod zostawia tylko punkty o opłatach, terminach, obowiązkach i skutkach). Podstawa prawna jest kopiowana zawsze, też sprawdza ją kod |
 | `AUTOFORMULARZ_CORS_ORIGINS` | `http://localhost:3000` | Dozwolone adresy frontendu |
 
 ## REST API

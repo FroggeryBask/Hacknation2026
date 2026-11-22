@@ -87,42 +87,51 @@ def test_compile_and_schema(client, nadplata_spec):
     assert "properties" in client.get("/api/v1/spec/schema").json()
 
 
-def test_pipeline_passes_document_to_compiler(nadplata_spec):
+def _finish(result) -> dict[str, str]:
+    """techName of each finish-page section -> text of its block."""
+    questions = result.form["tabs"][-1]["questions"]
+    return {
+        q["field"]["techName"]: q["field"]["repeatingSectionGrid"][0]["field"]["description"]
+        for q in questions
+    }
+
+
+def test_instructions_and_legal_basis_on_by_default(nadplata_spec):
+    """The model marks every block it sees as an instruction: the code keeps only what tells the applicant
+    something (fees, where to pay), never the request, the GDPR clause or hints for the paper."""
     from autoformularz.spec import BlockRole, Role
 
-    path = material("5. */*nadpłaty podatku.docx")
-    seen = {}
+    path = material("3. */*zaświadczenia.docx")
+    settings = Settings(_env_file=None)
+    assert settings.copy_source_text is True
 
-    def fake_llm(doc, _):  # the first block the model sees (presort already took the paper-only ones)
-        seen["first"] = doc.blocks[0]
-        return nadplata_spec.model_copy(
-            update={"block_roles": [BlockRole(block=doc.blocks[0].id, role=Role.LEGAL_BASIS)]}
-        )
+    def fake_llm(doc, _):
+        roles = [BlockRole(block=doc.blocks[0].id, to=doc.blocks[-1].id, role=Role.INSTRUCTION)]
+        return nadplata_spec.model_copy(update={"block_roles": roles})
 
-    settings = Settings(_env_file=None, copy_source_text=True)
     result = pipeline.from_file(path.name, path.read_bytes(), settings, llm=fake_llm)
-    finish = result.form["tabs"][-1]["questions"]
-    legal = [q["field"] for q in finish if q["field"]["techName"] == "podstawa_prawna"]
-    from autoformularz.compiler import _plain
-
-    assert legal, "LEGAL_BASIS block should become a finish-page section"
-    text_block = legal[0]["repeatingSectionGrid"][0]["field"]["description"]
-    assert _plain(seen["first"])[:20] in text_block
+    text = _finish(result)["pouczenie"]
+    assert "Opłata za wydanie zaświadczenia wynosi 17 zł" in text and "Konto bankowe Urzędu" in text
+    assert "Administrator" not in text and "INFORMACJE" not in text and "Wnoszę" not in text
     assert result.document is not None and result.coverage is not None
 
 
-def test_source_text_copy_is_off_by_default(nadplata_spec):
-    """Saved results showed unreliable block roles (paper instructions, GDPR as legal basis): off by default."""
+def test_legal_basis_stays_when_instructions_are_off(nadplata_spec):
+    """AUTOFORMULARZ_COPY_SOURCE_TEXT=false turns instructions off; the legal basis (material 5 names it in
+    the request sentence) stays."""
     from autoformularz.spec import BlockRole, Role
 
     path = material("5. */*nadpłaty podatku.docx")
-    spec = nadplata_spec.model_copy(update={"block_roles": [BlockRole(block="b1", role=Role.LEGAL_BASIS)]})
-    settings = Settings(_env_file=None)
-    assert settings.copy_source_text is False
-    result = pipeline.from_file(path.name, path.read_bytes(), settings, llm=lambda doc, _: spec)
-    finish = [q["field"]["techName"] for q in result.form["tabs"][-1]["questions"]]
-    assert "podstawa_prawna" not in finish and "pouczenie" not in finish
-    assert result.document is not None  # ?details=true still shows the source blocks
+    settings = Settings(_env_file=None, copy_source_text=False)
+
+    def fake_llm(doc, _):
+        roles = [BlockRole(block=doc.blocks[0].id, role=Role.INSTRUCTION)]
+        return nadplata_spec.model_copy(update={"block_roles": roles})
+
+    finish = _finish(pipeline.from_file(path.name, path.read_bytes(), settings, llm=fake_llm))
+    assert "pouczenie" not in finish
+    text = finish["podstawa_prawna"]
+    assert "Na podstawie art. 75 ustawy z dnia 29 sierpnia 1997 r." in text and "wnoszę" not in text
 
 
 def test_schema_endpoint_matches_what_compile_accepts(client):

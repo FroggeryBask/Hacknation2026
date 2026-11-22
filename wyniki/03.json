@@ -693,6 +693,47 @@
           "rows": 2,
           "cols": 3,
           "field": {
+            "id": "0e6ca04e-34ec-59c4-856d-dcde21f88b03",
+            "type": "SECTION",
+            "techName": "pouczenie",
+            "title": "Pouczenie",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "27919c2c-fe54-5c48-a2fe-4553853cf6dd",
+                  "type": "TEXT_BLOCK",
+                  "techName": "pouczenie_tekst",
+                  "title": "",
+                  "description": "<html><head></head><body><p>Opłata za wydanie zaświadczenia wynosi 17 zł (od każdego egzemplarza). Obowiązek uiszczenia opłaty skarbowej powstaje z chwilą złożenia wniosku o wydanie zaświadczenia.</p><p>Opłatę skarbową należy wnieść w kasie lub bezgotówkowo na rachunek tut. Urzędu – przed złożeniem wniosku. Konto bankowe Urzędu: Bank PKO BP S.A. 12 1234 1234 1234 1234 1234 1234.</p><p>Zwolnienie z opłaty skarbowej określa art. 2, natomiast wyłączenie art. 7 ustawy z dnia 16 listopada 2006 r. o opłacie skarbowej.</p></body></html>",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "rows": 2,
+          "cols": 3,
+          "field": {
             "id": "b18b2997-b996-52a8-94fe-cf033f3ffb2c",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
@@ -724,7 +765,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         }

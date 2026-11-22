@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from autoformularz.document import Block, Document
+from autoformularz.presort import fold
 from autoformularz.spec import Condition, FieldSpec, FormSpec, Kind, Role, SectionSpec
 
 Json = dict[str, Any]
@@ -817,16 +818,163 @@ def _plain(block: Block) -> str:
     return block.text
 
 
-def source_texts(spec: FormSpec, doc: Document | None) -> dict[Role, list[str]]:
-    """Verbatim text of blocks with a copied role, in document order (the model only points to them)."""
+# "6. Podstawa prawna", "Podstawa prawna: art. 6n ...", "| Podstawa prawna: | art. 75 ... |"; not the GDPR
+# clause's "Podstawy prawne przetwarzania".
+LEGAL_LABEL = re.compile(
+    r"^\s*(\d{1,2}\s*[.)]\s*)?podstaw[a-ząćęłńóśźż]*\s+prawn[a-ząćęłńóśźż]*(?!\s+przetwarzani)\s*[:.\-–]?\s*",
+    re.IGNORECASE,
+)
+# A legal basis cites a provision: an article, a paragraph sign, an act, a regulation, a code, a journal.
+CITATION = re.compile(
+    r"\bart\.?\s*\d|§|\bustaw[a-ząćęłńóśźż]*\b|\brozporz[aą]dzeni|\bkodeks|\bordynacj|\bdz\.\s*u\b",
+    re.IGNORECASE,
+)
+# The request sentence that names its basis: "Na podstawie art. 75 ustawy … wnoszę o …" (material 5),
+# "Zgodnie z ustawą … Prawo łowieckie … proszę o wydanie …" (material 7): the part before the request verb,
+# with its lead words (the act is named in the case they ask for).
+REQUEST_BASIS = re.compile(
+    r"^\s*(?P<basis>(?:na\s+podstawie|zgodnie\s+z)\s+.+?)\s*,?\s+"
+    r"(?:wnosz[eę]|prosz[eę]|zwracam\s+si[eę]|składam|skladam|ubiegam\s+si[eę])\b",
+    re.IGNORECASE,
+)
+# A statement or a request in the first person may cite a provision but is not the basis ("Oświadczam, że
+# zapewniam warunki … zgodnie z rozporządzeniem", material 7): never taken from a model role.
+FIRST_PERSON = re.compile(
+    r"^\W*(o[sś]wiadczam|wyra[zż]am|zobowi[aą]zuj[eę]|wnosz[eę]|prosz[eę]|jestem|posiadam|zapewniam)\b",
+    re.IGNORECASE,
+)
+NEW_PART = re.compile(r"^([A-Z]|\d{1,2})(\.\d{1,2})*\s*[.)]\s+\S")
+LEGAL_LINES = 4  # lines after a "Podstawa prawna" heading that may still belong to it (a broken sentence)
+
+
+def legal_basis(spec: FormSpec, doc: Document) -> list[str]:
+    """Legal basis of the request, checked in code. Blocks labelled "Podstawa prawna" on the paper (the label
+    alone as a heading: the citing lines after it), and blocks the model marked LEGAL_BASIS when they cite
+    a provision. Never the GDPR clause (it is linked, not placed on the form) and never a bare label."""
+    roles = spec.roles()
+    gdpr = {b for b, r in roles.items() if r is Role.GDPR}
+    out: list[str] = []
+    heading = 0  # lines left after a bare "Podstawa prawna" heading
+    joined = False  # the last block was taken and its sentence goes on in the next line
+    for block in doc.blocks:
+        text = " ".join(_plain(block).split())
+        if block.id in gdpr or not text:
+            heading, joined = 0, False
+            continue
+        label = LEGAL_LABEL.match(text)
+        if label and not text[label.end() :].strip():
+            heading, joined = LEGAL_LINES, False
+            continue
+        if joined and not label and text[:1].islower():  # "... ustawy o utrzymaniu czystości i" / "porządku"
+            out[-1] = f"{out[-1]} {text}"
+            joined = not text.endswith((".", ";", ")"))
+            continue
+        rest = text[label.end() :].strip() if label else text
+        marked = roles.get(block.id) is Role.LEGAL_BASIS and not FIRST_PERSON.match(rest)
+        taken = (label or heading or marked) and CITATION.search(rest)
+        if not taken and (request := REQUEST_BASIS.match(text)) and CITATION.search(request["basis"]):
+            rest, taken = (
+                re.sub(r"(?<=\w)\(", " (", request["basis"].rstrip(" ,")),
+                True,
+            )  # "podatkowa(Dz. U."
+            rest += "."  # the sentence goes on with the request, not with more of the basis
+        if taken:
+            out.append(rest[:1].upper() + rest[1:])
+        if not taken:  # the next numbered part ("7. Załączniki") ends the heading's lines
+            heading = 0 if block.kind == "heading" or NEW_PART.match(text) else max(0, heading - 1)
+        joined = bool(taken) and not rest.endswith((".", ";", ")"))
+    return list(dict.fromkeys(out))
+
+
+# Instructions (pouczenia), checked in code per item (a numbered point or a sentence over several lines).
+# "Pouczenie:" on the paper (material 8) opens a run of items; other items come from the model's INSTRUCTION
+# roles and stay only when they tell the applicant something the e-form does not: fees and where to pay,
+# deadlines, duties, consequences, how the case is handled (material 3: "Opłata za wydanie zaświadczenia
+# wynosi 17 zł …"). Rules on folded text (no diacritics).
+INSTRUCTION_LABEL = re.compile(r"^\s*(\d{1,2}\s*[.)]\s*)?pouczeni[ea]\b\s*[:.\-–]?\s*", re.IGNORECASE)
+ITEM_NUMBER = re.compile(r"^\s*(\d{1,2}|[a-z])\s*[.)]\s+")
+JOURNAL = re.compile(r"\bdz\.\s*u\.[^)]*")
+ITEM_START = re.compile(
+    r"^\s*(\d{1,2}|[a-z])\s*[.)]\s+\S"
+)  # "1) W przypadku …", "2. Obowiązek …", "a) osoby …"
+USEFUL = re.compile(
+    r"\boplat|\btermin|\brozpatr|\bniewykonani|\begzekuc|\btytul\w* wykonawcz|\bodmow|\bodwolan|\bgrzywn"
+    r"|\bkar[aey]\b|\bzwolni|\buiszcz|\brachun\w* bankow|\bkonto bankowe|\bobowiazek|\bodpowiedzialnosc"
+)
+# What the e-form replaces or shows elsewhere: references to paper positions and ways of filling it in,
+# hints of a field, attachment notes (the attachments section has them), the request and statements.
+NOT_INSTRUCTION = re.compile(
+    r"\bpoz\.|\bpozycj|\bpunkt\w*\b|\bpkt\b|\bkrat\w*|\brubryk|\bczesc\w* [a-z]\b|\bobjasnieni\w* dotycz"
+    r"|\bniepotrzebne skresl|\bzaznacz|\bwypelni\w* (drukowanymi|czytelnie|odrebn|w przypadku)|\bnalezy wypelnic"
+    r"|\bdo (wniosku|deklaracji) (nalezy|mozna) (dolaczyc|zalaczyc)|\bzalacz\w* do (wniosku|deklaracji)"
+    r"|^(oswiadczam|wyrazam|wnosze|prosze|zobowiazuje|zgodnie z|na podstawie)\b|\b(wnosze|prosze) o\b"
+)
+
+
+def _items(doc: Document, ids: set[str]) -> list[list[Block]]:
+    """Blocks in `ids` grouped into items: consecutive blocks of one numbered point or one sentence."""
+    items: list[list[Block]] = []
+    prev = -2
+    for n, block in enumerate(doc.blocks):
+        if block.id not in ids:
+            continue
+        text = " ".join(_plain(block).split())
+        last = " ".join(_plain(items[-1][-1]).split()) if items else ""
+        new = (
+            n != prev + 1 or ITEM_START.match(text) or (last.endswith((".", ":", ";")) and text[:1].isupper())
+        )
+        if new:
+            items.append([block])
+        else:
+            items[-1].append(block)
+        prev = n
+    return items
+
+
+def instruction_texts(spec: FormSpec, doc: Document) -> list[str]:
+    roles = spec.roles()
+    blocked = {b for b, r in roles.items() if r in (Role.GDPR, Role.SKIP, Role.STATEMENT, Role.LEGAL_BASIS)}
+    marked = {b for b, r in roles.items() if r is Role.INSTRUCTION} - blocked
+    labelled: set[str] = set()  # the items of a "Pouczenie:" run on the paper
+    run = False
+    for n, block in enumerate(doc.blocks):
+        text = " ".join(_plain(block).split())
+        if block.id in blocked or not text:
+            run = False
+        elif label := INSTRUCTION_LABEL.match(text):
+            run = True
+            if text[label.end() :].strip():
+                labelled.add(block.id)
+        elif run:
+            prev = " ".join(_plain(doc.blocks[n - 1]).split()) if n else ""
+            if ITEM_START.match(text) or text[:1].islower() or not prev.endswith((".", ":", ";")):
+                labelled.add(block.id)
+            else:
+                run = False  # "Objaśnienia dotyczące sposobu wypełniania deklaracji": another part
+    out = []
+    for item in _items(doc, marked | labelled):
+        text = " ".join(" ".join(_plain(b).split()) for b in item)
+        text = ITEM_NUMBER.sub("", INSTRUCTION_LABEL.sub("", text)).strip()  # paper numbering: "2. Obowiązek"
+        folded = JOURNAL.sub("", fold(text))  # "Dz. U. z 2025 r., poz. 132" is not a position on the paper
+        if not text or text.endswith(":") and len(text) < 40:  # a bare label: "INFORMACJE:"
+            continue
+        if text.startswith("(") and text.endswith(")") or NOT_INSTRUCTION.search(folded):
+            continue
+        if any(b.id in labelled for b in item) or USEFUL.search(folded):
+            out.append(text)
+    return list(dict.fromkeys(out))
+
+
+def source_texts(spec: FormSpec, doc: Document | None, *, instructions: bool = True) -> dict[Role, list[str]]:
+    """Verbatim text in document order (the model only points to blocks), checked in code: instructions
+    (when `instructions`) and the legal basis."""
     if doc is None:
         return {}
-    copied = {role for role, _, _ in SOURCE_SECTIONS}
-    wanted = {block: role for block, role in spec.roles().items() if role in copied}
     out: dict[Role, list[str]] = {}
-    for block in doc.blocks:
-        if role := wanted.get(block.id):
-            out.setdefault(role, []).append(_plain(block))
+    if instructions and (texts := instruction_texts(spec, doc)):
+        out[Role.INSTRUCTION] = texts
+    if legal := legal_basis(spec, doc):
+        out[Role.LEGAL_BASIS] = legal
     return out
 
 
@@ -857,11 +1005,14 @@ def split_date_ranges(spec: FormSpec) -> FormSpec:
     return spec.model_copy(update={"pages": pages})
 
 
-def compile_form(spec: FormSpec, doc: Document | None = None) -> tuple[Json, list[str]]:
-    """Returns (form JSON, warnings). `doc` (the source) adds verbatim legal text; None keeps the spec only."""
+def compile_form(
+    spec: FormSpec, doc: Document | None = None, *, instructions: bool = True
+) -> tuple[Json, list[str]]:
+    """Returns (form JSON, warnings). `doc` (the source) adds the verbatim legal basis and, with
+    `instructions`, the instructions; None keeps the spec only."""
     spec = split_date_ranges(spec)
     b = Builder(spec.title)
-    std = Standard(b, spec, source_texts(spec, doc))
+    std = Standard(b, spec, source_texts(spec, doc, instructions=instructions))
     pages = SpecPages(b, spec)
     data_sections = std.data_tab_sections()  # reserves predefined techNames first
     pages.plan()

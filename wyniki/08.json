@@ -3226,6 +3226,88 @@
           "rows": 2,
           "cols": 3,
           "field": {
+            "id": "e1b45c97-6055-56e7-86c5-f629c095227e",
+            "type": "SECTION",
+            "techName": "pouczenie",
+            "title": "Pouczenie",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "3fcf0b75-2cb9-5319-9db2-2aeb467b5ee2",
+                  "type": "TEXT_BLOCK",
+                  "techName": "pouczenie_tekst",
+                  "title": "",
+                  "description": "<html><head></head><body><p>Termin składania: w terminie 14 dni od dnia zamieszkania na danej nieruchomości pierwszego mieszkańca, w terminie 14 dni od dnia powstania na nieruchomości odpadów komunalnych lub w terminie do 10 dnia miesiąca następującego po miesiącu, w którym nastąpiła zmiana danych stanowiących podstawę ustalenia opłaty.</p><p>Opłata stanowi sumę iloczynów ilości gospodarstw domowych dla których składana jest deklaracja oraz stawki opłaty ustalonej uchwałą Rady Miasta Gdyni podjętej na podstawie art. 6k ustawy o utrzymaniu czystości i porządku w gminach</p><p>W przypadku niewykonania w całości lub w części zadeklarowanego zobowiązania, niniejsza deklaracja stanowi podstawę do wystawienia tytułu wykonawczego (art. 3a § 1 i 2 – ustawy z dnia 17 czerwca 1966 r. o postępowaniu egzekucyjnym w administracji – tekst jedn. Dz. U. z 2025r., poz. 132 ze zm.).</p><p>Obowiązek złożenia deklaracji spoczywa na każdym faktycznie władającym nieruchomością lub jej częścią na której zamieszkują mieszkańcy lub nieruchomością na której w części zamieszkują, a w części nie zamieszkują mieszkańcy.</p><p>Jeżeli nieruchomość jest zabudowana budynkiem wielolokalowym, w którym ustanowiono odrębną własność lokalu, obowiązek złożenia deklaracji spoczywający na właścicielach nieruchomości wspólnej oraz właścicielach lokali obciąża wspólnotę mieszkaniową albo spółdzielnię mieszkaniową.</p></body></html>",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "rows": 2,
+          "cols": 3,
+          "field": {
+            "id": "a3d7ff29-54dc-56e2-8026-0e1aa1f53427",
+            "type": "SECTION",
+            "techName": "podstawa_prawna",
+            "title": "Podstawa prawna",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "81d2b4f4-89db-5d1d-8ca5-99d071b59aa8",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podstawa_prawna_tekst",
+                  "title": "",
+                  "description": "<html><head></head><body><p>Art. 6n ust. 1 i 2 i art. 6m ust. 1a i 1b ustawy o utrzymaniu czystości i porządku w gminach (t.j. Dz.U. z 2025r. poz.733)</p></body></html>",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 1,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "rows": 2,
+          "cols": 3,
+          "field": {
             "id": "80d55977-980c-5dee-a7fc-605b0a805d31",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
@@ -3257,7 +3339,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 2,
             "tooltipMessage": ""
           }
         }

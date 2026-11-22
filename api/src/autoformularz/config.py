@@ -52,9 +52,10 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.0
     llm_sample_temperature: float = 0.4
     max_pdf_pages: int = 6
-    # Copy INSTRUCTION / LEGAL_BASIS blocks verbatim to the finish page. Off until the model's block roles
-    # are reliable: on saved results it copied paper instructions and the GDPR clause (docs/decisions.md).
-    copy_source_text: bool = False
+    # Copy instructions (pouczenia) verbatim to the finish page, checked in code per item
+    # (compiler.instruction_texts: fees, deadlines, duties, consequences; never hints for the paper or
+    # attachment notes). The legal basis is always copied (compiler.legal_basis).
+    copy_source_text: bool = True
     # Presort: the code recognises the GDPR clause, signature/paper-only lines and the template's applicant
     # data before the model, so they are left out of the prompt and the answer (presort.py).
     presort: bool = True

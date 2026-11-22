@@ -834,6 +834,47 @@
           "rows": 2,
           "cols": 3,
           "field": {
+            "id": "200dfdf7-3f8a-5432-847d-6955e525773a",
+            "type": "SECTION",
+            "techName": "podstawa_prawna",
+            "title": "Podstawa prawna",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "8393745f-8343-54c9-9d62-8c5f6a1664ce",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podstawa_prawna_tekst",
+                  "title": "",
+                  "description": "<html><head></head><body><p>Zgodnie z ustawą z dnia 13 października 1995 r. Prawo Łowieckie oraz Rozporządzeniem Ministra Rolnictwa i Rozwoju Wsi z dnia 5 lipca 2010 r. w sprawie warunków i sposobu hodowania i utrzymywania chartów rasowych oraz ich mieszańców.</p></body></html>",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "rows": 2,
+          "cols": 3,
+          "field": {
             "id": "1d579aff-4b18-5ecf-b660-33d2f2dfd55e",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
@@ -865,7 +906,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         }

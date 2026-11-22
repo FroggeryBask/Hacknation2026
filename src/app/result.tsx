@@ -2,7 +2,6 @@
 
 // A created form: its checks (rules, notes, safety scan), download and preview. Shared by the
 // single-file flow and the list of several files (upload-form.tsx, batch.tsx).
-import { cn } from "cn";
 import {
   CircleCheck,
   Download,
@@ -32,28 +31,22 @@ import { uniqueNames, zip } from "@/lib/zip";
 import type { Result } from "./jobs";
 import { JsonView } from "./json-view";
 
-/** Rule errors and warnings, and content the model may have copied from a hostile document. */
+/**
+ * Rule errors and content the model may have copied from a hostile document. Rule warnings are not
+ * shown: they stay in the API response (`issues`) for other clients.
+ */
 export function useChecks(result: Result | undefined) {
   const findings = useMemo(
     () => (result ? scanForm(result.form) : []),
     [result],
   );
   const errors = result?.issues.filter((i) => i.level === "error") ?? [];
-  // SAFETY_* warnings are the API's copy of the same scan (for other clients): shown once, in `findings`.
-  const warnings =
-    result?.issues.filter(
-      (i) => i.level === "warning" && !i.code.startsWith("SAFETY_"),
-    ) ?? [];
-  return { findings, errors, warnings };
+  return { findings, errors };
 }
 
-/** "Błędy: 0 · Ostrzeżenia: 2 · Treść do sprawdzenia: 1" */
-export function checksText({
-  errors,
-  warnings,
-  findings,
-}: ReturnType<typeof useChecks>) {
-  return `Błędy: ${errors.length} · Ostrzeżenia: ${warnings.length}${
+/** "Błędy: 0 · Treść do sprawdzenia: 1" */
+export function checksText({ errors, findings }: ReturnType<typeof useChecks>) {
+  return `Błędy: ${errors.length}${
     findings.length > 0 ? ` · Treść do sprawdzenia: ${findings.length}` : ""
   }`;
 }
@@ -119,32 +112,21 @@ function Findings({ findings }: { findings: Finding[] }) {
   );
 }
 
-/** Rule issues, notes and safety findings of one result. */
+/** Rule errors, notes and safety findings of one result. */
 export function ResultChecks({ result }: { result: Result }) {
-  const { findings, errors, warnings } = useChecks(result);
+  const { findings, errors } = useChecks(result);
   return (
     <>
-      {errors.length + warnings.length > 0 ? (
+      {errors.length > 0 ? (
         <ul className="flex flex-col gap-2 text-sm">
-          {[...errors, ...warnings].map((i) => (
+          {errors.map((i) => (
             <li
               key={`${i.code}-${i.path}-${i.message}`}
-              className={cn(
-                "flex items-start gap-2",
-                i.level === "error" && "text-destructive",
-              )}
+              className="flex items-start gap-2 text-destructive"
             >
-              <TriangleAlert
-                className={cn(
-                  "mt-0.5 size-4 shrink-0",
-                  i.level === "warning" && "text-warning",
-                )}
-                aria-hidden
-              />
+              <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
               <span>
-                <span className="sr-only">
-                  {i.level === "error" ? "Błąd: " : "Ostrzeżenie: "}
-                </span>
+                <span className="sr-only">Błąd: </span>
                 {i.message}
                 {i.path && (
                   <span className="text-muted-foreground"> ({i.path})</span>

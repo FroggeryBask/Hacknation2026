@@ -1871,6 +1871,47 @@
           "rows": 2,
           "cols": 3,
           "field": {
+            "id": "6c43921c-696c-5222-ae50-955f3d339282",
+            "type": "SECTION",
+            "techName": "podstawa_prawna",
+            "title": "Podstawa prawna",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "a10dfa01-3720-5c46-a1d0-8befaa009a9c",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podstawa_prawna_tekst",
+                  "title": "",
+                  "description": "<html><head></head><body><p>Art. 9 ustawy z dnia 16 listopada 2006 r. o opłacie skarbowej</p></body></html>",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "rows": 2,
+          "cols": 3,
+          "field": {
             "id": "769269a1-087a-5450-8a52-fe0299e61a80",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
@@ -1902,7 +1943,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         }
