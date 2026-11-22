@@ -22,8 +22,10 @@ import {
   type CoiQuestion,
   evaluateStates,
   type FieldState,
+  fieldMaxLength,
   fieldOptions,
   fieldValidators,
+  isPhone,
   isRequired,
   orderedTabs,
   sortQuestions,
@@ -98,6 +100,56 @@ function Questions({
 const description = (html?: string, inline = false): ReactNode =>
   hasText(html) ? <RichText html={html} inline={inline} /> : undefined;
 
+/** Read-only registry field in the preview: the platform fills it after login. */
+const EXTERNAL_PLACEHOLDER = "Uzupełni się automatycznie z danych logowania";
+
+/** Input type and keyboard for the kind of data (phone and e-mail keyboards). */
+function textKind(f: CoiField) {
+  if (validatorNames(f).includes("EMAIL"))
+    return { type: "email" as const, autoComplete: "email" };
+  if (isPhone(f))
+    return {
+      type: "tel" as const,
+      inputMode: "tel" as const,
+      autoComplete: "tel",
+    };
+  if (["PESEL", "NIP", "REGON"].some((v) => validatorNames(f).includes(v)))
+    return { type: "text" as const, inputMode: "numeric" as const };
+  if (validatorNames(f).includes("ZIP_CODE"))
+    return { type: "text" as const, autoComplete: "postal-code" };
+  return { type: "text" as const };
+}
+
+/*
+ * Address fields as the design standard and the COI visualisation of
+ * material 1 show them. The COI import format has no key for these, the
+ * e-service platform draws them, so the preview adds them by the field title.
+ */
+
+/** "Wyświetl dodatkowy checkbox wyłączający pole" (design standard, address). */
+function noValueLabel(f: CoiField): string | undefined {
+  const title = f.title.trim().toLowerCase();
+  if (title === "ulica") return "Brak nazwy ulicy";
+  if (title === "numer lokalu") return "Brak numeru lokalu";
+  if (title === "kod pocztowy" && /zagranica/.test(f.techName))
+    return "Brak kodu pocztowego";
+  return undefined;
+}
+
+const isZip = (f: CoiField) => validatorNames(f).includes("ZIP_CODE");
+
+/** A short "Np. …" hint is the field's placeholder ("Np. Polna, Aleja Leśna…"). */
+function exampleHint(f: CoiField): string | undefined {
+  const text = (f.description ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return /^Np\.\s/.test(text) && text.length <= 80 ? text : undefined;
+}
+
+const firstValue = (v: CoiField["defaultValue"]) =>
+  (Array.isArray(v) ? v[0] : v) || undefined;
+
 function Field({ field: f, prefix }: { field: CoiField; prefix?: string }) {
   const states = useContext(StatesContext);
   const name = prefix ? `${prefix}.${f.techName}` : f.techName;
@@ -105,13 +157,18 @@ function Field({ field: f, prefix }: { field: CoiField; prefix?: string }) {
   // Conditional fields stay hidden until their condition is known to be true.
   if (f.states?.length && !state?.show) return null;
 
+  const external = f.defaultValueType === "EXTERNAL_SYSTEM";
+  const readOnly = f.readOnly || state?.readOnly;
   const common = {
     name,
     label: f.title,
     description: description(f.description, true),
     required: isRequired(f),
-    readOnly: f.readOnly || state?.readOnly,
+    readOnly,
     validators: fieldValidators(f),
+    // A value written in the JSON (office name, "Polska") is shown as is;
+    // registry data (MLPZ, PESEL) is filled in by the platform, not by us.
+    defaultValue: external ? undefined : firstValue(f.defaultValue),
   };
 
   switch (f.type) {
@@ -134,19 +191,29 @@ function Field({ field: f, prefix }: { field: CoiField; prefix?: string }) {
           )}
         </RepeatingSection>
       );
-    case "TEXT_FIELD":
+    case "TEXT_FIELD": {
+      const example = exampleHint(f);
       return (
         <TextField
           {...common}
-          type={validatorNames(f).includes("EMAIL") ? "email" : "text"}
+          description={example ? undefined : common.description}
+          maxLength={fieldMaxLength(f)}
+          {...textKind(f)}
+          placeholder={
+            external && readOnly
+              ? EXTERNAL_PLACEHOLDER
+              : (example ?? (isZip(f) ? "__-___" : undefined))
+          }
+          noValueLabel={readOnly ? undefined : noValueLabel(f)}
         />
       );
+    }
     case "NUMBER":
-      return <NumberField {...common} />;
+      return <NumberField {...common} maxLength={fieldMaxLength(f)} />;
     case "DATEPICKER":
       return <DateField {...common} />;
     case "TEXTAREA":
-      return <TextareaField {...common} />;
+      return <TextareaField {...common} maxLength={fieldMaxLength(f)} />;
     case "RADIO":
       return <RadioField {...common} options={fieldOptions(f)} />;
     case "CHECKBOX": {
@@ -202,10 +269,11 @@ function Field({ field: f, prefix }: { field: CoiField; prefix?: string }) {
 }
 
 /**
- * E-form built from COI JSON: tabs in flow order, FINISH last. A preview of the
- * structure only: no field is prefilled (defaultValue and EXTERNAL_SYSTEM data
- * come from the e-service platform, not from us), and every tab can be opened
- * without filling the required fields.
+ * E-form built from COI JSON: tabs in flow order, FINISH last. Values written
+ * in the JSON (office name, "Polska") are shown; registry data
+ * (EXTERNAL_SYSTEM: MLPZ, PESEL) comes from the e-service platform, so a
+ * read-only field of that kind says where its value comes from. "Dalej" checks
+ * the page; the stepper opens pages already reached.
  */
 export function CoiFormView({ form }: { form: CoiForm }) {
   const pages = useMemo(

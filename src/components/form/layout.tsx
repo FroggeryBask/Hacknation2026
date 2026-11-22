@@ -1,11 +1,11 @@
 "use client";
 
 import { cn } from "cn";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Plus, Trash2, TriangleAlert } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FormProvider, useForm, useFormApi } from "./form-context";
+import { FormProvider, focusField, useForm, useFormApi } from "./form-context";
 
 /* ------------------------------------------------------------------ */
 /* SECTION: white card with title and optional description             */
@@ -112,6 +112,15 @@ export function RepeatingSection({
   );
 }
 
+/**
+ * Navigation buttons keep the focus where it is on mouse down. Otherwise the
+ * field being left checks itself (an error message appears, the character
+ * counter goes) and the page shifts between mouse down and up, so the click
+ * lands next to the button and is lost. The click still runs: "Dalej" checks
+ * the whole page anyway. Keyboard use is unchanged.
+ */
+const keepFocus = (e: React.MouseEvent) => e.preventDefault();
+
 /* ------------------------------------------------------------------ */
 /* Stepper (page navigation)                                           */
 /* ------------------------------------------------------------------ */
@@ -121,12 +130,15 @@ export function Stepper({
   current,
   label = "Kroki formularza",
   onSelect,
+  canSelect,
 }: {
   steps: string[];
   current: number;
   label?: string;
-  /** Makes every step a button that opens it (structure preview). */
+  /** Makes steps buttons that open them. */
   onSelect?: (index: number) => void;
+  /** Which steps can be opened (default: all); the others stay plain text. */
+  canSelect?: (index: number) => boolean;
 }) {
   return (
     <nav aria-label={label}>
@@ -173,9 +185,10 @@ export function Stepper({
               aria-current={active ? "step" : undefined}
               className="flex min-w-0 flex-1"
             >
-              {onSelect ? (
+              {onSelect && (canSelect?.(i) ?? true) ? (
                 <button
                   type="button"
+                  onMouseDown={keepFocus}
                   onClick={() => onSelect(i)}
                   aria-label={`Krok ${i + 1}: ${s}`}
                   className="group flex min-w-0 flex-1 cursor-pointer flex-col gap-2 rounded-xs pb-1 text-left outline-none hover:[&>span:last-child]:underline focus-visible:ring-3 focus-visible:ring-ring/50"
@@ -210,12 +223,103 @@ export function FormNav({
     <div className="flex items-center justify-end gap-3 pt-2">
       <div className="flex gap-3">
         {onBack && (
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onMouseDown={keepFocus} onClick={onBack}>
             Wstecz
           </Button>
         )}
-        <Button onClick={onNext}>{nextLabel}</Button>
+        <Button onMouseDown={keepFocus} onClick={onNext}>
+          {nextLabel}
+        </Button>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Error summary after a page check (pattern of gov.pl / GOV.UK forms) */
+/* ------------------------------------------------------------------ */
+
+/** The visible label of a field, without the "(opcjonalnie)" suffix. */
+function fieldLabel(name: string): string {
+  const el = document.querySelector(`[data-field="${CSS.escape(name)}"]`);
+  const text = el?.querySelector("label, legend")?.textContent?.trim();
+  return text?.replace(/\s*\(opcjonalnie\)$/, "") || name;
+}
+
+/** Field names in the order they appear on the page. */
+function inPageOrder(names: string[]): string[] {
+  const at = (n: string) =>
+    document.querySelector(`[data-field="${CSS.escape(n)}"]`);
+  return [...names].sort((a, b) => {
+    const x = at(a);
+    const y = at(b);
+    if (!x || !y) return 0;
+    return x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING
+      ? -1
+      : 1;
+  });
+}
+
+/**
+ * Shown when "Dalej" finds errors: a list with links to the fields (focus
+ * moves here, so screen readers read it). Follows the live errors: fixing a
+ * field removes its line, and when all are fixed it says so.
+ */
+export function ErrorSummary({ errors }: { errors: Record<string, string> }) {
+  const box = useRef<HTMLElement | null>(null);
+  const keep = (el: HTMLElement | null) => {
+    box.current = el;
+  };
+  const names = inPageOrder(Object.keys(errors));
+  const count = names.length;
+  // Focus once, when the summary appears (each check mounts a new one).
+  useEffect(() => {
+    box.current?.focus();
+    box.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, []);
+
+  if (!count) {
+    return (
+      <output
+        ref={keep}
+        tabIndex={-1}
+        className="flex items-start gap-2 rounded-lg border border-success bg-card p-4 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <Check className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
+        Wszystkie błędy na tej stronie są poprawione. Możesz przejść dalej.
+      </output>
+    );
+  }
+  return (
+    <div
+      ref={keep}
+      tabIndex={-1}
+      role="alert"
+      aria-labelledby="error-summary-title"
+      className="flex flex-col gap-2 rounded-lg border-2 border-destructive bg-card p-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
+      <h2
+        id="error-summary-title"
+        className="flex items-center gap-2 font-bold text-destructive"
+      >
+        <TriangleAlert className="size-4 shrink-0" aria-hidden />
+        {count === 1
+          ? "Popraw 1 błąd na tej stronie"
+          : `Popraw błędy na tej stronie: ${count}`}
+      </h2>
+      <ul className="flex flex-col gap-1 text-sm">
+        {names.map((name) => (
+          <li key={name}>
+            <button
+              type="button"
+              onClick={() => focusField(name)}
+              className="cursor-pointer text-left text-primary underline underline-offset-2 outline-none hover:no-underline focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              {fieldLabel(name)}: {errors[name]}
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -245,11 +349,31 @@ function PagedForm({
   const form = useFormApi();
   const [page, setPage] = useState(0);
   const [sent, setSent] = useState(false);
+  // Failed "Dalej" checks on this page (each one shows the summary again).
+  const [checks, setChecks] = useState(0);
+  // Furthest page reached with "Dalej": the stepper opens only pages up to it,
+  // so a page can't be skipped before the ones before it are correct.
+  const [reached, setReached] = useState(0);
   const last = page === pages.length - 1;
 
   const go = (to: number) => {
     setPage(to);
+    setChecks(0);
+    // Preview: errors of the page left behind are not shown on the next one.
+    if (freeNavigation) form.clearErrors();
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  /** Like the e-service: "Dalej" stays on the page while it has errors. */
+  const next = () => {
+    if (form.check().length) {
+      setChecks((n) => n + 1);
+      return;
+    }
+    if (last) setSent(true);
+    else {
+      setReached((r) => Math.max(r, page + 1));
+      go(page + 1);
+    }
   };
 
   if (sent) {
@@ -290,6 +414,7 @@ function PagedForm({
         steps={pages.map((p) => p.title)}
         current={page}
         onSelect={freeNavigation ? go : undefined}
+        canSelect={(i) => i <= reached}
       />
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
@@ -300,6 +425,7 @@ function PagedForm({
           transition={{ duration: 0.2 }}
           className="flex flex-col gap-4"
         >
+          {checks > 0 && <ErrorSummary key={checks} errors={form.errors} />}
           <AnimatePresence initial={false}>
             {pages[page].content}
           </AnimatePresence>
@@ -308,11 +434,7 @@ function PagedForm({
       <FormNav
         onBack={page > 0 ? () => go(page - 1) : undefined}
         nextLabel={last ? submitLabel : "Dalej"}
-        onNext={() => {
-          if (!freeNavigation && !form.validate()) return;
-          if (last) setSent(true);
-          else go(page + 1);
-        }}
+        onNext={next}
       />
     </form>
   );
@@ -329,7 +451,7 @@ export function FormShell({
   pages: FormPage[];
   submitLabel?: string;
   initialValues?: Parameters<typeof useForm>[0];
-  /** Any step can be opened and "Dalej" does not check required fields (structure preview). */
+  /** The stepper opens pages already reached (back and forth); "Dalej" checks the page first. */
   freeNavigation?: boolean;
 }) {
   const form = useForm(initialValues);

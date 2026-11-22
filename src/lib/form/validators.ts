@@ -70,6 +70,17 @@ export const IBAN_PL = text((s) =>
     : "Numer rachunku ma 26 cyfr.",
 );
 
+/** Whole or decimal number, spaces allowed between thousands: "1 250,50". */
+export const NUMBER = text((s) =>
+  /^-?\d+([.,]\d+)?$/.test(s.replace(/\s/g, ""))
+    ? undefined
+    : "Wpisz liczbę, np. 120 lub 120,50.",
+);
+
+/** Over the length limit (a pasted value can be longer than `maxLength`). */
+export const maxChars = (max: number): Validator =>
+  text((s) => (s.length > max ? `Wpisz najwyżej ${max} znaków.` : undefined));
+
 export const pattern = (re: RegExp, message: string): Validator =>
   text((s) => (re.test(s) ? undefined : message));
 
