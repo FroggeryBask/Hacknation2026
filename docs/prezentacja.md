@@ -269,7 +269,7 @@ Mówca: jedno zdanie o tym, co robimy. Zespół przedstawiamy na końcu.
 - Dostępność (a11y)
 - Upload wielu plików naraz (batch)
 
-Wideo: <a href="https://drive.google.com/file/d/1R41hzPY-2XGb4rstmdMXj6w0sqbB5rDl/view?usp=sharing">Google Drive</a>
+Wideo: <a href="https://drive.google.com/file/d/1i21lJTVdUyuuoSr-BGNU0vZxO5TijOff/view?usp=sharing">Google Drive</a>
 
 </div>
 </div>
@@ -342,4 +342,4 @@ Czas przetworzenia formularza: <em>średnio 7,4 s</em>
 
 Ewelina Musińska · Konrad Piekarz · Gabriela Rusek
 
-Repozytorium: <a href="https://github.com/FroggeryBask/Hacknation2026">github.com/FroggeryBask/Hacknation2026</a> · Film: <a href="https://drive.google.com/file/d/1R41hzPY-2XGb4rstmdMXj6w0sqbB5rDl/view?usp=sharing">Google Drive</a>
+Repozytorium: <a href="https://github.com/FroggeryBask/Hacknation2026">github.com/FroggeryBask/Hacknation2026</a> · Film: <a href="https://drive.google.com/file/d/1i21lJTVdUyuuoSr-BGNU0vZxO5TijOff/view?usp=sharing">Google Drive</a>
