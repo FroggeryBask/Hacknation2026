@@ -142,7 +142,7 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_EDEN_REASONING_EFFORT` | `none` | Wyłącza myślenie modelu na Eden: `reasoning_effort` w zapytaniu i przełącznik `/no_think` w prompcie (jak `think: false` w Ollamie). Gdy Eden odrzuci parametr, zapytanie idzie ponownie bez niego. Pusta wartość: nie wysyła żadnego z nich |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `1800` | Limit czasu odpowiedzi modelu (Ollama na CPU potrzebuje do ~25 min na duży formularz) |
 | `AUTOFORMULARZ_LLM_NUM_CTX` | `24576` | Okno kontekstu modelu w Ollamie: prompt + odpowiedź (więcej = więcej pamięci RAM/VRAM; 16384 nie mieści formularza 8) |
-| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Maksymalna długość odpowiedzi modelu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
+| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Górny limit długości odpowiedzi modelu; mały formularz dostaje mniejszy (2000 + 100 na blok, co najmniej 3000), a schemat ogranicza liczbę stron, sekcji i pól do rozmiaru dokumentu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
 | `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron skanu (PDF lub obraz) przekazać modelowi jako obrazy; OCR czyta wszystkie strony (do 30) |
 | `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc; .ods jest czytany bez niego) |
 | `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |

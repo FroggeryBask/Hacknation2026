@@ -298,3 +298,31 @@ def test_template_sections_after_the_form_stop_the_stream():
     out, _ = drop_paper_only_fields(spec)
     titles = [s.title for p in out.pages for s in p.sections]
     assert titles[:2] == ["Opłata skarbowa", "Uzasadnienie"] and "Podpis" not in titles
+
+
+# ---------------------------------------------------------------- answer size per document
+
+
+def test_every_saved_result_fits_its_document_limits():
+    """The per-document maxItems and max_tokens never cut a correct answer: each saved spec (forms 2-9)
+    fits the limits computed from the blocks the model gets for it, with room to spare."""
+    from autoformularz import llm, results
+    from autoformularz.config import Settings
+
+    settings = Settings(_env_file=None)
+    for n in results.FORMS:
+        src = results.source_file(n)
+        data = src.read_bytes()
+        model_doc = presort(extract(validate_upload(src.name, data, 50 * 2**20), data)).model_doc
+        spec = FormSpec.model_validate_json((results.OUT / f"{n:02d}.spec.json").read_text(encoding="utf-8"))
+        lim = llm.model_limits(model_doc)
+        sections = [s for p in spec.pages for s in p.sections]
+        fields = [f for s in sections for f in s.fields]
+        assert len(spec.pages) <= lim.pages, n
+        assert max(len(p.sections) for p in spec.pages) <= lim.sections, n
+        assert max(len(s.fields) for s in sections) <= lim.fields, n
+        assert max([len(f.options) for f in fields] or [0]) <= lim.options, n
+        assert len(spec.consents) <= lim.consents, n
+        assert max(len(x.blocks) for x in [*sections, *fields]) <= lim.refs, n
+        answer = spec.model_dump_json(exclude_defaults=True)
+        assert len(answer) / 2.5 < llm.answer_budget(model_doc, settings), n  # ~2.5+ characters per token

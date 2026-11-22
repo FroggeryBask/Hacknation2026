@@ -19,7 +19,16 @@ from autoformularz import metrics, progress
 from autoformularz.check import TEMPLATE_TITLE
 from autoformularz.config import Settings
 from autoformularz.document import FILL_LINE, Document
-from autoformularz.spec import FormSpec, model_schema
+from autoformularz.spec import (
+    MAX_FIELDS,
+    MAX_OPTIONS,
+    MAX_PAGES,
+    MAX_REFS,
+    MAX_SECTIONS,
+    FormSpec,
+    Limits,
+    model_schema,
+)
 
 SYSTEM_PROMPT = """\
 Jesteś analitykiem, który zamienia papierowe formularze urzędowe na opis formularza elektronicznego (e-usługi).
@@ -164,6 +173,41 @@ class LLMError(Exception):
         self.partial = partial  # the cut answer (LLM_TRUNCATED), to see where the model got stuck
 
 
+# Answer size per document. Measured on the saved results 2-9 (blocks sent to the model -> what the
+# model wrote): at most 3 pages for 27 blocks and 6 for 236, 6 sections on a page (36 blocks), 16 fields in a
+# section, 20 options, 4 statements, ~170 answer characters per block (~70 tokens). Each bound below is at
+# least 1.3x the largest measured value, so a correct answer always fits and a looping one must stop early.
+ANSWER_TOKENS_BASE, ANSWER_TOKENS_PER_UNIT, ANSWER_TOKENS_MIN = 2000, 100, 3000
+SCAN_PAGE_UNITS = 60
+
+
+def size_units(ex: Document) -> int:
+    """Blocks, with each table cell counted (a table row is one block but may hold many fields). A scan
+    without OCR has no blocks: then a full page per image (forms 2-9 have 20-60 blocks per page)."""
+    if not ex.blocks:
+        return SCAN_PAGE_UNITS * max(1, len(ex.images))
+    return sum(max(1, b.text.count("|") - 1) for b in ex.blocks)
+
+
+def model_limits(ex: Document) -> Limits:
+    n = size_units(ex)
+    return Limits(
+        pages=min(MAX_PAGES, max(4, n // 25)),
+        sections=min(MAX_SECTIONS, max(8, n // 8)),
+        fields=min(MAX_FIELDS, max(12, n // 2, len(ex.candidates))),
+        options=min(MAX_OPTIONS, max(10, n // 4)),
+        consents=max(6, n // 20),
+        refs=min(MAX_REFS, max(4, len(ex.blocks))),
+    )
+
+
+def answer_budget(ex: Document, settings: Settings) -> int:
+    """max_tokens for this document: small forms get a small budget, so a loop the detectors miss ends in
+    seconds; AUTOFORMULARZ_LLM_MAX_TOKENS stays the ceiling (the largest forms)."""
+    want = max(ANSWER_TOKENS_MIN, ANSWER_TOKENS_BASE + ANSWER_TOKENS_PER_UNIT * size_units(ex))
+    return min(settings.llm_max_tokens, want)
+
+
 def build_user_prompt(ex: Document) -> str:
     parts = ["Przeanalizuj formularz i zwróć FormSpec."]
     if ex.blocks:
@@ -190,14 +234,16 @@ def _mime(img: bytes) -> str:
     return "image/jpeg" if img[:3] == b"\xff\xd8\xff" else "image/png"
 
 
-def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) -> str:
+def _call_ollama(
+    messages: list[dict], images: list[bytes], settings: Settings, schema: dict | None = None
+) -> str:
     msgs = [dict(m) for m in messages]
     if images:
         msgs[1]["images"] = [_b64(img) for img in images]
     payload = {
         "model": settings.llm_model,
         "messages": msgs,
-        "format": model_schema(),
+        "format": schema or model_schema(),
         # Streamed so a looping answer can be stopped as soon as it repeats a section (see below).
         "stream": True,
         "think": False,
@@ -212,6 +258,7 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
     done_reason = None
     final: dict = {}
     call = metrics.start_call("ollama", settings.llm_model, msgs, images)
+    call.max_tokens = settings.llm_max_tokens
     try:
         with httpx.stream(
             "POST", f"{settings.ollama_url}/api/chat", json=payload, timeout=settings.llm_timeout_s
@@ -325,6 +372,7 @@ class Answer:
         self.outline = Outline()
         self.started = time.perf_counter()
         self.first_at: float | None = None  # when the first piece arrived (metrics: time to first token)
+        self.stopped = False  # we closed the stream: the answer was looping (metrics: finishReason "repeat")
 
     def text(self) -> str:
         return "".join(self.parts)
@@ -348,6 +396,7 @@ class Answer:
             found = _complete_pages(text)
             if found and first_repeat(found[1]):
                 log.warning("Model started repeating sections: stopped after %d characters.", self.size)
+                self.stopped = True
                 raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
             # The form's own sections are done and the model goes on with the template's ("Dane
             # kontaktowe", "Podpis", "Data", "Podpis", …): stop, nothing after them belongs to the form.
@@ -355,11 +404,13 @@ class Answer:
                 log.warning(
                     "Model started writing template sections: stopped after %d characters.", self.size
                 )
+                self.stopped = True
                 raise LLMError("LLM_TRUNCATED", "Model zaczął dopisywać części szablonu.", partial=text)
             # A loop inside one section: the same field again and again (form 1: "Numer porządkowy" 22
             # times). The section never closes, so the check above never sees it.
             if field_loop(text) is not None:
                 log.warning("Model started repeating fields: stopped after %d characters.", self.size)
+                self.stopped = True
                 raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać pola.", partial=text)
 
 
@@ -383,7 +434,9 @@ def _eden_messages(messages: list[dict], images: list[bytes], no_think: bool = F
     return msgs
 
 
-def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) -> str:
+def _call_eden(
+    messages: list[dict], images: list[bytes], settings: Settings, schema: dict | None = None
+) -> str:
     key = _key(settings)
     if not key or not settings.eden_model:
         raise LLMError(
@@ -401,7 +454,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         "stream_options": {"include_usage": True},
         "response_format": {
             "type": "json_schema",
-            "json_schema": {"name": "FormSpec", "schema": model_schema()},
+            "json_schema": {"name": "FormSpec", "schema": schema or model_schema()},
         },
     }
     if settings.eden_reasoning_effort.strip():
@@ -414,6 +467,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
             guard(settings.eden_model)
         answer = Answer()
         call = metrics.start_call("eden", settings.eden_model or "", payload["messages"], images)
+        call.max_tokens = payload["max_tokens"]
         sse: dict | None = None
         try:
             with httpx.stream(
@@ -512,7 +566,8 @@ def _finish_call(call: metrics.ModelCall, answer: Answer, finish: str | None) ->
     call.seconds = time.perf_counter() - answer.started
     if answer.first_at is not None:
         call.first_token_s = answer.first_at - answer.started
-    call.finish_reason = finish
+    # Stopped on our side: the provider never sent its finish reason nor usage (cost unknown for this call)
+    call.finish_reason = "repeat" if answer.stopped else finish
     metrics.answer_shape(call, answer.text())
 
 
@@ -723,9 +778,13 @@ def generate_spec(ex: Document, settings: Settings) -> FormSpec:
     if eden:  # json_schema may be dropped by the provider, so the schema also goes in the prompt
         system += "\nSchemat JSON (FormSpec):\n" + json.dumps(model_schema(), ensure_ascii=False)
     messages = [{"role": "system", "content": system}, {"role": "user", "content": build_user_prompt(ex)}]
+    # Enforced per document (json_schema / format and max_tokens); the schema in the prompt stays the static
+    # one, so the system prompt is the same for every form (provider prompt cache, Ollama keep_alive).
+    schema = model_schema(model_limits(ex))
+    settings = settings.model_copy(update={"llm_max_tokens": answer_budget(ex, settings)})
     progress.stage("Model opisuje formularz")
     try:
-        content = call(messages, ex.images, settings)
+        content = call(messages, ex.images, settings, schema)
     except LLMError as e:
         if e.code != "LLM_TRUNCATED" or not (spec := salvage(e.partial)):
             raise
@@ -749,7 +808,7 @@ def generate_spec(ex: Document, settings: Settings) -> FormSpec:
         },
     ]
     progress.stage("Model poprawia odpowiedź")
-    content = call(retry, ex.images, settings)
+    content = call(retry, ex.images, settings, schema)
     try:
         return parse_spec(content)
     except (json.JSONDecodeError, ValidationError) as e:

@@ -32,7 +32,8 @@ class ModelCall:
     prompt_tokens: int | None = None  # as reported by the provider
     completion_tokens: int | None = None
     cost_usd: float | None = None
-    finish_reason: str | None = None
+    finish_reason: str | None = None  # also "repeat": stopped on our side, the answer was looping
+    max_tokens: int | None = None  # answer budget of this call (per document, see llm.answer_budget)
     answer_chars: int = 0
     # Keys the model wrote with a default value: each is output time (and Eden cost) for nothing.
     answer_nulls: int = 0
@@ -56,6 +57,7 @@ class ModelCall:
             "completionTokens": self.completion_tokens,
             "costUsd": self.cost_usd,
             "finishReason": self.finish_reason,
+            "maxTokens": self.max_tokens,
             "answerChars": self.answer_chars,
             "answerNulls": self.answer_nulls,
             "answerEmptyLists": self.answer_empty_lists,

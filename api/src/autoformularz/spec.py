@@ -4,6 +4,7 @@ The LLM never writes the target JSON directly (1-2k lines with UUIDs and jsonata
 WHAT the form asks for; `compiler.py` deterministically turns this into the COI import format,
 adding the predefined sections from the design standard."""
 
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
 
@@ -232,7 +233,21 @@ MODEL_ROLES = [Role.INSTRUCTION, Role.LEGAL_BASIS, Role.STATEMENT, Role.GDPR, Ro
 MODEL_MAX_ROLES = 40  # with ranges a whole form fits; forces one entry per run of blocks
 
 
-def model_schema() -> dict:
+@dataclass(frozen=True)
+class Limits:
+    """Per-document size of the answer (`maxItems` in the model schema, see `llm.model_limits`). The static
+    MAX_* bounds fit the largest form; a small form gets small ones, so a looping answer has to close the
+    JSON after a few items instead of writing up to 15 sections per page."""
+
+    pages: int
+    sections: int
+    fields: int
+    options: int
+    consents: int
+    refs: int
+
+
+def model_schema(limits: Limits | None = None) -> dict:
     """JSON Schema sent to the model (Ollama `format`, Eden `json_schema`). Both providers enforce it, so
     rules that must hold go here, not only in the prompt. Stricter than `FormSpec` itself, which still
     loads saved specs:
@@ -250,7 +265,20 @@ def model_schema() -> dict:
     for obj in (schema, *defs.values()):
         _only_non_defaults(obj)
     defs["ApplicantSpec"]["minProperties"] = 1  # an empty "applicant": {} is the default: leave it out
+    if limits is not None:
+        _cap(schema["properties"]["pages"], limits.pages)
+        _cap(schema["properties"]["consents"], limits.consents)
+        _cap(defs["PageSpec"]["properties"]["sections"], limits.sections)
+        _cap(defs["SectionSpec"]["properties"]["fields"], limits.fields)
+        _cap(defs["FieldSpec"]["properties"]["options"], limits.options)
+        for name in ("FieldSpec", "SectionSpec"):
+            _cap(defs[name]["properties"]["blocks"], limits.refs)
     return schema
+
+
+def _cap(prop: dict, n: int) -> None:
+    """maxItems at most n (never above the static bound, never below minItems)."""
+    prop["maxItems"] = max(prop.get("minItems", 0), min(prop.get("maxItems", n), n))
 
 
 def _only_non_defaults(obj: dict) -> None:
