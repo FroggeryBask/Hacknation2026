@@ -151,9 +151,24 @@ def _run(n: int, settings: Settings, m: metrics.Metrics, *, compile_only: bool, 
             "notes": document.notes + result.notes,
             "coverage": coverage(spec, document).as_dict(),
             "edenUsage": usage,
+            "proposedDictionaries": result.dictionaries,
         },
     )
     return f"{n:02d}: {src.name} -> błędy lintera: {errors}, ostrzeżenia: {len(result.issues) - errors} ({model})"
+
+
+def write_dictionaries() -> int:
+    """wyniki/slowniki.json: every proposed dictionary from the reports, merged by name (all forms)."""
+    merged: dict[str, dict] = {}
+    for report in sorted(OUT.glob("[0-9][0-9].report.json")):
+        form = int(report.name[:2])
+        for d in json.loads(report.read_text(encoding="utf-8")).get("proposedDictionaries") or []:
+            m = merged.setdefault(d["dictionaryName"], {**d, "entries": [], "usage": []})
+            codes = {e["kod"] for e in m["entries"]}
+            m["entries"] += [e for e in d["entries"] if e["kod"] not in codes]
+            m["usage"] += [{"form": form, **u} for u in d["usage"]]
+    write(OUT / "slowniki.json", list(merged.values()))
+    return len(merged)
 
 
 def compare_metrics(path: Path | None = None) -> str:
@@ -205,6 +220,7 @@ def main(argv: list[str] | None = None) -> int:
         except Exception as e:  # one bad form must not stop the others
             failed += 1
             print(f"{n:02d}: BŁĄD {type(e).__name__}: {getattr(e, 'message', e)}", flush=True)
+    print(f"Propozycje nowych słowników: {write_dictionaries()} (wyniki/slowniki.json)")
     total = usage_since(start)
     if total["calls"]:
         forms = ",".join(str(n) for n in args.only or FORMS)

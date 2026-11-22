@@ -1380,9 +1380,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "2c3c98ed-4553-54cb-86c7-50d4a81e7abf",
-                  "type": "INFO_SECTION",
-                  "techName": "podglad",
+                  "id": "2d2ad6d1-3e23-54fe-97ac-845574ff1e86",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podglad_1",
                   "title": "",
                   "description": "<html><head></head><body><p>Zanim przejdziesz do wyboru sposobu podpisu, sprawdź dane na podglądzie. Jeśli zobaczysz błędy, wróć do edycji.</p></body></html>",
                   "options": [],

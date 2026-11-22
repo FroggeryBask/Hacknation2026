@@ -3184,17 +3184,10 @@
             "questionOrder": 3,
             "tooltipMessage": ""
           }
-        }
-      ]
-    },
-    {
-      "id": "9bf7fbe0-e622-5d4d-8ae3-f5714badec37",
-      "title": "Oświadczenie",
-      "type": "MAIN",
-      "questions": [
+        },
         {
           "x": 0,
-          "y": 0,
+          "y": 38,
           "rows": 2,
           "cols": 3,
           "field": {
@@ -3240,7 +3233,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 4,
             "tooltipMessage": ""
           }
         }
@@ -3585,9 +3578,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b8a84afa-305f-5e58-a949-90052328cdd5",
-                  "type": "INFO_SECTION",
-                  "techName": "podglad",
+                  "id": "303ed0d1-a609-595f-bc93-264319959126",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podglad_1",
                   "title": "",
                   "description": "<html><head></head><body><p>Zanim przejdziesz do wyboru sposobu podpisu, sprawdź dane na podglądzie. Jeśli zobaczysz błędy, wróć do edycji.</p></body></html>",
                   "options": [],
@@ -3633,20 +3626,15 @@
       {
         "id": "b0384865",
         "source": "d26bcd2d-5b03-5b0e-920e-6b55d0b034dc",
-        "target": "9bf7fbe0-e622-5d4d-8ae3-f5714badec37"
-      },
-      {
-        "id": "41f9aa6c",
-        "source": "9bf7fbe0-e622-5d4d-8ae3-f5714badec37",
         "target": "cf611da0-6f47-5085-bba0-3a8e8467e73f"
       },
       {
-        "id": "ec8ef271",
+        "id": "41f9aa6c",
         "source": "cf611da0-6f47-5085-bba0-3a8e8467e73f",
         "target": "98913242-e51a-5954-8258-bb532cd77038"
       },
       {
-        "id": "f4cbb43d",
+        "id": "ec8ef271",
         "source": "98913242-e51a-5954-8258-bb532cd77038",
         "target": "6a058d21-5af3-5ef5-bcc4-1a8e10bf2f20"
       }

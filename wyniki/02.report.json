@@ -46,7 +46,8 @@
     "Sekcja „Adres siedziby lub miejsca zamieszkania wnioskodawcy” jest w części standardowej formularza (pominięta).",
     "Sekcja „Dane kontaktowe wnioskodawcy” jest w części standardowej formularza (pominięta).",
     "Sekcja „Dane pełnomocnika” jest w części standardowej formularza (pominięta).",
-    "Formularz pyta o NIP wnioskodawcy: wnioskodawcą może być firma lub instytucja."
+    "Formularz pyta o NIP wnioskodawcy: wnioskodawcą może być firma lub instytucja.",
+    "Strona „Załączniki” ma mało pól: jej sekcje są na stronie „Informacje o opłacie skarbowej”."
   ],
   "coverage": {
     "blocks": 63,
@@ -65,5 +66,6 @@
     "promptTokens": 0,
     "completionTokens": 0,
     "costUsd": 0
-  }
+  },
+  "proposedDictionaries": []
 }

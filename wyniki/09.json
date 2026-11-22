@@ -1516,8 +1516,8 @@
       ]
     },
     {
-      "id": "009c29a1-c6b0-51b0-8ef2-005048881220",
-      "title": "Rodzaj wniosku",
+      "id": "032e3999-6e19-5955-971a-6fa2662926a0",
+      "title": "Dane wnioskodawcy",
       "type": "MAIN",
       "questions": [
         {
@@ -1578,17 +1578,10 @@
             "questionOrder": 0,
             "tooltipMessage": ""
           }
-        }
-      ]
-    },
-    {
-      "id": "032e3999-6e19-5955-971a-6fa2662926a0",
-      "title": "Dane wnioskodawcy",
-      "type": "MAIN",
-      "questions": [
+        },
         {
           "x": 0,
-          "y": 0,
+          "y": 2,
           "rows": 9,
           "cols": 3,
           "field": {
@@ -1811,13 +1804,13 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 9,
+          "y": 11,
           "rows": 5,
           "cols": 3,
           "field": {
@@ -1940,13 +1933,13 @@
               }
             ],
             "states": [],
-            "questionOrder": 1,
+            "questionOrder": 2,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 14,
+          "y": 16,
           "rows": 7,
           "cols": 3,
           "field": {
@@ -2123,7 +2116,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 2,
+            "questionOrder": 3,
             "tooltipMessage": ""
           }
         }
@@ -2717,7 +2710,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Rodzaj wniosku' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
+                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Dane wnioskodawcy' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 0,
@@ -2744,7 +2737,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Rodzaj wniosku' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
+                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Dane wnioskodawcy' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 1,
@@ -2771,7 +2764,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Rodzaj wniosku' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
+                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Dane wnioskodawcy' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 2,
@@ -2798,7 +2791,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Rodzaj wniosku' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
+                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Dane wnioskodawcy' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 3,
@@ -2823,7 +2816,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Rodzaj wniosku' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
+                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Dane wnioskodawcy' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 4,
@@ -2936,7 +2929,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Rodzaj wniosku' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
+                      "query": "(\"Wniosek o przyznanie wyróżnienia sportowego Rady Miasta Zgierza\" in tabs['Dane wnioskodawcy' in title].questions['wybierz_rodzaj_wniosku' in field.techName].field.repeatingSectionGrid['rodzaj_wniosku' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 0,
@@ -3112,9 +3105,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "35ce4975-1058-5440-b1be-37503f646bc8",
-                  "type": "INFO_SECTION",
-                  "techName": "podglad",
+                  "id": "d2d7f29f-4cef-5595-be5f-5e648837d095",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podglad_1",
                   "title": "",
                   "description": "<html><head></head><body><p>Zanim przejdziesz do wyboru sposobu podpisu, sprawdź dane na podglądzie. Jeśli zobaczysz błędy, wróć do edycji.</p></body></html>",
                   "options": [],
@@ -3140,30 +3133,25 @@
       {
         "id": "b031af3c",
         "source": "447984e2-acf3-5f48-95d7-7bba77da3496",
-        "target": "009c29a1-c6b0-51b0-8ef2-005048881220"
-      },
-      {
-        "id": "642662d6",
-        "source": "009c29a1-c6b0-51b0-8ef2-005048881220",
         "target": "032e3999-6e19-5955-971a-6fa2662926a0"
       },
       {
-        "id": "98f60bad",
+        "id": "642662d6",
         "source": "032e3999-6e19-5955-971a-6fa2662926a0",
         "target": "9e772f90-5df2-5065-83d9-cceca89b9df4"
       },
       {
-        "id": "cad79c91",
+        "id": "98f60bad",
         "source": "9e772f90-5df2-5065-83d9-cceca89b9df4",
         "target": "319bae30-ffdd-53c0-9a0a-4da011618e7c"
       },
       {
-        "id": "c0abbbcc",
+        "id": "cad79c91",
         "source": "319bae30-ffdd-53c0-9a0a-4da011618e7c",
         "target": "fa20192b-7c01-56eb-a296-83114e8fe835"
       },
       {
-        "id": "43ad9431",
+        "id": "c0abbbcc",
         "source": "fa20192b-7c01-56eb-a296-83114e8fe835",
         "target": "c4faf9cd-bd79-5789-b7a8-8e7d27960622"
       }

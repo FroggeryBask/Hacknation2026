@@ -53,7 +53,8 @@
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (59 zł): informacja, nie pole.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (71 zł): informacja, nie pole.",
     "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (91 zł): informacja, nie pole.",
-    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole."
+    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole.",
+    "Strona „Oświadczenie” ma mało pól: jej sekcje są na stronie „Oświadczenie o wysokości opłaty”."
   ],
   "coverage": {
     "blocks": 318,
@@ -96,5 +97,6 @@
     "promptTokens": 0,
     "completionTokens": 0,
     "costUsd": 0
-  }
+  },
+  "proposedDictionaries": []
 }

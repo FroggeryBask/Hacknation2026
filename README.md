@@ -296,6 +296,21 @@ Pliki `.env*` są poza gitem (oprócz `.env.example`). Nie commituj ich.
 | `npm run smoke [url]` | Sprawdza, czy kluczowe strony frontendu odpowiadają |
 | `npx shadcn@latest add <name>` | Dodaje komponent UI |
 
+### Propozycje nowych słowników
+
+Platforma ma słowniki Kraje, TERYT i Numery kierunkowe. Gdy pole lepiej zasiliłaby wspólna lista niż opcje wpisane
+w formularzu albo wolny tekst, wynik zawiera propozycję nowego słownika: nazwę (`dictionaryName`), strukturę
+(`kod`, `nazwa`), pozycje i zastosowanie (strona, sekcja, pole, proponowana zmiana). Reguły działają na etykietach
+pól, bez modelu:
+
+- katalog rozpoznanych list: stopień pokrewieństwa, rodzaj dokumentu tożsamości, rasy psów uznawanych za agresywne
+  (wykaz z rozporządzenia MSWiA z 2003 r.), sposób doręczenia, urzędy skarbowe, dyscypliny sportowe,
+- każde inne pole wyboru z co najmniej 8 opcjami (nazwa słownika z etykiety pola).
+
+Gdzie: `dictionaries` w odpowiedzi `?details=true`, `proposedDictionaries` w `wyniki/NN.report.json` i zbiorczo
+`wyniki/slowniki.json` (na materiałach: rasy psów z formularza 7, sposób doręczenia i dyscypliny z formularza 9).
+JSON formularza się nie zmienia, bo słownika nieznanego platformie nie da się zaimportować.
+
 ### Metryki i porównywanie przebiegów
 
 Każde przetworzenie pliku zapisuje metryki: czasy etapów, czas modelu i czas do pierwszego tokenu, tokeny

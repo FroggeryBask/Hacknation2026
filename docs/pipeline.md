@@ -116,6 +116,10 @@ Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Z
   `calls[]` z każdym wywołaniem modelu (`seconds`, `firstTokenS`, `promptTokens`, `completionTokens`,
   `costUsd`, `imageTokensEst`, `answerNulls`/`answerEmptyLists`/`answerFalse`), sumy i rozmiar wyniku
   (`pages`, `sections`, `fields`, `lintErrors`). Plik jest opisany skrótem `fileSha`, bez nazwy i treści.
+- `dictionaries`: propozycje nowych słowników (rozszerzenie II, `dictionaries.py`), każda z `dictionaryName`,
+  `title`, `description`, `structure` (kolumny `kod`, `nazwa`), `entries`, `source` i `usage` (strona, sekcja,
+  pole, proponowana zmiana). JSON formularza się nie zmienia: nieznany platformie `dictionaryName` dałby po
+  imporcie puste pole, więc opcje zostają w polu.
 
 Pierwsza wersja: jeden blok na wiersz tekstu, kandydaci z wzorców w tekście (formularze z pól tekstowych
 bez `____`, np. nr 2, nie mają jeszcze kandydatów). Kompilator jeszcze nie korzysta z bloków.

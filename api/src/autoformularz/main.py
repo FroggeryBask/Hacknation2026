@@ -74,6 +74,8 @@ def body(result: pipeline.Result, details: bool) -> dict[str, Any]:
         "coverage": result.coverage.as_dict() if result.coverage else None,
         # Speed, tokens and cost of this conversion (null for /compile): to compare runs.
         "metrics": result.metrics.as_dict() if result.metrics else None,
+        # New dictionaries this form would use (name, structure, entries, which fields): extension II.
+        "dictionaries": result.dictionaries,
     }
 
 

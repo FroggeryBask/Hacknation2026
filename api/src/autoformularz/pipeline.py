@@ -5,8 +5,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+from autoformularz import dictionaries, metrics, progress
 from autoformularz import llm as llm_module
-from autoformularz import metrics, progress
 from autoformularz import presort as presort_step
 from autoformularz.check import (
     Coverage,
@@ -42,6 +42,7 @@ class Result:
     document: Document | None = None  # None for /compile (no source file)
     coverage: Coverage | None = None
     metrics: metrics.Metrics | None = None  # None for /compile (no model call)
+    dictionaries: list[dict] = field(default_factory=list)  # proposed new dictionaries (dictionaries.py)
 
 
 def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
@@ -65,6 +66,7 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
         spec=spec,
         issues=issues,
         notes=repeated + standard + amounts + ranges + paper + conditions + small + warnings,
+        dictionaries=[d.as_dict() for d in dictionaries.propose(spec)],
     )
 
 

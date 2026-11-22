@@ -1,0 +1,255 @@
+[
+  {
+    "dictionaryName": "RASY_PSOW_AGRESYWNYCH",
+    "title": "Rasy psów uznawanych za agresywne",
+    "description": "Wykaz z rozporządzenia MSWiA z 28 kwietnia 2003 r. w sprawie wykazu ras psów uznawanych za agresywne; pole „Rasa psa” na wniosku o zezwolenie na utrzymywanie takiego psa.",
+    "structure": [
+      {
+        "name": "kod",
+        "type": "string",
+        "description": "Stały identyfikator pozycji (wartość zapisywana w odpowiedzi)"
+      },
+      {
+        "name": "nazwa",
+        "type": "string",
+        "description": "Tekst widoczny na liście"
+      }
+    ],
+    "fieldTypes": [
+      "SELECT",
+      "RADIO",
+      "CHECKBOX"
+    ],
+    "entries": [
+      {
+        "kod": "AMERYKANSKI_PIT_BULL_TERIER",
+        "nazwa": "amerykański pit bull terier"
+      },
+      {
+        "kod": "PIES_Z_MAJORKI_PERRO_DE_PRESA_MALLORQUIN",
+        "nazwa": "pies z Majorki (Perro de Presa Mallorquin)"
+      },
+      {
+        "kod": "BULDOG_AMERYKANSKI",
+        "nazwa": "buldog amerykański"
+      },
+      {
+        "kod": "DOG_ARGENTYNSKI",
+        "nazwa": "dog argentyński"
+      },
+      {
+        "kod": "PIES_KANARYJSKI_PERRO_DE_PRESA_CANARIO",
+        "nazwa": "pies kanaryjski (Perro de Presa Canario)"
+      },
+      {
+        "kod": "TOSA_INU",
+        "nazwa": "tosa inu"
+      },
+      {
+        "kod": "ROTTWEILER",
+        "nazwa": "rottweiler"
+      },
+      {
+        "kod": "AKBASH_DOG",
+        "nazwa": "akbash dog"
+      },
+      {
+        "kod": "ANATOLIAN_KARABASH",
+        "nazwa": "anatolian karabash"
+      },
+      {
+        "kod": "MOSKIEWSKI_STROZUJACY",
+        "nazwa": "moskiewski stróżujący"
+      },
+      {
+        "kod": "OWCZAREK_KAUKASKI",
+        "nazwa": "owczarek kaukaski"
+      }
+    ],
+    "source": null,
+    "usage": [
+      {
+        "form": 7,
+        "page": "Informacje o psie",
+        "section": "Dane psa",
+        "field": "Rasa psa",
+        "fieldType": "TEXT",
+        "change": "pole listy rozwijanej z dictionaryName „RASY_PSOW_AGRESYWNYCH” zamiast pola tekstowego"
+      }
+    ]
+  },
+  {
+    "dictionaryName": "SPOSOBY_DORECZENIA",
+    "title": "Sposób doręczenia korespondencji",
+    "description": "Jak urząd ma przekazać odpowiedź lub decyzję.",
+    "structure": [
+      {
+        "name": "kod",
+        "type": "string",
+        "description": "Stały identyfikator pozycji (wartość zapisywana w odpowiedzi)"
+      },
+      {
+        "name": "nazwa",
+        "type": "string",
+        "description": "Tekst widoczny na liście"
+      }
+    ],
+    "fieldTypes": [
+      "SELECT",
+      "RADIO",
+      "CHECKBOX"
+    ],
+    "entries": [
+      {
+        "kod": "E_DORECZENIA",
+        "nazwa": "e-Doręczenia"
+      },
+      {
+        "kod": "SKRZYNKA_EPUAP",
+        "nazwa": "skrzynka ePUAP"
+      },
+      {
+        "kod": "POCZTA_TRADYCYJNA",
+        "nazwa": "poczta tradycyjna"
+      },
+      {
+        "kod": "ODBIOR_OSOBISTY_W_URZEDZIE",
+        "nazwa": "odbiór osobisty w urzędzie"
+      }
+    ],
+    "source": null,
+    "usage": [
+      {
+        "form": 9,
+        "page": "Dane wnioskodawcy",
+        "section": "Dane klubu sportowego",
+        "field": "Preferowany sposób korespondencji z urzędem",
+        "fieldType": "SINGLE_CHOICE",
+        "change": "pole listy rozwijanej z dictionaryName „SPOSOBY_DORECZENIA” zamiast opcji wpisanych w polu"
+      }
+    ]
+  },
+  {
+    "dictionaryName": "DYSCYPLINY_SPORTOWE",
+    "title": "Dyscypliny sportowe",
+    "description": "Dyscyplina uprawiana przez sportowca.",
+    "structure": [
+      {
+        "name": "kod",
+        "type": "string",
+        "description": "Stały identyfikator pozycji (wartość zapisywana w odpowiedzi)"
+      },
+      {
+        "name": "nazwa",
+        "type": "string",
+        "description": "Tekst widoczny na liście"
+      }
+    ],
+    "fieldTypes": [
+      "SELECT",
+      "RADIO",
+      "CHECKBOX"
+    ],
+    "entries": [
+      {
+        "kod": "GIMNASTYKA_ARTYSTYCZNA",
+        "nazwa": "gimnastyka artystyczna"
+      },
+      {
+        "kod": "HOKEJ",
+        "nazwa": "hokej"
+      },
+      {
+        "kod": "KARATE",
+        "nazwa": "karate"
+      },
+      {
+        "kod": "KOLARSTWO",
+        "nazwa": "kolarstwo"
+      },
+      {
+        "kod": "KOSZYKOWKA",
+        "nazwa": "koszykówka"
+      },
+      {
+        "kod": "LEKKOATLETYKA",
+        "nazwa": "lekkoatletyka"
+      },
+      {
+        "kod": "LUCZNICTWO",
+        "nazwa": "łucznictwo"
+      },
+      {
+        "kod": "LYZWIARSTWO",
+        "nazwa": "łyżwiarstwo"
+      },
+      {
+        "kod": "NARCIARSTWO_KLASYCZNE",
+        "nazwa": "narciarstwo klasyczne"
+      },
+      {
+        "kod": "PILKA_NOZNA",
+        "nazwa": "piłka nożna"
+      },
+      {
+        "kod": "PILKA_RECZNA",
+        "nazwa": "piłka ręczna"
+      },
+      {
+        "kod": "PILKA_SIATKOWA",
+        "nazwa": "piłka siatkowa"
+      },
+      {
+        "kod": "PILKA_WODNA",
+        "nazwa": "piłka wodna"
+      },
+      {
+        "kod": "SPORT_MOTOCYKLOWY",
+        "nazwa": "sport motocyklowy"
+      },
+      {
+        "kod": "SPORTY_WALKI",
+        "nazwa": "sporty walki"
+      },
+      {
+        "kod": "SPORTY_WODNE",
+        "nazwa": "sporty wodne"
+      },
+      {
+        "kod": "TENIS_STOLOWY",
+        "nazwa": "tenis stołowy"
+      },
+      {
+        "kod": "TENIS_ZIEMNY",
+        "nazwa": "tenis ziemny"
+      },
+      {
+        "kod": "UNIHOKEJ",
+        "nazwa": "unihokej"
+      },
+      {
+        "kod": "ZAPASY",
+        "nazwa": "zapasy"
+      }
+    ],
+    "source": "Wykaz dyscyplin polskich związków sportowych (Ministerstwo Sportu); poniżej pozycje z formularza.",
+    "usage": [
+      {
+        "form": 9,
+        "page": "Dane sportowca",
+        "section": "Dyscypliny sportowe",
+        "field": "Dyscypliny sportowe",
+        "fieldType": "MULTI_CHOICE",
+        "change": "pole listy rozwijanej z dictionaryName „DYSCYPLINY_SPORTOWE” zamiast opcji wpisanych w polu"
+      },
+      {
+        "form": 9,
+        "page": "Dane sportowca",
+        "section": "Dyscypliny sportowe",
+        "field": "Inna dyscyplina sportowa",
+        "fieldType": "TEXT",
+        "change": "pole listy rozwijanej z dictionaryName „DYSCYPLINY_SPORTOWE” zamiast pola tekstowego"
+      }
+    ]
+  }
+]
