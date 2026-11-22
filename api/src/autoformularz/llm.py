@@ -16,6 +16,7 @@ import httpx
 from pydantic import ValidationError
 
 from autoformularz import metrics, progress
+from autoformularz.check import TEMPLATE_TITLE
 from autoformularz.config import Settings
 from autoformularz.document import FILL_LINE, Document
 from autoformularz.spec import FormSpec, model_schema
@@ -43,6 +44,10 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
   formularza, zakończ JSON. Nie każdy blok musi trafić do `pages`: pouczenia, objaśnienia, podstawa prawna i
   klauzula RODO idą tylko do `block_roles`, nigdy jako sekcje ani pola INFO.
 - Zachowaj zakres danych z formularza. Nie wymyślaj pól, których nie ma w dokumencie.
+- Pole to miejsce do wpisania lub zaznaczenia na druku (kropki, linia, kratka, pusta rubryka) wraz z jego
+  etykietą: każda część tej samej linii z własnym miejscem do wpisania to osobne pole, w kolejności z druku.
+  Tytuł wniosku i zdanie prośby („Wnoszę o…”, „Proszę o…”) nie są polami. Nie dodawaj pola na to, o co
+  wnioskodawca prosi urząd (np. numer lub decyzję, którą urząd dopiero wyda), ani pól, o które druk nie pyta.
 - Typ pola: TEXT krótki tekst; LONG_TEXT opis lub uzasadnienie; NUMBER tylko liczby (kwoty, liczby osób);
   DATE daty; SINGLE_CHOICE jedna z kilku opcji (kratki do zaznaczenia jednej odpowiedzi); MULTI_CHOICE wiele
   opcji; SELECT jedna z wielu (>5) opcji; FILE załączniki wymienione w formularzu; INFO stała informacja.
@@ -61,6 +66,7 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
 - Gdy dane się powtarzają (kilka osób, pojazdów, działek, zawodów), użyj sekcji z `repeating: true`.
 - Gdy dokument zawiera kilka wersji tego samego wniosku (np. kilka rodzajów wniosku z tymi samymi częściami),
   zrób JEDEN formularz: na pierwszej stronie pole SINGLE_CHOICE „Rodzaj wniosku” z opcjami = rodzaje.
+  Dokument z jednym wnioskiem nie ma pola „Rodzaj wniosku”.
   Część wspólną opisz raz. Porównaj wersje: KAŻDA sekcja, której nie ma we wszystkich wersjach, musi mieć
   `show_if`. Sekcja tylko dla jednego rodzaju: `show_if` z tą opcją; dla wszystkich rodzajów oprócz jednego:
   `show_if` z tą jedną opcją i `negate: true`. W `blocks` podaj ID z
@@ -343,6 +349,18 @@ class Answer:
             if found and first_repeat(found[1]):
                 log.warning("Model started repeating sections: stopped after %d characters.", self.size)
                 raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
+            # The form's own sections are done and the model goes on with the template's ("Dane
+            # kontaktowe", "Podpis", "Data", "Podpis", …): stop, nothing after them belongs to the form.
+            if found and template_tail(found[1]) >= TEMPLATE_TAIL:
+                log.warning(
+                    "Model started writing template sections: stopped after %d characters.", self.size
+                )
+                raise LLMError("LLM_TRUNCATED", "Model zaczął dopisywać części szablonu.", partial=text)
+            # A loop inside one section: the same field again and again (form 1: "Numer porządkowy" 22
+            # times). The section never closes, so the check above never sees it.
+            if field_loop(text) is not None:
+                log.warning("Model started repeating fields: stopped after %d characters.", self.size)
+                raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać pola.", partial=text)
 
 
 NO_THINK = "/no_think"  # Qwen3 soft switch: hybrid models skip reasoning; Instruct models ignore it
@@ -594,10 +612,86 @@ def first_repeat(pages: list[dict]) -> tuple[int, int] | None:
     return None
 
 
+TEMPLATE_TAIL = 2
+
+
+def template_tail(pages: list[dict]) -> int:
+    """How many of the last complete sections in a row are template or paper-only sections
+    (check.TEMPLATE_TITLE), after at least one section of the form's own."""
+    titles = [str(s.get("title") or "") for p in pages for s in p["sections"] if isinstance(s, dict)]
+    for run, title in enumerate(reversed(titles)):
+        if not TEMPLATE_TITLE.match(title):
+            return run
+    return 0  # only template sections: nothing of the form's own yet
+
+
+# A field (label and source blocks) written this many times in the open section is a loop. A real section
+# repeats a label at most twice in a row of a table, and those rows point to other blocks; three is never
+# seen on the materials.
+FIELD_LOOP = 3
+_FIELDS = re.compile(r'"fields"\s*:\s*\[')
+
+
+def field_loop(text: str) -> int | None:
+    """Where to cut an answer stuck in one section: the end of the last field before the first label
+    written for the FIELD_LOOP-th time in the open `fields` array (so the section keeps each field once).
+    None when the open section has no such repeat."""
+    m = next(reversed(list(_FIELDS.finditer(text))), None)  # the open section is the last one
+    if m is None:
+        return None
+    pos, ends, labels = m.end(), [], []
+    while True:
+        while pos < len(text) and text[pos] in " \n\r\t,":
+            pos += 1
+        if pos >= len(text) or text[pos] == "]":
+            return None  # closed (the section check handles it) or nothing more yet
+        try:
+            value, pos = _DECODER.raw_decode(text, pos)
+        except json.JSONDecodeError:
+            return None
+        # Same label AND same source blocks: table rows share a label but point to other blocks (form 8).
+        label = (value.get("label"), str(value.get("blocks"))) if isinstance(value, dict) else None
+        labels.append(label)
+        ends.append(pos)
+        if label is not None and labels.count(label) >= FIELD_LOOP:
+            first_repeat_at = next(i for i, x in enumerate(labels) if labels[:i].count(x) >= 1)
+            return ends[first_repeat_at - 1] if first_repeat_at else m.end()
+
+
+def close_json(text: str) -> str:
+    """Closes every open string, array and object of a cut JSON text (a trailing comma is dropped)."""
+    stack: list[str] = []
+    in_string = escape = False
+    for ch in text:
+        if in_string:
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_string = False
+        elif ch == '"':
+            in_string = True
+        elif ch in "[{":
+            stack.append("]" if ch == "[" else "}")
+        elif ch in "]}" and stack:
+            stack.pop()
+    out = text + ('"' if in_string else "")
+    out = out.rstrip().rstrip(",")
+    return out + "".join(reversed(stack))
+
+
 def salvage(partial: str) -> FormSpec | None:
-    """A FormSpec from an answer cut at the limit: everything before `pages`, then the complete pages and
-    sections up to the first repeated section. None when too little is left (no pages, invalid head).
-    On the materials the model wrote form 9 well once, then began it again per version of the request."""
+    """A FormSpec from an answer cut at the limit or stopped in a loop: everything before `pages`, then the
+    complete pages and sections up to the first repeated section. When the model got stuck repeating fields
+    inside one section, the answer is cut before the repeats and closed, so that section is kept.
+    None when too little is left (no pages, invalid head). On the materials the model wrote form 9 well
+    once, then began it again per version of the request."""
+    if (cut := field_loop(partial)) is not None:
+        try:
+            return FormSpec.model_validate(json.loads(close_json(partial[:cut])))
+        except json.JSONDecodeError, ValidationError:
+            pass
     found = _complete_pages(partial)
     if not found:
         return None
