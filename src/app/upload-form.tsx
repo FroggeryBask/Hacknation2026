@@ -42,13 +42,13 @@ import {
 
 const STEPS = [
   "Dodaj plik formularza",
-  "Tworzymy formularz",
-  "Sprawdź formularz utworzony przez AI",
+  "Generowanie formularza",
+  "Weryfikacja formularza",
 ];
 const STEPS_MANY = [
   "Dodaj pliki formularzy",
-  "Tworzymy formularze",
-  "Sprawdź formularze utworzone przez AI",
+  "Generowanie formularzy",
+  "Weryfikacja formularzy",
 ];
 // Several files at once (task 3.3.VI, batch). Each file costs one model call; the API runs at most
 // 4 jobs for all users (jobs.py MAX_RUNNING), so one page takes 2 and leaves room for others.
@@ -559,7 +559,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                   focus={moved.current}
                 >
                   <FormSection
-                    title="Tworzymy formularz"
+                    title="Generowanie formularza"
                     description={<FileName file={files[0]} url={urls[0]} />}
                   >
                     <div className="flex items-center gap-3 text-sm">
@@ -642,7 +642,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                   <FormSection
                     title={
                       batchRunning
-                        ? "Tworzymy formularze"
+                        ? "Generowanie formularzy"
                         : finished.length
                           ? "Formularze są gotowe"
                           : "Nie udało się utworzyć formularzy"

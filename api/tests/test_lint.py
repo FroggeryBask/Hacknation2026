@@ -22,6 +22,12 @@ def test_finish_text_block_is_allowed():
     assert "FINISH_TEXT_BLOCK" not in issues and "FINISH_HAS_INPUT" not in issues
 
 
+def test_editable_prefill_is_not_a_warning(nadplata_spec):
+    """Address and contact are prefilled from login data but stay editable, as in the references."""
+    form, _ = compile_form(nadplata_spec)
+    assert "PREFILL_EDITABLE" not in codes(form, "warning")
+
+
 def test_detects_broken_rules(nadplata_spec):
     form, _ = compile_form(nadplata_spec)
     broken = copy.deepcopy(form)

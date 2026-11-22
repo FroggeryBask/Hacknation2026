@@ -140,8 +140,7 @@ def lint(form: Json) -> list[Issue]:
             source = dv.split(".", 1)[0] if isinstance(dv, str) and "." in dv else None
             if source not in SOURCES:
                 err("PREFILL_SOURCE", f"Nieznane źródło danych inicjalnych: {dv}.", path)
-            if not f.get("readOnly"):
-                warn("PREFILL_EDITABLE", "Pole zasilane z rejestru powinno być tylko do odczytu.", path)
+            # An editable prefilled field is fine: the references prefill address and contact but let the user edit them.
         for s in f.get("states") or []:
             if s.get("type") not in ("SHOW", "READ_ONLY"):
                 err("STATE_TYPE", f"Nieznany stan: {s.get('type')}.", path)
