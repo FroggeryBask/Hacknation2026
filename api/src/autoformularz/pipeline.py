@@ -45,8 +45,11 @@ class Result:
     dictionaries: list[dict] = field(default_factory=list)  # proposed new dictionaries (dictionaries.py)
 
 
-def from_spec(spec: FormSpec, document: Document | None = None, *, quiet: bool = False) -> Result:
-    """Canon, then compile. `document` (the source file) adds verbatim legal text; None for /compile.
+def from_spec(
+    spec: FormSpec, document: Document | None = None, *, quiet: bool = False, instructions: bool = False
+) -> Result:
+    """Canon, then compile. `document` (the source file) adds the verbatim legal basis and, with
+    `instructions` (AUTOFORMULARZ_COPY_SOURCE_TEXT), the instructions; None for /compile.
     `quiet`: no progress (scoring several answers)."""
     # Canon: a model's repetitions and copies of the predefined part never reach the form.
     if not quiet:
@@ -58,7 +61,7 @@ def from_spec(spec: FormSpec, document: Document | None = None, *, quiet: bool =
     spec, paper = drop_paper_only_fields(spec)
     spec, conditions = drop_broken_conditions(spec)  # the rules above may drop a controlling field
     spec, small = merge_small_pages(spec)  # last: dropped fields may leave a page almost empty
-    form, warnings = compile_form(spec, document)
+    form, warnings = compile_form(spec, document, instructions=instructions)
     if not quiet:
         progress.stage("Sprawdzanie reguł technicznych")
     issues = lint(form) + safety.scan(form)  # SAFETY_* warnings: content smuggled in by the document
@@ -256,7 +259,7 @@ def _from_file(name: str | None, data: bytes, settings: Settings, llm, m: metric
     progress.item(f"Fragmenty tekstu: {len(document.blocks)}, obrazy stron: {len(document.images)}")
     spec = ask_model(document, settings, llm)
     with metrics.step("compile"):  # canon + compiler + lint + coverage
-        result = from_spec(spec, document if settings.copy_source_text else None)
+        result = from_spec(spec, document, instructions=settings.copy_source_text)
         result.coverage = coverage(spec, document)
     result.notes = document.notes + result.notes
     result.source_format = kind.value

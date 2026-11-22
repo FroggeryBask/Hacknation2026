@@ -31,12 +31,12 @@ Niespójności znalezione w `materialy/` i ustalenia zespołu (po rozmowie z men
 
 ### Eden AI a zakaz LLM przez API
 - Treść zadania (s. 3): „rozwiązanie nie może używać modeli LLM dostępnych wyłącznie przez API (ale można ich używać do pisania/testowania/projektowania kodu)”.
-- Ustalenie: w oddawanym rozwiązaniu tylko lokalny model (Ollama). Eden AI wyłącznie do pracy i testów.
+- Ustalenie (decyzja zespołu 2026-11-21): Eden AI organizatorów może działać także w oddawanym rozwiązaniu (domyślnie), ale tylko z modelami o otwartych wagach, które da się uruchomić lokalnie. Tryb w pełni lokalny (Ollama, `--profile ollama`) zostaje i nie potrzebuje żadnego zewnętrznego API.
 
 ### LibreOffice (konwersja .doc i .ods)
-- Po co: `.doc` (stary binarny format Worda) nie ma sensownego parsera w Pythonie na licencji innej niż copyleft, więc konwertujemy go do `.docx` przez LibreOffice uruchamiane jako osobny proces. `.ods` też idzie tą drogą, choć da się go czytać bez LibreOffice (to ZIP z XML, jak `.docx`).
+- Po co: `.doc` (stary binarny format Worda) nie ma sensownego parsera w Pythonie na licencji innej niż copyleft, więc konwertujemy go do `.docx` przez LibreOffice uruchamiane jako osobny proces. `.ods` czytamy bez LibreOffice, wprost z XML.
 - Ustalenie (mentorzy COI): dopuszczalne tylko przy licencji, która nie wymaga udostępnienia naszego kodu. **Trzeba uważać.**
-- Stan: LibreOffice ma licencję MPL-2.0 (słaby copyleft, obowiązek publikacji dotyczy tylko zmienionych plików samego LibreOffice). Nie modyfikujemy go ani nie linkujemy, tylko wywołujemy binarkę, więc naszego kodu to nie obejmuje. Do zrobienia: czytać `.ods` bezpośrednio z XML i zostawić LibreOffice tylko dla `.doc`; opisać licencję w README.
+- Stan: LibreOffice ma licencję MPL-2.0 (słaby copyleft, obowiązek publikacji dotyczy tylko zmienionych plików samego LibreOffice). Nie modyfikujemy go ani nie linkujemy, tylko wywołujemy binarkę, więc naszego kodu to nie obejmuje. Zrobione: `.ods` jest czytany z XML, LibreOffice zostało tylko dla `.doc` (obraz bez niego: `--build-arg WITH_LIBREOFFICE=0`), licencje opisane w README.
 
 ### Numeracja rozszerzeń
 - Problem: w pkt 3.3 treści zadania V to wizualizacja, VI to walidacje, a w kryteriach oceny „Punkt V (Walidacje pól)”.

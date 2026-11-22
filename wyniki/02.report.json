@@ -1,7 +1,8 @@
 {
-  "source": "materialy/2. Wniosek o zwrot opłaty skarbowej - formularze do cyfryzacji/Wniosek o zwrot opłaty skarbowej.docx",
-  "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "source": "materialy/2. Wniosek o zwrot opłaty skarbowej - formularze do cyfryzacji/Wniosek o zwrot opłaty skarbowej.pdf",
+  "sourceFormat": "pdf",
+  "seconds": 4.8,
+  "costUsd": 0.000686,
   "errors": 0,
   "issues": [
     {
@@ -41,24 +42,61 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [],
-  "coverage": {
-    "blocks": 63,
-    "referenced": 60,
-    "unreferenced": [
-      "b2",
-      "b3",
-      "b37"
-    ],
+  "notes": [
+    "Strona „Załączniki” ma mało pól: jej sekcje są na stronie „Sposób zwrotu opłaty”."
+  ],
+  "proposedDictionaries": [],
+  "metrics": {
+    "sourceFormat": "pdf",
+    "fileBytes": 55873,
+    "fileSha": "be4d196a6622",
+    "blocks": 49,
+    "blocksToModel": 24,
+    "presort": {
+      "SKIP": 10,
+      "FIELD_LABEL": 10,
+      "HEADING": 5
+    },
     "candidates": 0,
-    "candidatesWithoutField": [],
-    "unknownRefs": []
-  },
-  "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
-  },
-  "proposedDictionaries": []
+    "steps": {
+      "check": 0.0,
+      "extract": 0.13,
+      "presort": 0.0,
+      "model": 4.61,
+      "compile": 0.01
+    },
+    "totalS": 4.75,
+    "modelCalls": 1,
+    "promptTokens": 5336,
+    "completionTokens": 896,
+    "costUsd": 0.000686,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 4.61,
+        "firstTokenS": 1.03,
+        "promptChars": 15814,
+        "images": 0,
+        "imageBytes": 0,
+        "imageTokensEst": 0,
+        "promptTokens": 5336,
+        "completionTokens": 896,
+        "costUsd": 0.000686016,
+        "finishReason": "stop",
+        "maxTokens": 4400,
+        "answerChars": 3294,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 2,
+        "answerWhitespace": 1389
+      }
+    ],
+    "pages": 2,
+    "sections": 4,
+    "fields": 9,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
 }

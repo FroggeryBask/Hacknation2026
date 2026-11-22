@@ -134,7 +134,7 @@ def _run(n: int, settings: Settings, m: metrics.Metrics, *, compile_only: bool, 
         usage = usage_since(start)
         model = settings.eden_model if settings.llm_provider == "eden" else settings.llm_model
     with metrics.step("compile"):
-        result = pipeline.from_spec(spec, document if settings.copy_source_text else None)
+        result = pipeline.from_spec(spec, document, instructions=settings.copy_source_text)
     errors = sum(i.level == "error" for i in result.issues)
     if m.calls:  # the model was asked in this run: keep its metrics to compare runs
         pipeline.summarise(m, result)

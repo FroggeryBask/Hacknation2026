@@ -1,7 +1,8 @@
 {
-  "source": "materialy/4. Wniosek o wynajęcie lub użyczenie świetlicy wiejskiej - formularze do cyfryzacji/Wniosek o wynajęcie świetlicy.docx",
-  "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "source": "materialy/4. Wniosek o wynajęcie lub użyczenie świetlicy wiejskiej - formularze do cyfryzacji/Wniosek o wynajęcie świetlicy.ods",
+  "sourceFormat": "ods",
+  "seconds": 4.2,
+  "costUsd": 0.000587,
   "errors": 0,
   "issues": [
     {
@@ -42,22 +43,57 @@
     }
   ],
   "notes": [],
-  "coverage": {
-    "blocks": 29,
-    "referenced": 27,
-    "unreferenced": [
-      "b13",
-      "b14"
+  "proposedDictionaries": [],
+  "metrics": {
+    "sourceFormat": "ods",
+    "fileBytes": 23629,
+    "fileSha": "0ec713b2a5e1",
+    "blocks": 25,
+    "blocksToModel": 20,
+    "presort": {
+      "SKIP": 2,
+      "FIELD_LABEL": 3
+    },
+    "candidates": 2,
+    "steps": {
+      "check": 0.0,
+      "extract": 0.01,
+      "presort": 0.0,
+      "model": 4.18,
+      "compile": 0.0
+    },
+    "totalS": 4.2,
+    "modelCalls": 1,
+    "promptTokens": 5398,
+    "completionTokens": 710,
+    "costUsd": 0.000587,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 4.18,
+        "firstTokenS": 1.07,
+        "promptChars": 16014,
+        "images": 0,
+        "imageBytes": 0,
+        "imageTokensEst": 0,
+        "promptTokens": 5398,
+        "completionTokens": 710,
+        "costUsd": 0.000586816,
+        "finishReason": "stop",
+        "maxTokens": 4500,
+        "answerChars": 2554,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 1,
+        "answerWhitespace": 859
+      }
     ],
-    "candidates": 13,
-    "candidatesWithoutField": [],
-    "unknownRefs": []
-  },
-  "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
-  },
-  "proposedDictionaries": []
+    "pages": 1,
+    "sections": 2,
+    "fields": 7,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
 }

@@ -1,7 +1,8 @@
 {
-  "source": "materialy/7. Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanych za agresywne - formularze do cyfryzacji/Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanychza agresywne.DOC",
-  "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "source": "materialy/7. Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanych za agresywne - formularze do cyfryzacji/Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanychza agresywne.PNG",
+  "sourceFormat": "png",
+  "seconds": 11.7,
+  "costUsd": 0.001008,
   "errors": 0,
   "issues": [
     {
@@ -42,30 +43,6 @@
     }
   ],
   "notes": [],
-  "coverage": {
-    "blocks": 68,
-    "referenced": 64,
-    "unreferenced": [
-      "b5",
-      "b6",
-      "b7",
-      "b14"
-    ],
-    "candidates": 26,
-    "candidatesWithoutField": [
-      "b27",
-      "b51",
-      "b56",
-      "b63"
-    ],
-    "unknownRefs": []
-  },
-  "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
-  },
   "proposedDictionaries": [
     {
       "dictionaryName": "RASY_PSOW_AGRESYWNYCH",
@@ -145,5 +122,59 @@
         }
       ]
     }
-  ]
+  ],
+  "metrics": {
+    "sourceFormat": "png",
+    "fileBytes": 819995,
+    "fileSha": "5f373c9b16c8",
+    "blocks": 89,
+    "blocksToModel": 32,
+    "presort": {
+      "GDPR": 50,
+      "SKIP": 2,
+      "FIELD_LABEL": 4,
+      "HEADING": 1
+    },
+    "candidates": 14,
+    "steps": {
+      "check": 0.0,
+      "extract": 5.07,
+      "presort": 0.0,
+      "model": 6.59,
+      "compile": 0.0
+    },
+    "totalS": 11.68,
+    "modelCalls": 1,
+    "promptTokens": 7001,
+    "completionTokens": 1002,
+    "costUsd": 0.001008,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 6.59,
+        "firstTokenS": 2.26,
+        "promptChars": 16443,
+        "images": 2,
+        "imageBytes": 364682,
+        "imageTokensEst": 2880,
+        "promptTokens": 7001,
+        "completionTokens": 1002,
+        "costUsd": 0.00100812,
+        "finishReason": "stop",
+        "maxTokens": 5200,
+        "answerChars": 3500,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 5,
+        "answerWhitespace": 1190
+      }
+    ],
+    "pages": 1,
+    "sections": 2,
+    "fields": 10,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
 }

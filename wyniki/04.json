@@ -394,7 +394,7 @@
         {
           "x": 0,
           "y": 0,
-          "rows": 7,
+          "rows": 5,
           "cols": 3,
           "field": {
             "id": "282f3532-9d50-5c99-9936-4920bcbf82f6",
@@ -467,10 +467,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4dc0d6bf-765a-5930-922f-10565f336a0b",
+                  "id": "ceb0f4c7-f2ba-5bf5-8d87-64ae71c878be",
                   "type": "DATEPICKER",
-                  "techName": "okres_korzystania_ze_swietlicy_od",
-                  "title": "Okres korzystania ze świetlicy – od",
+                  "techName": "termin_od",
+                  "title": "Termin od",
                   "description": "",
                   "options": [],
                   "validation": [
@@ -489,23 +489,46 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b52c2fd2-da3b-5bd5-9a83-5ebba6baa6bd",
+                  "id": "6178175a-f0b4-5789-939c-daec1b85e6d1",
                   "type": "DATEPICKER",
-                  "techName": "okres_korzystania_ze_swietlicy_do",
-                  "title": "Okres korzystania ze świetlicy – do",
+                  "techName": "termin_do",
+                  "title": "Termin do",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
                   "questionOrder": 3,
                   "tooltipMessage": ""
                 }
-              },
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "rows": 4,
+          "cols": 3,
+          "field": {
+            "id": "50b6d5d5-e588-5452-b8e3-cda0d90c1972",
+            "type": "SECTION",
+            "techName": "przebieg_wydarzenia",
+            "title": "Przebieg wydarzenia",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
               {
                 "x": 0,
-                "y": 4,
+                "y": 0,
                 "rows": 1,
                 "cols": 3,
                 "field": {
@@ -521,20 +544,20 @@
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
-                  "questionOrder": 4,
+                  "questionOrder": 0,
                   "tooltipMessage": ""
                 }
               },
               {
                 "x": 0,
-                "y": 5,
+                "y": 1,
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3ddac8c0-3f65-5b9e-83ea-e30432b53a86",
+                  "id": "c9eaa8a0-6394-5485-bd2f-ba73806e0ed3",
                   "type": "NUMBER",
-                  "techName": "przewidywana_liczba_uczestnikow",
-                  "title": "Przewidywana liczba uczestników",
+                  "techName": "przewidywana_ilosc_uczestnikow",
+                  "title": "Przewidywana ilość uczestników",
                   "description": "",
                   "options": [],
                   "validation": [
@@ -543,42 +566,21 @@
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
-                  "questionOrder": 5,
+                  "questionOrder": 1,
                   "tooltipMessage": ""
                 }
-              }
-            ],
-            "states": [],
-            "questionOrder": 0,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 7,
-          "rows": 2,
-          "cols": 3,
-          "field": {
-            "id": "2d3fa36f-166a-54c7-92bb-a32652da3635",
-            "type": "SECTION",
-            "techName": "osoba_odpowiedzialna",
-            "title": "Osoba odpowiedzialna",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
+              },
               {
                 "x": 0,
-                "y": 0,
+                "y": 2,
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "8209993b-dcba-5882-803c-02d28d4ee947",
+                  "id": "683897d2-d716-5da1-9b60-a43d92a0fbdd",
                   "type": "TEXT_FIELD",
-                  "techName": "imie_i_nazwisko_osoby_odpowiedzialnej_za_utrzymanie_porzadku",
-                  "title": "Imię i nazwisko osoby odpowiedzialnej za utrzymanie porządku i bezpieczeństwa",
-                  "description": "<html><head></head><body><p>Osoba pełnoletnia. Jeśli to nie wnioskodawca, dołącz zgodę tej osoby</p></body></html>",
+                  "techName": "osoba_odpowiedzialna_za_utrzymanie_porzadku_i_bezpieczenstwa",
+                  "title": "Osoba odpowiedzialna za utrzymanie porządku i bezpieczeństwa",
+                  "description": "<html><head></head><body><p>Imię i nazwisko osoby pełnoletniej; w przypadku innej osoby niż wnioskodawca wymagana jest jej zgoda</p></body></html>",
                   "options": [],
                   "validation": [
                     "REQUIRED"
@@ -586,7 +588,7 @@
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
-                  "questionOrder": 0,
+                  "questionOrder": 2,
                   "tooltipMessage": ""
                 }
               }
@@ -706,15 +708,15 @@
                   "consentSectionConfig": {
                     "consents": [
                       {
-                        "description": "<html><head></head><body><p>Znam warunki wynajmu świetlicy wiejskiej</p></body></html>",
+                        "description": "<html><head></head><body><p>Zapoznałem się z warunkami wynajmu świetlicy wiejskiej</p></body></html>",
                         "required": true
                       },
                       {
-                        "description": "<html><head></head><body><p>W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym</p></body></html>",
+                        "description": "<html><head></head><body><p>W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym do świetlicy</p></body></html>",
                         "required": true
                       },
                       {
-                        "description": "<html><head></head><body><p>Zobowiązuję się do przestrzegania przepisów sanitarnych, BHP i przeciwpożarowych</p></body></html>",
+                        "description": "<html><head></head><body><p>Zobowiązuję się do przestrzegania przepisów sanitarnych, BHP i przeciwpożarowych w czasie trwania przedsięwzięcia</p></body></html>",
                         "required": true
                       },
                       {

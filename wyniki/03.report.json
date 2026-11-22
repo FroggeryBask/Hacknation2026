@@ -1,7 +1,8 @@
 {
-  "source": "materialy/3. Wniosek o wydanie zaświadczenia - formularze do cyfryzacji/Wniosek o wydanie zaświadczenia.docx",
-  "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "source": "materialy/3. Wniosek o wydanie zaświadczenia - formularze do cyfryzacji/Wniosek o wydanie zaświadczenia.jpg",
+  "sourceFormat": "jpeg",
+  "seconds": 5.3,
+  "costUsd": 0.000609,
   "errors": 0,
   "issues": [
     {
@@ -42,26 +43,57 @@
     }
   ],
   "notes": [],
-  "coverage": {
-    "blocks": 27,
-    "referenced": 23,
-    "unreferenced": [
-      "b5",
-      "b6",
-      "b7",
-      "b13"
+  "proposedDictionaries": [],
+  "metrics": {
+    "sourceFormat": "jpeg",
+    "fileBytes": 267868,
+    "fileSha": "368b1e645a43",
+    "blocks": 23,
+    "blocksToModel": 19,
+    "presort": {
+      "SKIP": 1,
+      "FIELD_LABEL": 3
+    },
+    "candidates": 1,
+    "steps": {
+      "check": 0.0,
+      "extract": 1.41,
+      "presort": 0.0,
+      "model": 3.87,
+      "compile": 0.0
+    },
+    "totalS": 5.29,
+    "modelCalls": 1,
+    "promptTokens": 6057,
+    "completionTokens": 528,
+    "costUsd": 0.000609,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 3.87,
+        "firstTokenS": 1.62,
+        "promptChars": 15871,
+        "images": 1,
+        "imageBytes": 89545,
+        "imageTokensEst": 1440,
+        "promptTokens": 6057,
+        "completionTokens": 528,
+        "costUsd": 0.000609416,
+        "finishReason": "stop",
+        "maxTokens": 3900,
+        "answerChars": 1982,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 6,
+        "answerWhitespace": 741
+      }
     ],
-    "candidates": 11,
-    "candidatesWithoutField": [
-      "b24"
-    ],
-    "unknownRefs": []
-  },
-  "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
-  },
-  "proposedDictionaries": []
+    "pages": 1,
+    "sections": 2,
+    "fields": 6,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
 }

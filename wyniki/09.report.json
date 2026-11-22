@@ -1,7 +1,8 @@
 {
   "source": "materialy/9. Wniosek o przyznanie stypendium, nagrody lub wyróżnienia sportowego Rady Miasta (Połączenie 3 wniosków w 1) - formularze do cyfryzacji/Wniosek o przyznanie stypendium.docx",
   "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "seconds": 14.1,
+  "costUsd": 0.002579,
   "errors": 0,
   "issues": [
     {
@@ -41,186 +42,9 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [],
-  "coverage": {
-    "blocks": 267,
-    "referenced": 161,
-    "unreferenced": [
-      "b5",
-      "b9",
-      "b10",
-      "b11",
-      "b12",
-      "b90",
-      "b95",
-      "b101",
-      "b104",
-      "b105",
-      "b106",
-      "b107",
-      "b108",
-      "b109",
-      "b110",
-      "b111",
-      "b112",
-      "b113",
-      "b114",
-      "b115",
-      "b116",
-      "b117",
-      "b118",
-      "b119",
-      "b120",
-      "b121",
-      "b122",
-      "b123",
-      "b124",
-      "b125",
-      "b126",
-      "b127",
-      "b128",
-      "b129",
-      "b130",
-      "b131",
-      "b132",
-      "b133",
-      "b134",
-      "b135",
-      "b136",
-      "b137",
-      "b138",
-      "b139",
-      "b140",
-      "b141",
-      "b142",
-      "b143",
-      "b144",
-      "b145",
-      "b146",
-      "b147",
-      "b148",
-      "b149",
-      "b150",
-      "b151",
-      "b152",
-      "b158",
-      "b163",
-      "b169",
-      "b172",
-      "b173",
-      "b174",
-      "b175",
-      "b176",
-      "b177",
-      "b178",
-      "b179",
-      "b180",
-      "b181",
-      "b182",
-      "b183",
-      "b184",
-      "b185",
-      "b186",
-      "b187",
-      "b188",
-      "b189",
-      "b190",
-      "b191",
-      "b192",
-      "b193",
-      "b194",
-      "b195",
-      "b196",
-      "b197",
-      "b221",
-      "b222",
-      "b223",
-      "b224",
-      "b225",
-      "b226",
-      "b227",
-      "b228",
-      "b229",
-      "b230",
-      "b231",
-      "b232",
-      "b233",
-      "b234",
-      "b235",
-      "b236",
-      "b237",
-      "b251",
-      "b259",
-      "b265"
-    ],
-    "candidates": 158,
-    "candidatesWithoutField": [
-      "b5",
-      "b36",
-      "b95",
-      "b101",
-      "b109",
-      "b110",
-      "b111",
-      "b112",
-      "b113",
-      "b114",
-      "b115",
-      "b116",
-      "b117",
-      "b120",
-      "b121",
-      "b122",
-      "b124",
-      "b125",
-      "b126",
-      "b127",
-      "b131",
-      "b132",
-      "b133",
-      "b134",
-      "b136",
-      "b138",
-      "b141",
-      "b145",
-      "b151",
-      "b152",
-      "b163",
-      "b169",
-      "b177",
-      "b178",
-      "b179",
-      "b180",
-      "b181",
-      "b182",
-      "b183",
-      "b184",
-      "b185",
-      "b188",
-      "b189",
-      "b190",
-      "b192",
-      "b193",
-      "b194",
-      "b195",
-      "b223",
-      "b225",
-      "b228",
-      "b231",
-      "b234",
-      "b237",
-      "b251",
-      "b259",
-      "b265"
-    ],
-    "unknownRefs": []
-  },
-  "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
-  },
+  "notes": [
+    "Strona „Dane podopiecznych trenera” ma mało pól: jej sekcje są na stronie „Osiągnięcia sportowe”."
+  ],
   "proposedDictionaries": [
     {
       "dictionaryName": "DYSCYPLINY_SPORTOWE",
@@ -246,89 +70,89 @@
       "entries": [
         {
           "kod": "GIMNASTYKA_ARTYSTYCZNA",
-          "nazwa": "Gimnastyka artystyczna"
+          "nazwa": "gimnastyka artystyczna"
         },
         {
           "kod": "HOKEJ",
-          "nazwa": "Hokej"
+          "nazwa": "hokej"
         },
         {
           "kod": "KARATE",
-          "nazwa": "Karate"
+          "nazwa": "karate"
         },
         {
           "kod": "KOLARSTWO",
-          "nazwa": "Kolarstwo"
+          "nazwa": "kolarstwo"
         },
         {
           "kod": "KOSZYKOWKA",
-          "nazwa": "Koszykówka"
+          "nazwa": "koszykówka"
         },
         {
           "kod": "LEKKOATLETYKA",
-          "nazwa": "Lekkoatletyka"
+          "nazwa": "lekkoatletyka"
         },
         {
           "kod": "LUCZNICTWO",
-          "nazwa": "Łucznictwo"
+          "nazwa": "łucznictwo"
         },
         {
           "kod": "LYZWIARSTWO",
-          "nazwa": "Łyżwiarstwo"
+          "nazwa": "łyżwiarstwo"
         },
         {
           "kod": "NARCIARSTWO_KLASYCZNE",
-          "nazwa": "Narciarstwo klasyczne"
+          "nazwa": "narciarstwo klasyczne"
         },
         {
           "kod": "PILKA_NOZNA",
-          "nazwa": "Piłka nożna"
+          "nazwa": "piłka nożna"
         },
         {
           "kod": "PILKA_RECZNA",
-          "nazwa": "Piłka ręczna"
+          "nazwa": "piłka ręczna"
         },
         {
           "kod": "PILKA_SIATKOWA",
-          "nazwa": "Piłka siatkowa"
+          "nazwa": "piłka siatkowa"
         },
         {
           "kod": "PILKA_WODNA",
-          "nazwa": "Piłka wodna"
+          "nazwa": "piłka wodna"
         },
         {
           "kod": "SPORT_MOTOCYKLOWY",
-          "nazwa": "Sport motocyklowy"
+          "nazwa": "sport motocyklowy"
         },
         {
           "kod": "SPORTY_WALKI",
-          "nazwa": "Sporty walki"
+          "nazwa": "sporty walki"
         },
         {
           "kod": "SPORTY_WODNE",
-          "nazwa": "Sporty wodne"
+          "nazwa": "sporty wodne"
         },
         {
           "kod": "TENIS_STOLOWY",
-          "nazwa": "Tenis stołowy"
+          "nazwa": "tenis stołowy"
         },
         {
           "kod": "TENIS_ZIEMNY",
-          "nazwa": "Tenis ziemny"
+          "nazwa": "tenis ziemny"
         },
         {
           "kod": "UNIHOKEJ",
-          "nazwa": "Unihokej"
+          "nazwa": "unihokej"
         },
         {
           "kod": "ZAPASY",
-          "nazwa": "Zapasy"
+          "nazwa": "zapasy"
         }
       ],
       "source": "Wykaz dyscyplin polskich związków sportowych (Ministerstwo Sportu); poniżej pozycje z formularza.",
       "usage": [
         {
-          "page": "Dane sportowca",
+          "page": "Dane kandydata",
           "section": "Dyscypliny sportowe",
           "field": "Dyscypliny sportowe",
           "fieldType": "MULTI_CHOICE",
@@ -336,5 +160,58 @@
         }
       ]
     }
-  ]
+  ],
+  "metrics": {
+    "sourceFormat": "docx",
+    "fileBytes": 39702,
+    "fileSha": "b0665d0f9621",
+    "blocks": 267,
+    "blocksToModel": 171,
+    "presort": {
+      "REPEAT": 71,
+      "GDPR": 15,
+      "SKIP": 10
+    },
+    "candidates": 158,
+    "steps": {
+      "check": 0.0,
+      "extract": 0.03,
+      "presort": 0.03,
+      "model": 13.92,
+      "compile": 0.01
+    },
+    "totalS": 14.03,
+    "modelCalls": 1,
+    "promptTokens": 8304,
+    "completionTokens": 3103,
+    "costUsd": 0.002579,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 13.92,
+        "firstTokenS": 1.53,
+        "promptChars": 24191,
+        "images": 0,
+        "imageBytes": 0,
+        "imageTokensEst": 0,
+        "promptTokens": 8304,
+        "completionTokens": 3103,
+        "costUsd": 0.002578984,
+        "finishReason": "stop",
+        "maxTokens": 12000,
+        "answerChars": 11553,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 16,
+        "answerWhitespace": 4569
+      }
+    ],
+    "pages": 4,
+    "sections": 10,
+    "fields": 34,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
 }

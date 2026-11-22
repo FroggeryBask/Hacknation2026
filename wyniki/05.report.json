@@ -1,0 +1,100 @@
+{
+  "source": "materialy/5. Wniosek o stwierdzenie nadpłaty podatku - materiał referencyjny dla Uczestników do zadania/Wniosek o stwierdzenie nadpłaty podatku.DOC",
+  "sourceFormat": "docx",
+  "seconds": 4.2,
+  "costUsd": 0.000572,
+  "errors": 0,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Kod pocztowy"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Ulica"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer budynku"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer lokalu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Numer telefonu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
+    }
+  ],
+  "notes": [],
+  "proposedDictionaries": [],
+  "metrics": {
+    "sourceFormat": "docx",
+    "fileBytes": 21826,
+    "fileSha": "0a32774bbc47",
+    "blocks": 30,
+    "blocksToModel": 20,
+    "presort": {
+      "SKIP": 2,
+      "HEADING": 1,
+      "FIELD_LABEL": 7
+    },
+    "candidates": 23,
+    "steps": {
+      "check": 0.0,
+      "extract": 0.0,
+      "presort": 0.0,
+      "model": 4.18,
+      "compile": 0.0
+    },
+    "totalS": 4.19,
+    "modelCalls": 1,
+    "promptTokens": 5211,
+    "completionTokens": 748,
+    "costUsd": 0.000572,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 4.17,
+        "firstTokenS": 0.97,
+        "promptChars": 15418,
+        "images": 0,
+        "imageBytes": 0,
+        "imageTokensEst": 0,
+        "promptTokens": 5211,
+        "completionTokens": 748,
+        "costUsd": 0.000572216,
+        "finishReason": "stop",
+        "maxTokens": 4000,
+        "answerChars": 2843,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 3,
+        "answerWhitespace": 1223
+      }
+    ],
+    "pages": 1,
+    "sections": 3,
+    "fields": 9,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
+}

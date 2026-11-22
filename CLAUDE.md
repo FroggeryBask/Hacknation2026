@@ -1,7 +1,7 @@
 # autoformularz: cyfryzacja formularzy (HackNation 2026, zadanie COI)
 
 REST API that turns a paper form file (PDF, DOC, DOCX, ODS, XLSX, JPG, PNG) into an e-form JSON in the COI import format.
-- `api/`: the solution. Python 3.14 · FastAPI · local LLM via Ollama (Qwen3-VL) · Docker. Managed with uv.
+- `api/`: the solution. Python 3.14 · FastAPI · open-weight LLM on Eden AI (DeepSeek V4.1 Flash) or local Ollama (Qwen3-VL) · Docker. Managed with uv.
 - `src/`: optional frontend (Next.js 16, shadcn/ui + Tailwind, lucide-react, Motion): upload UI and e-form preview from JSON.
 
 ## Task materials (MANDATORY)

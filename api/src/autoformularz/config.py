@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # Eden AI ends a request itself after ~400 s, so the long limit only matters for Ollama.
     llm_timeout_s: float = 1800.0
     # Prompt + answer. Largest material after presort: ~7k prompt tokens + up to llm_max_tokens (12000).
-    # 24576 with qwen3-vl:8b: 9.4 GB in memory (ollama ps); docs/tasks/docker-docs.md.
+    # 24576 with qwen3-vl:8b: 9.4 GB in memory (ollama ps).
     llm_num_ctx: int = 24576
     # Cap on the model's answer. A FormSpec of the largest material fits easily; a model stuck in a
     # repetition loop is cut here instead of running until the provider's limit (Eden: 400 s, ~16k tokens).
@@ -52,9 +52,10 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.0
     llm_sample_temperature: float = 0.4
     max_pdf_pages: int = 6
-    # Copy INSTRUCTION / LEGAL_BASIS blocks verbatim to the finish page. Off until the model's block roles
-    # are reliable: on saved results it copied paper instructions and the GDPR clause (docs/decisions.md).
-    copy_source_text: bool = False
+    # Copy instructions (pouczenia) verbatim to the finish page, checked in code per item
+    # (compiler.instruction_texts: fees, deadlines, duties, consequences; never hints for the paper or
+    # attachment notes). The legal basis is always copied (compiler.legal_basis).
+    copy_source_text: bool = True
     # Presort: the code recognises the GDPR clause, signature/paper-only lines and the template's applicant
     # data before the model, so they are left out of the prompt and the answer (presort.py).
     presort: bool = True

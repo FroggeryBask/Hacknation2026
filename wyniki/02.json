@@ -1536,10 +1536,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "b99d05b4-c298-58e8-836f-19a136ff9af0",
+                  "id": "81ba1df6-d41c-5ca6-8dfc-cddb698dd65f",
                   "type": "TEXTAREA",
-                  "techName": "uzasadnienie_wniosku_2",
-                  "title": "Uzasadnienie wniosku",
+                  "techName": "uzasadnienie",
+                  "title": "Uzasadnienie",
                   "description": "<html><head></head><body><p>Opisz, dlaczego opłata skarbowa, której dotyczy wniosek, została błędnie uiszczona</p></body></html>",
                   "options": [],
                   "validation": [
@@ -1557,17 +1557,24 @@
             "questionOrder": 1,
             "tooltipMessage": ""
           }
-        },
+        }
+      ]
+    },
+    {
+      "id": "657e1507-52ce-5a0b-bcbd-cb617e1964ed",
+      "title": "Sposób zwrotu opłaty",
+      "type": "MAIN",
+      "questions": [
         {
           "x": 0,
-          "y": 6,
+          "y": 0,
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "f425a2cd-5404-5cc0-bfc2-86c74428f4e8",
+            "id": "33831fc2-7794-574e-9820-0fbbf74faa17",
             "type": "SECTION",
-            "techName": "sposob_zwrotu_oplaty_skarbowej",
-            "title": "Sposób zwrotu opłaty skarbowej",
+            "techName": "forma_zwrotu",
+            "title": "Forma zwrotu",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -1579,10 +1586,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "9fdc8bfe-0fe6-5b9b-a5d0-c9577e5b1c3f",
+                  "id": "9a6b7f62-03b7-54db-9829-2b760a6c872b",
                   "type": "RADIO",
-                  "techName": "sposob_zwrotu_oplaty_skarbowej_2",
-                  "title": "Sposób zwrotu opłaty skarbowej",
+                  "techName": "forma_zwrotu_oplaty_skarbowej",
+                  "title": "Forma zwrotu opłaty skarbowej",
                   "description": "",
                   "options": [
                     {
@@ -1626,7 +1633,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Informacje o opłacie skarbowej' in title].questions['sposob_zwrotu_oplaty_skarbowej' in field.techName].field.repeatingSectionGrid['sposob_zwrotu_oplaty_skarbowej_2' in field.techName].field.__userAnswer)"
+                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Sposób zwrotu opłaty' in title].questions['forma_zwrotu' in field.techName].field.repeatingSectionGrid['forma_zwrotu_oplaty_skarbowej' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 1,
@@ -1653,7 +1660,7 @@
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Informacje o opłacie skarbowej' in title].questions['sposob_zwrotu_oplaty_skarbowej' in field.techName].field.repeatingSectionGrid['sposob_zwrotu_oplaty_skarbowej_2' in field.techName].field.__userAnswer)"
+                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Sposób zwrotu opłaty' in title].questions['forma_zwrotu' in field.techName].field.repeatingSectionGrid['forma_zwrotu_oplaty_skarbowej' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 2,
@@ -1662,13 +1669,13 @@
               }
             ],
             "states": [],
-            "questionOrder": 2,
+            "questionOrder": 0,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 10,
+          "y": 4,
           "rows": 3,
           "cols": 3,
           "field": {
@@ -1723,7 +1730,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 3,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         }
@@ -1871,6 +1878,47 @@
           "rows": 2,
           "cols": 3,
           "field": {
+            "id": "6c43921c-696c-5222-ae50-955f3d339282",
+            "type": "SECTION",
+            "techName": "podstawa_prawna",
+            "title": "Podstawa prawna",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "a10dfa01-3720-5c46-a1d0-8befaa009a9c",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podstawa_prawna_tekst",
+                  "title": "",
+                  "description": "<html><head></head><body><p>Art. 9 ustawy z dnia 16 listopada 2006 r. o opłacie skarbowej</p></body></html>",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "rows": 2,
+          "cols": 3,
+          "field": {
             "id": "769269a1-087a-5450-8a52-fe0299e61a80",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
@@ -1902,7 +1950,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         }
@@ -1919,10 +1967,15 @@
       {
         "id": "d2cdef3a",
         "source": "e8c9c67b-92cc-53c8-af13-83bb3fe7a4db",
-        "target": "d44f20fe-81a4-5549-bfa4-5316ace10299"
+        "target": "657e1507-52ce-5a0b-bcbd-cb617e1964ed"
       },
       {
         "id": "bc6244c9",
+        "source": "657e1507-52ce-5a0b-bcbd-cb617e1964ed",
+        "target": "d44f20fe-81a4-5549-bfa4-5316ace10299"
+      },
+      {
+        "id": "6ff145ea",
         "source": "d44f20fe-81a4-5549-bfa4-5316ace10299",
         "target": "4c77867a-2650-5f04-a646-49a13e52121c"
       }
