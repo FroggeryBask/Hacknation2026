@@ -1,7 +1,7 @@
 {
   "source": "materialy/9. Wniosek o przyznanie stypendium, nagrody lub wyróżnienia sportowego Rady Miasta (Połączenie 3 wniosków w 1) - formularze do cyfryzacji/Wniosek o przyznanie stypendium.docx",
   "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "model": "zapisany FormSpec",
   "errors": 0,
   "issues": [
     {
@@ -44,22 +44,13 @@
   "notes": [],
   "coverage": {
     "blocks": 267,
-    "referenced": 152,
+    "referenced": 161,
     "unreferenced": [
       "b5",
       "b9",
       "b10",
       "b11",
       "b12",
-      "b14",
-      "b15",
-      "b16",
-      "b17",
-      "b18",
-      "b19",
-      "b20",
-      "b21",
-      "b22",
       "b90",
       "b95",
       "b101",
@@ -165,15 +156,6 @@
     "candidates": 158,
     "candidatesWithoutField": [
       "b5",
-      "b14",
-      "b15",
-      "b16",
-      "b17",
-      "b18",
-      "b19",
-      "b20",
-      "b21",
-      "b22",
       "b36",
       "b95",
       "b101",
@@ -234,9 +216,9 @@
     "unknownRefs": []
   },
   "edenUsage": {
-    "calls": 5,
-    "promptTokens": 40455,
-    "completionTokens": 14850,
-    "costUsd": 0.009179
+    "calls": 0,
+    "promptTokens": 0,
+    "completionTokens": 0,
+    "costUsd": 0
   }
 }

@@ -77,10 +77,11 @@ def score(spec: FormSpec, document: Document) -> tuple[int, int, int, int]:
 
 
 def ask_model(document: Document, settings: Settings, llm=None) -> FormSpec:
-    """The best of `settings.llm_samples` answers (`score`); the first with temperature 0, the others
-    sampled so they differ. A failed answer is skipped while another one succeeds."""
+    """The best of `settings.llm_samples` answers (`score`), completed with sections the other answers
+    wrote for places it skipped (`complete_from`); the first answer with temperature 0, the others sampled
+    so they differ. A failed answer is skipped while another one succeeds."""
     samples = max(1, settings.llm_samples)
-    best: tuple[tuple, FormSpec] | None = None
+    answers: list[tuple[tuple, FormSpec]] = []
     error: Exception | None = None
     for i in range(samples):
         run = (
@@ -101,11 +102,77 @@ def ask_model(document: Document, settings: Settings, llm=None) -> FormSpec:
         progress.item(
             f"Ocena: błędy {-value[0]}, pominięte miejsca {-value[1]}, odrzucone {-value[2]}, pola {value[3]}"
         )
-        if best is None or value > best[0]:
-            best = (value, spec)
-    if best is None:
+        answers.append((value, spec))
+    if not answers:
         raise error or llm_module.LLMError("LLM_ERROR", "Model nie odpowiedział.")
-    return best[1]
+    answers.sort(key=lambda a: a[0], reverse=True)
+    spec, added = complete_from(answers[0][1], [a[1] for a in answers[1:]], document)
+    if added:
+        progress.item(f"Uzupełniono z innych wersji: {', '.join(added)}")
+    return spec
+
+
+def _block_no(block_id: str) -> int:
+    return int(block_id[1:]) if block_id[1:].isdigit() else 10**9
+
+
+def complete_from(best: FormSpec, others: list[FormSpec], document: Document) -> tuple[FormSpec, list[str]]:
+    """The best answer with the sections other answers wrote for places to fill in on the paper it left
+    without a field. Answers differ from run to run in what they skip (form 9: one answer has the club
+    representative's and proxy's sections, another the conditions per kind of request); this keeps both. A
+    section counts when every field points only to such places; it goes after the section of the best
+    answer that comes before it on the paper. Its own conditions stay only if they point inside the
+    section (the canon removes broken ones)."""
+    missing = set(coverage(from_spec(best, quiet=True).spec, document).candidates_without_field)
+    if not missing:
+        return best, []
+    pages = [p.model_copy(update={"sections": list(p.sections)}) for p in best.pages]
+    added: list[str] = []
+    for other in others:
+        for page in other.pages:
+            for section in page.sections:
+                blocks = {b for f in section.fields for b in f.blocks}
+                if not section.fields or not blocks or not blocks <= missing:
+                    continue
+                if not all(f.blocks for f in section.fields):
+                    continue
+                start, end = min(_block_no(b) for b in blocks), max(_block_no(b) for b in blocks)
+                # Between the sections of the best answer around it on the paper, next to the closer one:
+                # after the previous section, or before the next one (also at the top of the next page).
+                before, after = None, None  # ((page, index), distance on the paper)
+                for pi, pg in enumerate(pages):
+                    for si, sec in enumerate(pg.sections):
+                        nos = sorted(_block_no(b) for f in sec.fields for b in f.blocks)
+                        if not nos:
+                            continue
+                        # Where a section is on the paper: the median of its blocks (an attachments section
+                        # may start with a line next to this one and go on far below).
+                        at = nos[len(nos) // 2]
+                        if at < start and (before is None or at >= before[2]):
+                            before = ((pi, si + 1), start - max(n for n in nos if n < start), at)
+                        if at > end and (after is None or at < after[2]):
+                            after = ((pi, si), at - end, at)
+                # A heading between the previous section and this one ("1. Wnioskodawca") starts the part of
+                # the paper this section belongs to: it goes with the next section.
+                headed = before is not None and any(
+                    start - before[1] < _block_no(b.id) < start and presort_step.is_heading(b)
+                    for b in document.blocks
+                )
+                # …unless the next section is much farther away than the previous one (form 9: a consent
+                # in the middle of the paper is not moved to the coach's part at its end).
+                near_next = after is not None and before is not None and after[1] <= 2 * before[1] + 5
+                if after and (before is None or (headed and near_next) or after[1] < before[1]):
+                    where = after[0]
+                else:
+                    where = before[0] if before else (0, 0)
+                if pages:
+                    pi, si = where
+                    pages[pi].sections.insert(si, section)
+                    missing -= blocks
+                    added.append(section.title)
+    if not added:
+        return best, []
+    return best.model_copy(update={"pages": pages}), added
 
 
 def _ask_once(document: Document, settings: Settings, llm=None) -> FormSpec:

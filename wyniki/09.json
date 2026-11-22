@@ -1541,6 +1541,277 @@
         {
           "x": 0,
           "y": 0,
+          "rows": 5,
+          "cols": 3,
+          "field": {
+            "id": "1e3a1987-59d0-532d-a4ab-b80594b67bfe",
+            "type": "SECTION",
+            "techName": "reprezentant_klubu_sportowego",
+            "title": "Reprezentant klubu sportowego",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "b606d80c-66cf-5671-af70-bbe2229d2dec",
+                  "type": "RADIO",
+                  "techName": "dane_reprezentanta_klubu_sportowego_z_krs_lub_innego_wlasciw",
+                  "title": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                  "description": "",
+                  "options": [
+                    {
+                      "id": "Tak",
+                      "name": "Tak",
+                      "techName": "tak"
+                    }
+                  ],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "9396a81e-4da0-5387-a06b-d414ba1cd283",
+                  "type": "TEXT_FIELD",
+                  "techName": "imie_reprezentanta",
+                  "title": "Imię reprezentanta",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['reprezentant_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_reprezentanta_klubu_sportowego_z_krs_lub_innego_wlasciw' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 1,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "7dc9efcf-01cd-5d1b-8f81-25540d6dd190",
+                  "type": "TEXT_FIELD",
+                  "techName": "nazwisko_reprezentanta",
+                  "title": "Nazwisko reprezentanta",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['reprezentant_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_reprezentanta_klubu_sportowego_z_krs_lub_innego_wlasciw' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 2,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 3,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "7c0f75fb-b430-5c51-9e66-685740fe4b24",
+                  "type": "TEXT_FIELD",
+                  "techName": "numer_telefonu_reprezentanta",
+                  "title": "Numer telefonu reprezentanta",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['reprezentant_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_reprezentanta_klubu_sportowego_z_krs_lub_innego_wlasciw' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 3,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 0,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "rows": 6,
+          "cols": 3,
+          "field": {
+            "id": "6d70147f-30df-51c6-ba5b-f41e6bf90cac",
+            "type": "SECTION",
+            "techName": "pelnomocnik_klubu_sportowego",
+            "title": "Pełnomocnik klubu sportowego",
+            "description": "<html><head></head><body></body></html>",
+            "options": [],
+            "validation": [],
+            "readOnly": false,
+            "repeatingSectionGrid": [
+              {
+                "x": 0,
+                "y": 0,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "1e2b9ea7-9632-58f8-b179-58892f97ca30",
+                  "type": "RADIO",
+                  "techName": "dane_pelnomocnika_klubu_sportowego",
+                  "title": "Dane pełnomocnika klubu sportowego",
+                  "description": "",
+                  "options": [
+                    {
+                      "id": "Tak",
+                      "name": "Tak",
+                      "techName": "tak"
+                    }
+                  ],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [],
+                  "questionOrder": 0,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "14368b76-cda6-5207-8d4c-d661bdeb41d3",
+                  "type": "TEXT_FIELD",
+                  "techName": "imie_pelnomocnika",
+                  "title": "Imię pełnomocnika",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['pelnomocnik_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_pelnomocnika_klubu_sportowego' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 1,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "a1f4ed17-2eb9-5c42-a6a8-76fdcbfbb9f5",
+                  "type": "TEXT_FIELD",
+                  "techName": "nazwisko_pelnomocnika",
+                  "title": "Nazwisko pełnomocnika",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['pelnomocnik_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_pelnomocnika_klubu_sportowego' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 2,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 3,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "e07d464a-0fcf-5c87-9bbc-df14be8321e4",
+                  "type": "TEXT_FIELD",
+                  "techName": "seria_i_numer_dowodu_osobistego_pelnomocnika",
+                  "title": "Seria i numer dowodu osobistego pełnomocnika",
+                  "description": "",
+                  "options": [],
+                  "validation": [
+                    "SERIAL_NUMBER_ID_CARD"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['pelnomocnik_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_pelnomocnika_klubu_sportowego' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 3,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 4,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "c1d1556f-ff60-560f-9b50-723010a0a4dc",
+                  "type": "TEXT_FIELD",
+                  "techName": "numer_telefonu_pelnomocnika",
+                  "title": "Numer telefonu pełnomocnika",
+                  "description": "",
+                  "options": [],
+                  "validation": [],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Tak\" in tabs['Wnioskodawca' in title].questions['pelnomocnik_klubu_sportowego' in field.techName].field.repeatingSectionGrid['dane_pelnomocnika_klubu_sportowego' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 4,
+                  "tooltipMessage": ""
+                }
+              }
+            ],
+            "states": [],
+            "questionOrder": 1,
+            "tooltipMessage": ""
+          }
+        },
+        {
+          "x": 0,
+          "y": 11,
           "rows": 4,
           "cols": 3,
           "field": {
@@ -1619,13 +1890,13 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 2,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 4,
+          "y": 15,
           "rows": 6,
           "cols": 3,
           "field": {
@@ -1799,7 +2070,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 1,
+            "questionOrder": 3,
             "tooltipMessage": ""
           }
         }

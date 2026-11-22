@@ -234,6 +234,200 @@
       "title": "Wnioskodawca",
       "sections": [
         {
+          "title": "Reprezentant klubu sportowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "Tak"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b14"
+              ]
+            },
+            {
+              "label": "Imię reprezentanta",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b15"
+              ]
+            },
+            {
+              "label": "Nazwisko reprezentanta",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
+              ]
+            },
+            {
+              "label": "Numer telefonu reprezentanta",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane reprezentanta klubu sportowego z KRS lub innego właściwego rejestru",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b17"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
+          "title": "Pełnomocnik klubu sportowego",
+          "repeating": false,
+          "description": null,
+          "fields": [
+            {
+              "label": "Dane pełnomocnika klubu sportowego",
+              "kind": "SINGLE_CHOICE",
+              "required": false,
+              "description": null,
+              "options": [
+                "Tak"
+              ],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b18"
+              ]
+            },
+            {
+              "label": "Imię pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b19"
+              ]
+            },
+            {
+              "label": "Nazwisko pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b20"
+              ]
+            },
+            {
+              "label": "Seria i numer dowodu osobistego pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b21"
+              ]
+            },
+            {
+              "label": "Numer telefonu pełnomocnika",
+              "kind": "TEXT",
+              "required": false,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Dane pełnomocnika klubu sportowego",
+                "equals": "Tak",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b22"
+              ]
+            }
+          ],
+          "show_if": null,
+          "blocks": []
+        },
+        {
           "title": "Dane klubu sportowego",
           "repeating": false,
           "description": null,

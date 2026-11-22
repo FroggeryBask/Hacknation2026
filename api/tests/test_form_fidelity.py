@@ -337,3 +337,66 @@ def test_statement_the_paper_makes_conditional_is_optional():
         "Psy nie będą wykorzystywane do polowań",
     ]
     assert conditional_consents(statements, texts) == statements[:1]
+
+
+def test_best_answer_is_completed_with_sections_other_answers_wrote():
+    """Answers skip different things (form 9): the best one gets the sections another answer wrote for
+    places to fill in it left out, placed in the part of the paper they belong to (after the heading)."""
+    from autoformularz.pipeline import complete_from
+
+    d = build(
+        [
+            (t, None)
+            for t in (
+                "Wniosek o stypendium",  # b1
+                "Rodzaj: ☐ stypendium ☐ nagroda",  # b2
+                "1. Wnioskodawca",  # b3: a heading starts the next part
+                "Imię reprezentanta ……………",  # b4
+                "Nazwisko reprezentanta ……………",  # b5
+                "Nazwa klubu ……………",  # b6
+                "Adres siedziby ……………",  # b7
+            )
+        ]
+    )
+    best = FormSpec(
+        title="Wniosek o stypendium",
+        authority_name="Urząd",
+        pages=[
+            PageSpec(
+                title="Rodzaj",
+                sections=[
+                    SectionSpec(
+                        title="Rodzaj",
+                        fields=[
+                            field("Rodzaj", ["b2"], Kind.SINGLE_CHOICE, options=["stypendium", "nagroda"])
+                        ],
+                    )
+                ],
+            ),
+            PageSpec(
+                title="Klub",
+                sections=[
+                    SectionSpec(
+                        title="Klub", fields=[field("Nazwa klubu", ["b6"]), field("Adres siedziby", ["b7"])]
+                    )
+                ],
+            ),
+        ],
+    )
+    other = best.model_copy(
+        update={
+            "pages": [
+                PageSpec(
+                    title="X",
+                    sections=[
+                        SectionSpec(
+                            title="Reprezentant", fields=[field("Imię", ["b4"]), field("Nazwisko", ["b5"])]
+                        )
+                    ],
+                )
+            ]
+        }
+    )
+    merged, added = complete_from(best, [other], d)
+    assert added == ["Reprezentant"]
+    assert [s.title for s in merged.pages[1].sections] == ["Reprezentant", "Klub"]
