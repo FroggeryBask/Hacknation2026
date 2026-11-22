@@ -63,7 +63,7 @@ Na Windows (PowerShell) ustaw w `.env` `AUTOFORMULARZ_LLM_PROVIDER=ollama`, pote
 ### 3. Adresy i zatrzymanie
 
 - API: http://localhost:8000 (dokumentacja OpenAPI: http://localhost:8000/docs)
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3000 (upload jednego albo wielu plików naraz, do 20; każdy plik to osobne zadanie `/api/v1/jobs`, po 2 jednocześnie; podgląd e-formularza i JSON-u, pobieranie pojedynczo albo wszystkich)
 - Zatrzymanie: `docker compose down` (z `--profile ollama`, jeśli startowało z Ollamą). `docker compose down -v` usuwa też pobrany model.
 
 ### Wymagania sprzętowe i czasy
