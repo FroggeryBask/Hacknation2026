@@ -503,3 +503,30 @@ def test_cancel_stops_the_stream(post, nadplata_spec):
     post(sse(spec_json(nadplata_spec)))
     with progress.reporting(sink), pytest.raises(Stop):
         generate_spec(doc(text="x"), eden())
+
+
+def test_eden_thinking_off(post, nadplata_spec):
+    """Like `think: false` for Ollama: reasoning_effort none and the Qwen3 /no_think switch."""
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="Wniosek", images=[PNG]), eden())
+    body = rec.calls[0]["json"]
+    assert body["reasoning_effort"] == "none"
+    user = body["messages"][-1]["content"]
+    text = user[0]["text"] if isinstance(user, list) else user
+    assert text.rstrip().endswith("/no_think")
+    assert body["messages"][0]["role"] == "system" and "/no_think" not in body["messages"][0]["content"]
+
+
+def test_eden_reasoning_refused_retries_without_it(post, nadplata_spec):
+    refused = httpx.Response(400, json={"error": "Unsupported parameter: reasoning_effort"})
+    rec = post(refused, completion(spec_json(nadplata_spec)))
+    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+    assert "reasoning_effort" in rec.calls[0]["json"] and "reasoning_effort" not in rec.calls[1]["json"]
+    assert rec.calls[1]["json"]["messages"][-1]["content"].endswith("/no_think")  # the switch stays
+
+
+def test_eden_thinking_switch_can_be_turned_off(post, nadplata_spec):
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="x"), eden(eden_reasoning_effort=""))
+    body = rec.calls[0]["json"]
+    assert "reasoning_effort" not in body and "/no_think" not in body["messages"][-1]["content"]

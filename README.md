@@ -139,6 +139,7 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_LLM_MODEL` | `qwen3-vl:8b` | Model (dowolny model wizyjny z Ollama) |
 | `AUTOFORMULARZ_LLM_PROVIDER` | `eden` | `ollama` uruchamia model lokalnie (offline, w Dockerze z `--profile ollama`), patrz [Model językowy](#model-językowy-eden-ai-domyślnie-albo-ollama-offline) |
 | `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
+| `AUTOFORMULARZ_EDEN_REASONING_EFFORT` | `none` | Wyłącza myślenie modelu na Eden: `reasoning_effort` w zapytaniu i przełącznik `/no_think` w prompcie (jak `think: false` w Ollamie). Gdy Eden odrzuci parametr, zapytanie idzie ponownie bez niego. Pusta wartość: nie wysyła żadnego z nich |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `1800` | Limit czasu odpowiedzi modelu (Ollama na CPU potrzebuje do ~25 min na duży formularz) |
 | `AUTOFORMULARZ_LLM_NUM_CTX` | `24576` | Okno kontekstu modelu w Ollamie: prompt + odpowiedź (więcej = więcej pamięci RAM/VRAM; 16384 nie mieści formularza 8) |
 | `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Maksymalna długość odpowiedzi modelu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
@@ -223,6 +224,17 @@ Pliki `.env*` są poza gitem (oprócz `.env.example`). Nie commituj ich.
 | `cd api && uv run pytest` | Testy API, w tym porównanie z referencyjnymi JSON-ami COI |
 | `npm run smoke [url]` | Sprawdza, czy kluczowe strony frontendu odpowiadają |
 | `npx shadcn@latest add <name>` | Dodaje komponent UI |
+
+### Metryki i porównywanie przebiegów
+
+Każde przetworzenie pliku zapisuje metryki: czasy etapów, czas modelu i czas do pierwszego tokenu, tokeny
+wejścia i wyjścia, koszt Eden, szacunek tokenów obrazów, liczbę wartości domyślnych (`null`, `[]`, `false`) w surowej
+odpowiedzi i rozmiar wyniku. Plik jest opisany skrótem SHA-256, nigdy nazwą ani treścią.
+
+- API: jedna linia JSON w logu (`docker compose logs api | grep metrics`) i klucz `metrics` w `?details=true`.
+- Generator wyników: każde zapytanie modelu dopisuje linię do `wyniki/metrics.jsonl` (ze stanem ustawień: model,
+  presort, rozdzielczość obrazów…) i zapisuje surową odpowiedź w `wyniki/NN.raw.txt` (oba poza gitem).
+  Tabela porównawcza bez modelu: `cd api && uv run python -m autoformularz.results --metrics`.
 
 ### Model językowy: Eden AI (domyślnie) albo Ollama (offline)
 

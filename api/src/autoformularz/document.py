@@ -38,7 +38,9 @@ class FieldCandidate:
 class Document:
     blocks: list[Block] = field(default_factory=list)
     candidates: list[FieldCandidate] = field(default_factory=list)
-    images: list[bytes] = field(default_factory=list)  # PNG bytes, already downscaled (scans)
+    images: list[bytes] = field(
+        default_factory=list
+    )  # JPEG page images for the model, already downscaled (scans)
     notes: list[str] = field(default_factory=list)
     hint: str = ""  # one line for the model about blocks the code already handled (presort), not in the API
 

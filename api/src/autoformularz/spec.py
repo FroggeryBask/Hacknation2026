@@ -239,4 +239,37 @@ def model_schema() -> dict:
     field = defs["FieldSpec"]
     field["required"] = [*field.get("required", []), "required"]
     field["properties"]["required"].pop("default", None)
+    for obj in (schema, *defs.values()):
+        _only_non_defaults(obj)
+    defs["ApplicantSpec"]["minProperties"] = 1  # an empty "applicant": {} is the default: leave it out
     return schema
+
+
+def _only_non_defaults(obj: dict) -> None:
+    """An optional key may be written only with a value that differs from its default; otherwise it is left
+    out (Pydantic fills the default when reading). A default value is output time and cost for nothing:
+    the saved specs are ~45% default values (null, [], false) when every key is written.
+    - `null` is not allowed (description, dictionary, prefill, show_if, max_files, to, summary),
+    - a list needs at least one item (options, validators, allowed_formats, blocks, consents, block_roles),
+    - a flag can only be written as the non-default value (repeating, negate, entity: true; signed,
+      other_person: false), a string with a default only as another value (authority_kind: "organ")."""
+    required = set(obj.get("required", []))
+    for name, prop in (obj.get("properties") or {}).items():
+        if name in required:
+            continue
+        default = prop.pop("default", None)
+        if "anyOf" in prop:
+            options = [o for o in prop["anyOf"] if o.get("type") != "null"]
+            if len(options) == 1:
+                prop.pop("anyOf")
+                prop.update(options[0])
+            else:
+                prop["anyOf"] = options
+        if prop.get("type") == "array":
+            prop["minItems"] = max(prop.get("minItems", 0), 1)
+        elif prop.get("type") == "boolean" and isinstance(default, bool):
+            prop["enum"] = [not default]
+        elif isinstance(default, str) and "enum" in prop:
+            prop["enum"] = [v for v in prop["enum"] if v != default]
+        elif isinstance(default, str) and "$ref" in prop:
+            pass  # an enum class by reference: kept as is (not used for optional keys today)

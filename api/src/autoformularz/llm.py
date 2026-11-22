@@ -8,13 +8,14 @@ import base64
 import json
 import logging
 import re
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import httpx
 from pydantic import ValidationError
 
-from autoformularz import progress
+from autoformularz import metrics, progress
 from autoformularz.config import Settings
 from autoformularz.document import FILL_LINE, Document
 from autoformularz.spec import FormSpec, model_schema
@@ -203,6 +204,8 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
     }
     answer = Answer()
     done_reason = None
+    final: dict = {}
+    call = metrics.start_call("ollama", settings.llm_model, msgs, images)
     try:
         with httpx.stream(
             "POST", f"{settings.ollama_url}/api/chat", json=payload, timeout=settings.llm_timeout_s
@@ -218,11 +221,20 @@ def _call_ollama(messages: list[dict], images: list[bytes], settings: Settings) 
                 done_reason = chunk.get("done_reason") or done_reason
                 answer.add((chunk.get("message") or {}).get("content", ""))
                 if chunk.get("done"):
+                    final = chunk
                     break
     except httpx.HTTPError as e:
         raise LLMError(
             "LLM_UNAVAILABLE", f"Model językowy jest niedostępny ({settings.ollama_url}).", 503
         ) from e
+    finally:
+        _finish_call(call, answer, done_reason)
+        call.prompt_tokens, call.completion_tokens = final.get("prompt_eval_count"), final.get("eval_count")
+        call.ollama = {  # Ollama reports nanoseconds
+            k.removesuffix("_duration") + "S": round(final[k] / 1e9, 2)
+            for k in ("load_duration", "prompt_eval_duration", "eval_duration")
+            if isinstance(final.get(k), int | float)
+        }
     content = answer.text()
     if done_reason == "length":
         raise truncated(settings, content)
@@ -305,6 +317,8 @@ class Answer:
         self.parts: list[str] = []
         self.size = self.checked = 0
         self.outline = Outline()
+        self.started = time.perf_counter()
+        self.first_at: float | None = None  # when the first piece arrived (metrics: time to first token)
 
     def text(self) -> str:
         return "".join(self.parts)
@@ -312,6 +326,8 @@ class Answer:
     def add(self, piece: str) -> None:
         if not piece:
             return
+        if self.first_at is None:
+            self.first_at = time.perf_counter()
         self.parts.append(piece)
         self.size += len(piece)
         self.outline.feed(piece)
@@ -329,8 +345,18 @@ class Answer:
                 raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
 
 
-def _eden_messages(messages: list[dict], images: list[bytes]) -> list[dict]:
+NO_THINK = "/no_think"  # Qwen3 soft switch: hybrid models skip reasoning; Instruct models ignore it
+
+
+def thinking_off(settings: Settings) -> bool:
+    return settings.eden_reasoning_effort.strip().lower() in ("none", "disable")
+
+
+def _eden_messages(messages: list[dict], images: list[bytes], no_think: bool = False) -> list[dict]:
     msgs = [dict(m) for m in messages]
+    if no_think:  # at the end of the last user message, where Qwen3 reads the switch
+        last = max(i for i, m in enumerate(msgs) if m["role"] == "user")
+        msgs[last]["content"] = f"{msgs[last]['content']}\n\n{NO_THINK}"
     if images:
         msgs[1]["content"] = [{"type": "text", "text": msgs[1]["content"]}] + [
             {"type": "image_url", "image_url": {"url": f"data:{_mime(img)};base64,{_b64(img)}"}}
@@ -352,7 +378,7 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         "model": settings.eden_model,
         "temperature": 0,
         "max_tokens": settings.llm_max_tokens,
-        "messages": _eden_messages(messages, images),
+        "messages": _eden_messages(messages, images, no_think=thinking_off(settings)),
         "stream": True,
         "stream_options": {"include_usage": True},
         "response_format": {
@@ -360,6 +386,8 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
             "json_schema": {"name": "FormSpec", "schema": model_schema()},
         },
     }
+    if settings.eden_reasoning_effort.strip():
+        payload["reasoning_effort"] = settings.eden_reasoning_effort.strip()
 
     def post() -> tuple[httpx.Response, dict | None, Answer]:
         """One call. Streamed (SSE) so progress shows and a looping answer stops early; the body is None
@@ -367,6 +395,8 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         for guard in before_eden_call:
             guard(settings.eden_model)
         answer = Answer()
+        call = metrics.start_call("eden", settings.eden_model or "", payload["messages"], images)
+        sse: dict | None = None
         try:
             with httpx.stream(
                 "POST",
@@ -377,13 +407,25 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
             ) as r:
                 if r.status_code != 200 or "text/event-stream" not in r.headers.get("content-type", ""):
                     r.read()
+                    if r.status_code != 200:
+                        call.finish_reason = f"http {r.status_code}"
                     return r, None, answer
-                return r, _read_sse(r, answer), answer
+                sse = _read_sse(r, answer)
+                return r, sse, answer
         except httpx.HTTPError as e:
             log.warning("Eden AI call failed: %s: %s", type(e).__name__, e)
             raise LLMError("LLM_UNAVAILABLE", "Model językowy jest niedostępny (Eden AI).", 503) from e
+        finally:
+            _finish_call(call, answer, (sse or {}).get("finish_reason") or call.finish_reason)
+            if sse:
+                _eden_call_usage(call, sse)
 
     r, body, answer = post()
+    if 400 <= r.status_code < 500 and "reasoning" in r.text.lower() and "reasoning_effort" in payload:
+        # Eden documents that a parameter the model does not list "may be dropped, ignored, or refused".
+        # Refused: the same call without it (the /no_think switch stays in the prompt).
+        payload.pop("reasoning_effort")
+        r, body, answer = post()
     if 400 <= r.status_code < 500 and "response_format" in r.text:
         # Some providers behind Eden reject json_schema; the schema is in the prompt and Pydantic validates.
         payload["response_format"] = {"type": "json_object"}
@@ -404,6 +446,10 @@ def _call_eden(messages: list[dict], images: list[bytes], settings: Settings) ->
         content = content or ""
         answer.outline.feed(content)
         finish = choice.get("finish_reason")
+        if (m := metrics.current()) is not None and m.calls:  # plain JSON answer: fill the call's record
+            metrics.answer_shape(m.calls[-1], content)
+            m.calls[-1].finish_reason = finish
+            _eden_call_usage(m.calls[-1], body)
     else:
         content, finish = answer.text(), body.get("finish_reason")
     _record(settings.eden_model, body)
@@ -441,6 +487,23 @@ def _read_sse(r: httpx.Response, answer: Answer) -> dict:
     if "usage" not in out:
         log.warning("Eden AI sent no usage in the stream: this call's cost is not recorded.")
     return out
+
+
+def _finish_call(call: metrics.ModelCall, answer: Answer, finish: str | None) -> None:
+    """Fill a call's metrics from the streamed answer (also when it was stopped or failed)."""
+    call.seconds = time.perf_counter() - answer.started
+    if answer.first_at is not None:
+        call.first_token_s = answer.first_at - answer.started
+    call.finish_reason = finish
+    metrics.answer_shape(call, answer.text())
+
+
+def _eden_call_usage(call: metrics.ModelCall, body: dict) -> None:
+    usage = body.get("usage") if isinstance(body.get("usage"), dict) else {}
+    call.prompt_tokens = usage.get("prompt_tokens")
+    call.completion_tokens = usage.get("completion_tokens")
+    cost = body.get("cost", usage.get("cost", usage.get("estimated_cost")))
+    call.cost_usd = float(cost) if isinstance(cost, int | float) else None
 
 
 def _record(model: str, body: dict) -> None:
