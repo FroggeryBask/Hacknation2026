@@ -144,7 +144,7 @@ Kontrakt (JSON Schema FormSpec) się nie zmienia, a jakość sprawdzają te same
 | Konfiguracja (rozmiar, JWT, integracje) | zmienne `AUTOFORMULARZ_*`, [README, „Konfiguracja”](../README.md#konfiguracja) |
 | Docker: oficjalne obrazy, wersje, non-root, porty, sekrety w runtime | `api/Dockerfile`, `Dockerfile.web`, `docker-compose.yml` |
 | README: budowanie, uruchomienie, konfiguracja, REST API | [README](../README.md) |
-| Bez zewnętrznych API, MCP, SaaS i LLM tylko przez API | model w kontenerze `ollama`, sekcja 4 |
+| Bez zewnętrznych API, MCP, SaaS i LLM tylko przez API | jedyna usługa zewnętrzna to Eden AI organizatorów z modelami o otwartych wagach; ten sam pipeline w pełni lokalnie z modelem w kontenerze `ollama`, sekcja 4 |
 | Open source bez copyleft | sekcja 7 |
 
 ## 7. Licencje
@@ -194,8 +194,8 @@ Treść zadania zakazuje licencji „wymagających upublicznienia całości lub 
 ## 8. Ograniczenia i dalsze kroki
 
 - Skany: OCR daje bloki tekstu, ale puste kratki do zaznaczenia widzi tylko model na obrazie strony.
-- Tryb demo z Eden AI zależy od internetu i budżetu zespołu; wersja docelowa (Ollama) działa bez sieci.
-- Czasy odpowiedzi modelu w Dockerze nie są jeszcze zmierzone (patrz README).
+- Tryb z Eden AI zależy od internetu i budżetu; tryb Ollama działa bez sieci, ale na CPU wolno (minuty na formularz), a mały model 8B daje słabsze wyniki niż DeepSeek V4.1 Flash.
 - `/api/v1/forms/compile` nie dostaje dokumentu źródłowego, więc po ręcznej korekcie FormSpec pouczenia
   i podstawa prawna nie są dołączane.
-- Czas odpowiedzi na samym CPU jest liczony w minutach; do pracy na wielu formularzach zalecany GPU.
+- Do pracy z modelem lokalnym na wielu formularzach zalecany GPU.
+- Biały lub bardzo mały tekst w PDF/DOCX (inny sposób ukrycia poleceń dla modelu) nie jest jeszcze wykrywany.

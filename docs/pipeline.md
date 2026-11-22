@@ -81,7 +81,7 @@ Obecne reguły z „Reguł technicznych”, a do tego:
 
 ## Kontrakt
 
-Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Zmiany tylko po uzgodnieniu
+Wspólny kontrakt między etapami. Zmiany tylko po uzgodnieniu
 (Ewelina ↔ Konrad: `Document`, Konrad ↔ Gabrysia: `?details=true`).
 
 **`Document`** (`api/src/autoformularz/document.py`, wynik `extract.py`):
