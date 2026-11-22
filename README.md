@@ -1,4 +1,4 @@
-# autoformularz: cyfryzacja formularzy
+# AutoFormularz: cyfryzacja formularzy
 
 Usługa REST, która zamienia plik formularza urzędowego (PDF, DOC, DOCX, ODS, XLSX, JPG, JPEG, PNG) na konfigurację
 formularza e-usługi w formacie JSON, gotową do importu w systemie docelowym COI. Zadanie COI „Cyfryzacja
@@ -15,7 +15,7 @@ Model językowy to model o otwartych wagach. Domyślnie działa na Eden AI, udos
 | `api/` | rozwiązanie: REST API (Python 3.14, FastAPI), testy, `Dockerfile` |
 | `src/`, `Dockerfile.web` | frontend (Next.js): wgranie jednego lub wielu plików, podgląd e-formularza z JSON-u, podgląd JSON-u |
 | `docker-compose.yml`, `.env.example` | uruchomienie całości w Dockerze i przykładowa konfiguracja |
-| `wyniki/` | wynikowe pliki JSON dla formularzy z materiałów (`NN.json`), opis pośredni (`NN.spec.json`), raport (`NN.report.json`) i propozycje słowników (`slowniki.json`) |
+| `wyniki/` | wynikowe pliki JSON dla materiałów 1–9 (`NN.json`), raporty (`NN.report.json`) i propozycje słowników (`slowniki.json`), [Wyniki](#wyniki) |
 | `docs/architektura.md` | **dokumentacja architektury** (komponenty, przepływ, bezpieczeństwo, koszt, zgodność z wymaganiami, licencje) |
 | `docs/pipeline.md`, `docs/decisions.md` | kroki przetwarzania i decyzje projektowe z uzasadnieniem |
 | `docs/prezentacja.pdf` | prezentacja projektu (źródło: `docs/prezentacja.md`, Marp) |
@@ -48,7 +48,8 @@ docker compose up --build
 ```
 
 API: http://localhost:8000 (OpenAPI: http://localhost:8000/docs), frontend: http://localhost:3000. Token do API:
-`docker compose exec api autoformularz-token`. Tryb offline bez Eden AI: [Uruchomienie lokalnie (Ollama)](#2b-w-pełni-lokalnie-ollama-offline).
+`docker compose exec api autoformularz-token`. Tryb offline bez Eden AI: [Uruchomienie lokalnie (Ollama)](#2b-w-pełni-lokalnie-ollama-offline), ten sam model
+DeepSeek na własnym serwerze: [2c](#2c-ten-sam-model-co-na-eden-ai-ale-na-własnym-serwerze-deepseek-v41-flash).
 
 ## Budowanie obrazu Docker
 
@@ -124,6 +125,46 @@ Na Windows (PowerShell) ustaw w `.env` `AUTOFORMULARZ_LLM_PROVIDER=ollama`, pote
   dopiero po pobraniu. Potem wszystko działa bez internetu.
 - GPU NVIDIA (Linux, Windows z WSL2): odkomentuj blok `deploy` w `docker-compose.yml`. Docker na macOS nie daje
   kontenerom dostępu do GPU, więc tam model liczy się na CPU.
+
+### 2c. Ten sam model co na Eden AI, ale na własnym serwerze (DeepSeek V4.1 Flash)
+
+DeepSeek V4.1 Flash ma otwarte wagi (MIT, `deepseek-ai/DeepSeek-V4.1-Flash-1017` na Hugging Face), więc da się go
+uruchomić u siebie i przestać korzystać z Eden AI. Kod się nie zmienia. Dostawca `eden` to zwykły klient API
+zgodnego z OpenAI (`POST {AUTOFORMULARZ_EDEN_BASE_URL}/chat/completions`, odpowiedź strumieniowana, schemat
+`json_schema`), więc wystarczy wskazać mu własny serwer zamiast `api.edenai.run`.
+
+1. **Serwer modelu.** To duży model MoE, więc potrzebny jest serwer z kilkoma GPU, nie laptop (wymagania pamięci
+   podaje karta modelu). Model wystawia serwer zgodny z OpenAI API, np. [vLLM](https://github.com/vllm-project/vllm)
+   albo [SGLang](https://github.com/sgl-project/sglang) (oba Apache-2.0), jeśli dana wersja obsługuje ten model.
+   Przykład dla vLLM:
+
+   ```bash
+   vllm serve deepseek-ai/DeepSeek-V4.1-Flash-1017 --served-model-name deepseek-v4.1-flash \
+     --api-key <dowolny-klucz> --tensor-parallel-size <liczba GPU> --port 8001
+   ```
+
+2. **Konfiguracja API** w `.env`. Nazwy zmiennych mają przedrostek `EDEN`, ale działają z każdym serwerem
+   zgodnym z OpenAI:
+
+   ```bash
+   AUTOFORMULARZ_LLM_PROVIDER=eden                              # klient API zgodnego z OpenAI
+   AUTOFORMULARZ_EDEN_BASE_URL=http://<adres-serwera>:8001/v1   # zamiast https://api.edenai.run/v3
+   AUTOFORMULARZ_EDEN_MODEL=deepseek-v4.1-flash                 # nazwa z --served-model-name
+   EDENAI_API_KEY=<dowolny-klucz>                               # ten sam co w --api-key
+   ```
+
+   `AUTOFORMULARZ_EDEN_REASONING_EFFORT=none` może zostać. Gdy serwer odrzuci `reasoning_effort` albo
+   `json_schema`, API samo ponawia zapytanie bez tego parametru albo z `json_object`; schemat i tak jest w prompcie,
+   a odpowiedź sprawdza Pydantic. Jeśli serwer stoi na tym samym komputerze co Docker, adres to
+   `http://host.docker.internal:8001/v1`. Docker Desktop (Windows, macOS) zna ten adres sam; na Linuksie usługa `api`
+   potrzebuje dodatkowo `extra_hosts: ["host.docker.internal:host-gateway"]`.
+
+3. **Start:** `docker compose up --build`, jak w wariancie 2a. `GET /health` pokaże `"provider": "eden"`
+   i `"configured": true`. Koszt w `usage` wyniesie 0, bo własny serwer nie zwraca ceny.
+
+Wyniki powinny być bardzo zbliżone do tych z Eden AI, bo to ten sam model z tym samym promptem i schematem (mogą
+się różnić, jeśli serwer używa innej kwantyzacji wag). Nie testowaliśmy tego na własnym serwerze (nie mamy sprzętu dla tego modelu); na Eden AI ta sama ścieżka kodu działa
+na wszystkich materiałach. Na zwykłym komputerze bez GPU zostaje wariant 2b (Ollama z `qwen3-vl:8b`).
 
 ### 3. Adresy, token i zatrzymanie
 
@@ -208,7 +249,7 @@ przy uruchomieniu.
 | `AUTOFORMULARZ_LLM_PROVIDER` | `eden` | `eden` (Eden AI) albo `ollama` (lokalnie, offline) |
 | `EDENAI_API_KEY` | brak | **Sekret.** Klucz Eden AI, wymagany przy `eden`; trafia tylko do kontenera `api` |
 | `AUTOFORMULARZ_EDEN_MODEL` | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash` | Model na Eden AI (tylko modele o otwartych wagach) |
-| `AUTOFORMULARZ_EDEN_BASE_URL` | `https://api.edenai.run/v3` | Adres API Eden AI |
+| `AUTOFORMULARZ_EDEN_BASE_URL` | `https://api.edenai.run/v3` | Adres API Eden AI albo własnego serwera zgodnego z OpenAI, np. vLLM z DeepSeekiem ([2c](#2c-ten-sam-model-co-na-eden-ai-ale-na-własnym-serwerze-deepseek-v41-flash)) |
 | `AUTOFORMULARZ_EDEN_REASONING_EFFORT` | `none` | Wyłącza „myślenie” modelu na Eden (`reasoning_effort`; dla Qwen też `/no_think`). Pusta wartość: nie wysyła nic |
 | `AUTOFORMULARZ_OLLAMA_URL` | `http://localhost:11434` | Adres serwera Ollama (w Compose: `http://ollama:11434`) |
 | `AUTOFORMULARZ_LLM_MODEL` | `qwen3-vl:8b` | Model w Ollamie (model wizyjny: czyta też skany) |
@@ -313,6 +354,31 @@ PowerShell:
 $token = docker compose exec -T api autoformularz-token
 curl.exe -H "Authorization: Bearer $token" -F "file=@wniosek.pdf" http://localhost:8000/api/v1/forms -o wniosek.json
 ```
+
+## Wyniki
+
+`wyniki/NN.json` to wynikowe pliki JSON dla materiałów 1–9. Każdy to jedno zwykłe wywołanie usługi bez żadnej
+poprawki: materiał wysłany raz do `POST /api/v1/forms?details=true` w obrazie Docker z ustawieniami domyślnymi
+(Eden AI, DeepSeek V4.1 Flash, jedna odpowiedź modelu na plik), za każdym razem w innym formacie. `NN.json` to
+formularz do importu, `NN.report.json` to plik źródłowy, czas, koszt, uwagi, raport reguł, propozycje słowników
+i metryki, `slowniki.json` zbiera propozycje słowników. Przebieg z 2026-11-22:
+
+| Materiał | Format | Czas | Koszt (USD) | Strony | Sekcje / pola z formularza | Błędy reguł |
+|---|---|---|---|---|---|---|
+| 1. Numer porządkowy nieruchomości | XLSX | 3,2 s | 0,0003 | 4 | 1 / 4 | 0 |
+| 2. Zwrot opłaty skarbowej | PDF | 4,8 s | 0,0007 | 5 | 4 / 9 | 0 |
+| 3. Wydanie zaświadczenia | JPG (skan) | 5,3 s | 0,0006 | 4 | 2 / 6 | 0 |
+| 4. Wynajęcie świetlicy | ODS | 4,2 s | 0,0006 | 4 | 2 / 7 | 0 |
+| 5. Stwierdzenie nadpłaty podatku | DOC | 4,2 s | 0,0006 | 4 | 3 / 9 | 0 |
+| 6. Zajęcie pasa drogowego | XLSX | 8,2 s | 0,0012 | 5 | 5 / 19 | 0 |
+| 7. Psy ras uznawanych za agresywne | PNG (skan) | 11,7 s | 0,0010 | 4 | 2 / 10 | 0 |
+| 8. Deklaracja opłaty za odpady | ODS | 18,9 s | 0,0037 | 6 | 11 / 54 | 0 |
+| 9. Stypendium, nagroda, wyróżnienie | DOCX | 14,1 s | 0,0026 | 7 | 10 / 34 | 0 |
+
+Razem 0,011 USD. Czas to całe żądanie (odczyt, OCR skanów, model, kompilacja, walidacja). Strony liczą też
+predefiniowane („Dane”, „Kontakt i zgody”, „Strona końcowa”), a sekcje i pola tylko te, które model opisał
+z formularza (sekcje standardowe dodaje kompilator). Skaner bezpieczeństwa nie zgłosił nic w żadnym wyniku.
+Propozycje słowników: rasy psów (7) i dyscypliny sportowe (9).
 
 ## Co jeszcze robi rozwiązanie
 

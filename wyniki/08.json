@@ -1472,14 +1472,14 @@
       ]
     },
     {
-      "id": "86cf8ae0-6436-587c-a46b-e3047ac5fd71",
-      "title": "Dane podmiotu i nieruchomości",
+      "id": "c6f90cfc-9666-50ed-9960-8bce247f45f6",
+      "title": "Dane o nieruchomości",
       "type": "MAIN",
       "questions": [
         {
           "x": 0,
           "y": 0,
-          "rows": 3,
+          "rows": 2,
           "cols": 3,
           "field": {
             "id": "809d578c-f109-5564-9a56-a3e2e5aadea2",
@@ -1544,31 +1544,6 @@
                   "questionOrder": 0,
                   "tooltipMessage": ""
                 }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "ed48b4c3-9319-5087-8928-96bbe5b46e12",
-                  "type": "TEXT_FIELD",
-                  "techName": "opis_innego_podmiotu",
-                  "title": "Opis innego podmiotu",
-                  "description": "",
-                  "options": [],
-                  "validation": [],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "(\"inny podmiot posiadający nieruchomość w zarządzie lub użytkowaniu\" in tabs['Dane podmiotu i nieruchomości' in title].questions['skladajacy_deklaracje' in field.techName].field.repeatingSectionGrid['skladajacy_deklaracje_2' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 1,
-                  "tooltipMessage": ""
-                }
               }
             ],
             "states": [],
@@ -1578,7 +1553,7 @@
         },
         {
           "x": 0,
-          "y": 3,
+          "y": 2,
           "rows": 4,
           "cols": 3,
           "field": {
@@ -1586,7 +1561,7 @@
             "type": "SECTION",
             "techName": "dane_identyfikacyjne_wspolmalzonka",
             "title": "Dane identyfikacyjne współmałżonka",
-            "description": "<html><head></head><body><p>Wypełnić tylko w przypadku zaznaczenia współwłaściciela (wspólność majątkowa)</p></body></html>",
+            "description": "<html><head></head><body><p>Wypełnić tylko w przypadku zaznaczenia opcji współwłaściciel (wspólność majątkowa)</p></body></html>",
             "options": [],
             "validation": [],
             "readOnly": false,
@@ -1603,7 +1578,9 @@
                   "title": "Nazwisko i imię współmałżonka",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -1623,7 +1600,9 @@
                   "title": "Adres zamieszkania współmałżonka",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -1644,6 +1623,7 @@
                   "description": "",
                   "options": [],
                   "validation": [
+                    "REQUIRED",
                     "PESEL"
                   ],
                   "readOnly": false,
@@ -1657,7 +1637,7 @@
             "states": [
               {
                 "type": "SHOW",
-                "query": "(\"współwłaściciel (wspólność majątkowa)\" in tabs['Dane podmiotu i nieruchomości' in title].questions['skladajacy_deklaracje' in field.techName].field.repeatingSectionGrid['skladajacy_deklaracje_2' in field.techName].field.__userAnswer)"
+                "query": "(\"współwłaściciel (wspólność majątkowa)\" in tabs['Dane o nieruchomości' in title].questions['skladajacy_deklaracje' in field.techName].field.repeatingSectionGrid['skladajacy_deklaracje_2' in field.techName].field.__userAnswer)"
               }
             ],
             "questionOrder": 1,
@@ -1666,7 +1646,7 @@
         },
         {
           "x": 0,
-          "y": 7,
+          "y": 6,
           "rows": 9,
           "cols": 3,
           "field": {
@@ -1854,7 +1834,7 @@
         },
         {
           "x": 0,
-          "y": 16,
+          "y": 15,
           "rows": 6,
           "cols": 3,
           "field": {
@@ -1873,10 +1853,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "5da4431c-ee22-59d2-967b-65a8d0cf27a0",
+                  "id": "38ecf1db-7496-5fa7-83c8-b14560421f4a",
                   "type": "RADIO",
-                  "techName": "okolicznosc",
-                  "title": "Okoliczność",
+                  "techName": "okolicznosci",
+                  "title": "Okoliczności",
                   "description": "",
                   "options": [
                     {
@@ -1922,13 +1902,15 @@
                   "title": "Data zdarzenia powodującego powstanie obowiązku opłaty",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"pierwsza deklaracja\" in tabs['Dane podmiotu i nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"pierwsza deklaracja\" in tabs['Dane o nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosci' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 1,
@@ -1947,13 +1929,15 @@
                   "title": "Data wystąpienia zmiany danych",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"nowa deklaracja składana ze względu na zmianę danych\" in tabs['Dane podmiotu i nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"nowa deklaracja składana ze względu na zmianę danych\" in tabs['Dane o nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosci' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 2,
@@ -1972,13 +1956,15 @@
                   "title": "Data zdarzenia powodującego ustanie obowiązku opłaty",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"ustanie obowiązku uiszczania opłaty\" in tabs['Dane podmiotu i nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"ustanie obowiązku uiszczania opłaty\" in tabs['Dane o nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosci' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 3,
@@ -1997,13 +1983,15 @@
                   "title": "Data wystąpienia zmiany danych",
                   "description": "",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"korekta złożonej, obowiązującej deklaracji\" in tabs['Dane podmiotu i nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosc' in field.techName].field.__userAnswer)"
+                      "query": "(\"korekta złożonej, obowiązującej deklaracji\" in tabs['Dane o nieruchomości' in title].questions['okolicznosci_uzasadniajace_zlozenie_deklaracji' in field.techName].field.repeatingSectionGrid['okolicznosci' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 4,
@@ -2018,7 +2006,7 @@
         },
         {
           "x": 0,
-          "y": 22,
+          "y": 21,
           "rows": 7,
           "cols": 3,
           "field": {
@@ -2146,10 +2134,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "eadae4ac-d00b-5cd4-ba71-6f53c5840d96",
+                  "id": "7d6381c7-e297-53a1-a05d-a4c983015a27",
                   "type": "TEXT_FIELD",
-                  "techName": "numer_y_dzialki_dzialek",
-                  "title": "Numer/y działki/działek",
+                  "techName": "numery_dzialek",
+                  "title": "Numery działek",
                   "description": "<html><head></head><body><p>Wypełnić, jeżeli nieruchomość nie ma urzędowo nadanego adresu</p></body></html>",
                   "options": [],
                   "validation": [],
@@ -2168,7 +2156,7 @@
         },
         {
           "x": 0,
-          "y": 29,
+          "y": 28,
           "rows": 3,
           "cols": 3,
           "field": {
@@ -2176,7 +2164,7 @@
             "type": "SECTION",
             "techName": "miejsce_gromadzenia_odpadow",
             "title": "Miejsce gromadzenia odpadów",
-            "description": "<html><head></head><body><p>Wypełnić w przypadku nieruchomości zabudowanej budynkiem wielolokalowym lub budynkami wielolokalowymi, jeżeli poszczególne budynki lub ich części posiadają przypisane im odrębne miejsca gromadzenia odpadów komunalnych</p></body></html>",
+            "description": "<html><head></head><body><p>Wypełnić w przypadku nieruchomości zabudowanej budynkiem wielolokalowym lub budynkami wielolokalowymi, jeżeli poszczególne budynki lub ich części mają przypisane odrębne miejsca gromadzenia odpadów</p></body></html>",
             "options": [],
             "validation": [],
             "readOnly": false,
@@ -2207,10 +2195,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "25bba7c5-d83b-5c7b-af91-776da2c04795",
+                  "id": "7cde0080-7b70-5e11-82c0-7d1963d8b2e4",
                   "type": "TEXT_FIELD",
-                  "techName": "numer_y_dzialki_dzialek_geodezyjnych",
-                  "title": "Numer/y działki/działek geodezyjnych",
+                  "techName": "numery_dzialek_geodezyjnych",
+                  "title": "Numery działek geodezyjnych",
                   "description": "",
                   "options": [],
                   "validation": [],
@@ -2229,7 +2217,7 @@
         },
         {
           "x": 0,
-          "y": 32,
+          "y": 31,
           "rows": 3,
           "cols": 3,
           "field": {
@@ -2281,10 +2269,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "48a63496-8e87-50b5-922e-1a5d424e1c3b",
+                  "id": "43c82843-6b55-50c7-b216-66fc7b6d636d",
                   "type": "RADIO",
-                  "techName": "nieruchomosc_w_czesci_stanowi_nieruchomosc_na_ktorej_zamiesz",
-                  "title": "Nieruchomość w części stanowi nieruchomość, na której zamieszkują mieszkańcy, a w części nieruchomość, na której nie zamieszkują mieszkańcy, a powstają na niej odpady komunalne",
+                  "techName": "nieruchomosc_w_czesci_zamieszkana_przez_mieszkancow_a_w_czes",
+                  "title": "Nieruchomość w części zamieszkana przez mieszkańców, a w części niezamieszkana, na której powstają odpady komunalne",
                   "description": "",
                   "options": [
                     {
@@ -2327,10 +2315,10 @@
           "rows": 12,
           "cols": 3,
           "field": {
-            "id": "4becf46f-0e2a-587c-865b-90902c2d6004",
+            "id": "516ae241-ebf2-575d-9a92-2d6847b17acb",
             "type": "SECTION",
-            "techName": "obliczenie_wysokosci_oplaty_dla_nieruchomosci",
-            "title": "Obliczenie wysokości opłaty dla nieruchomości",
+            "techName": "oplata_dla_nieruchomosci",
+            "title": "Opłata dla nieruchomości",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -2348,9 +2336,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach do 45 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2368,11 +2354,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_do_45_m2",
                   "title": "Wysokość miesięcznej opłaty dla lokali do 45 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 38 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 38 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2392,9 +2376,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 45 m² do 60 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2412,11 +2394,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_powyzej_45_m2_do_60_m",
                   "title": "Wysokość miesięcznej opłaty dla lokali powyżej 45 m² do 60 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 69 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 69 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2436,9 +2416,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 60 m² do 80 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2456,11 +2434,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_powyzej_60_m2_do_80_m",
                   "title": "Wysokość miesięcznej opłaty dla lokali powyżej 60 m² do 80 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 81 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 81 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2480,9 +2456,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 80 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2500,11 +2474,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_powyzej_80_m2",
                   "title": "Wysokość miesięcznej opłaty dla lokali powyżej 80 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 101 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 101 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2524,9 +2496,7 @@
                   "title": "Liczba gospodarstw domowych objętych zwolnieniem dochodowym",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2544,11 +2514,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznego_zwolnienia",
                   "title": "Wysokość miesięcznego zwolnienia",
-                  "description": "<html><head></head><body><p>Stawka zwolnienia od gospodarstwa domowego wynosi 15 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka zwolnienia 15 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2566,11 +2534,9 @@
                   "type": "NUMBER",
                   "techName": "suma_oplat_pomniejszona_o_zwolnienie",
                   "title": "Suma opłat pomniejszona o zwolnienie",
-                  "description": "<html><head></head><body><p>Suma poz. 38, 41, 44 i 47 pomniejszona o kwotę z poz. 50</p></body></html>",
+                  "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2590,10 +2556,10 @@
           "rows": 12,
           "cols": 3,
           "field": {
-            "id": "13f19f88-70d0-5913-849f-cadaffb0af70",
+            "id": "9faef740-1d2e-5722-8f32-b273b8d68fa3",
             "type": "SECTION",
-            "techName": "obliczenie_wysokosci_oplaty_dla_wlascicieli_nieruchomosci_za",
-            "title": "Obliczenie wysokości opłaty dla właścicieli nieruchomości zabudowanych budynkami mieszkalnymi jednorodzinnymi zwolnionych z części opłaty",
+            "techName": "oplata_dla_wlascicieli_nieruchomosci_z_budynkiem_jednorodzin",
+            "title": "Opłata dla właścicieli nieruchomości z budynkiem jednorodzinnym zwolnionych z części opłaty",
             "description": "<html><head></head><body><p>Na podstawie oświadczenia o przydomowym kompostowniku</p></body></html>",
             "options": [],
             "validation": [],
@@ -2611,9 +2577,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach do 45 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2631,11 +2595,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_do_45_m2_2",
                   "title": "Wysokość miesięcznej opłaty dla lokali do 45 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 28 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 28 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2655,9 +2617,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 45 m² do 60 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2675,11 +2635,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_powyzej_45_m2_do_60_m_2",
                   "title": "Wysokość miesięcznej opłaty dla lokali powyżej 45 m² do 60 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 59 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 59 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2699,9 +2657,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 60 m² do 80 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2719,11 +2675,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_powyzej_60_m2_do_80_m_2",
                   "title": "Wysokość miesięcznej opłaty dla lokali powyżej 60 m² do 80 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 71 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 71 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2743,9 +2697,7 @@
                   "title": "Liczba gospodarstw domowych w lokalach powyżej 80 m²",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2763,11 +2715,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznej_oplaty_dla_lokali_powyzej_80_m2_2",
                   "title": "Wysokość miesięcznej opłaty dla lokali powyżej 80 m²",
-                  "description": "<html><head></head><body><p>Stawka opłaty od gospodarstwa domowego wynosi 91 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka 91 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2787,9 +2737,7 @@
                   "title": "Liczba gospodarstw domowych objętych zwolnieniem dochodowym",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2807,11 +2755,9 @@
                   "type": "NUMBER",
                   "techName": "wysokosc_miesiecznego_zwolnienia_2",
                   "title": "Wysokość miesięcznego zwolnienia",
-                  "description": "<html><head></head><body><p>Stawka zwolnienia od gospodarstwa domowego wynosi 15 zł</p></body></html>",
+                  "description": "<html><head></head><body><p>Stawka zwolnienia 15 zł od gospodarstwa domowego</p></body></html>",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2829,11 +2775,9 @@
                   "type": "NUMBER",
                   "techName": "suma_oplat_pomniejszona_o_zwolnienie_2",
                   "title": "Suma opłat pomniejszona o zwolnienie",
-                  "description": "<html><head></head><body><p>Suma poz. 54, 57, 60 i 63 pomniejszona o kwotę z poz. 66</p></body></html>",
+                  "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -2842,7 +2786,12 @@
                 }
               }
             ],
-            "states": [],
+            "states": [
+              {
+                "type": "SHOW",
+                "query": "(\"Nieruchomość zabudowana budynkiem mieszkalnym jednorodzinnym\" in tabs['Dane o nieruchomości' in title].questions['rodzaj_nieruchomosci' in field.techName].field.repeatingSectionGrid['rodzaj_nieruchomosci_2' in field.techName].field.__userAnswer)"
+              }
+            ],
             "questionOrder": 1,
             "tooltipMessage": ""
           }
@@ -2853,10 +2802,10 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "11672959-c516-5c6b-82c4-fae67aa47019",
+            "id": "1eb49b73-7125-55e4-a5fe-92b7bdbe915a",
             "type": "SECTION",
-            "techName": "wysokosc_oplaty_dla_czesci_nieruchomosci_na_ktorej_nie_zamie",
-            "title": "Wysokość opłaty dla części nieruchomości, na której nie zamieszkują mieszkańcy, a powstają odpady komunalne",
+            "techName": "oplata_dla_czesci_nieruchomosci_niezamieszkanej",
+            "title": "Opłata dla części nieruchomości niezamieszkanej",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -2872,7 +2821,7 @@
                   "type": "NUMBER",
                   "techName": "kwota_z_zalacznika_a_lub_b",
                   "title": "Kwota z załącznika A lub B",
-                  "description": "<html><head></head><body><p>Wypełnić tylko w przypadku złożenia załącznika A lub B do deklaracji</p></body></html>",
+                  "description": "<html><head></head><body><p>Wypełnić tylko w przypadku złożenia załącznika A lub B</p></body></html>",
                   "options": [],
                   "validation": [],
                   "readOnly": false,
@@ -2883,51 +2832,13 @@
                 }
               }
             ],
-            "states": [],
-            "questionOrder": 2,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 26,
-          "rows": 2,
-          "cols": 3,
-          "field": {
-            "id": "781f8bf7-2fb4-5028-97af-24ef5495731c",
-            "type": "SECTION",
-            "techName": "razem_wysokosc_miesiecznej_oplaty",
-            "title": "Razem wysokość miesięcznej opłaty",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
+            "states": [
               {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "92bf7d76-f7cd-56a1-a11d-4a4826a11462",
-                  "type": "NUMBER",
-                  "techName": "suma_oplat",
-                  "title": "Suma opłat",
-                  "description": "<html><head></head><body><p>Suma poz. 51 lub 67 oraz 68</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
+                "type": "SHOW",
+                "query": "(\"TAK\" in tabs['Dane o nieruchomości' in title].questions['rodzaj_nieruchomosci' in field.techName].field.repeatingSectionGrid['nieruchomosc_w_czesci_zamieszkana_przez_mieszkancow_a_w_czes' in field.techName].field.__userAnswer)"
               }
             ],
-            "states": [],
-            "questionOrder": 3,
+            "questionOrder": 2,
             "tooltipMessage": ""
           }
         }
@@ -3189,7 +3100,7 @@
                     "consents": [
                       {
                         "description": "<html><head></head><body><p>Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są wytworzone na jej terenie bioodpady stanowiące odpady komunalne</p></body></html>",
-                        "required": true
+                        "required": false
                       },
                       {
                         "description": "<html><head></head><body><p>Wyrażam zgodę na otrzymywanie korespondencji za pośrednictwem adresu poczty elektronicznej</p></body></html>",
@@ -3351,11 +3262,11 @@
       {
         "id": "06330481",
         "source": "9df5735a-0efb-55db-b79d-0fcb6c41ed72",
-        "target": "86cf8ae0-6436-587c-a46b-e3047ac5fd71"
+        "target": "c6f90cfc-9666-50ed-9960-8bce247f45f6"
       },
       {
         "id": "dad191ef",
-        "source": "86cf8ae0-6436-587c-a46b-e3047ac5fd71",
+        "source": "c6f90cfc-9666-50ed-9960-8bce247f45f6",
         "target": "68521782-e99a-539e-bc07-84c370e07265"
       },
       {

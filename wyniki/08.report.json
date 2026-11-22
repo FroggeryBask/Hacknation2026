@@ -1,7 +1,8 @@
 {
-  "source": "materialy/8. Deklaracja o wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi - formularze do cyfryzacji/Deklaracja o wysokości opłaty.docx",
-  "sourceFormat": "docx",
-  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
+  "source": "materialy/8. Deklaracja o wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi - formularze do cyfryzacji/Deklaracja o wysokości opłaty.ods",
+  "sourceFormat": "ods",
+  "seconds": 18.9,
+  "costUsd": 0.003667,
   "errors": 0,
   "issues": [
     {
@@ -42,59 +43,59 @@
     }
   ],
   "notes": [],
-  "coverage": {
-    "blocks": 318,
-    "referenced": 285,
-    "unreferenced": [
-      "b2",
-      "b3",
-      "b16",
-      "b17",
-      "b23",
-      "b24",
-      "b25",
-      "b37",
-      "b41",
-      "b57",
-      "b58",
-      "b63",
-      "b64",
-      "b65",
-      "b68",
-      "b77",
-      "b78",
-      "b79",
-      "b80",
-      "b81",
-      "b82",
-      "b85",
-      "b136",
-      "b137",
-      "b138",
-      "b188",
-      "b189",
-      "b194",
-      "b197",
-      "b198",
-      "b199",
-      "b200",
-      "b206"
+  "proposedDictionaries": [],
+  "metrics": {
+    "sourceFormat": "ods",
+    "fileBytes": 70083,
+    "fileSha": "1c8b2175f7d6",
+    "blocks": 178,
+    "blocksToModel": 133,
+    "presort": {
+      "GDPR": 32,
+      "SKIP": 7,
+      "FIELD_LABEL": 4,
+      "HEADING": 2
+    },
+    "candidates": 11,
+    "steps": {
+      "check": 0.0,
+      "extract": 0.05,
+      "presort": 0.01,
+      "model": 18.81,
+      "compile": 0.01
+    },
+    "totalS": 18.9,
+    "modelCalls": 1,
+    "promptTokens": 9771,
+    "completionTokens": 4386,
+    "costUsd": 0.003667,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 18.8,
+        "firstTokenS": 1.08,
+        "promptChars": 27109,
+        "images": 0,
+        "imageBytes": 0,
+        "imageTokensEst": 0,
+        "promptTokens": 9771,
+        "completionTokens": 4386,
+        "costUsd": 0.0036670160000000004,
+        "finishReason": "stop",
+        "maxTokens": 12000,
+        "answerChars": 16743,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 38,
+        "answerWhitespace": 6351
+      }
     ],
-    "candidates": 15,
-    "candidatesWithoutField": [
-      "b212",
-      "b227",
-      "b261",
-      "b282",
-      "b297"
-    ],
-    "unknownRefs": []
-  },
-  "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
-  },
-  "proposedDictionaries": []
+    "pages": 3,
+    "sections": 11,
+    "fields": 54,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
 }

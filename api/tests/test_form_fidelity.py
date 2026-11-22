@@ -4,6 +4,7 @@ stuck repeating one field. All run without a model."""
 
 import json
 
+import pytest
 from conftest import material
 
 from autoformularz.check import dedupe, drop_paper_only_fields
@@ -310,7 +311,10 @@ def test_every_saved_result_fits_its_document_limits():
     from autoformularz.config import Settings
 
     settings = Settings(_env_file=None)
-    for n in results.FORMS:
+    saved = [n for n in results.FORMS if (results.OUT / f"{n:02d}.spec.json").exists()]
+    if not saved:
+        pytest.skip("brak zapisanych FormSpec w wyniki/")
+    for n in saved:
         src = results.source_file(n)
         data = src.read_bytes()
         model_doc = presort(extract(validate_upload(src.name, data, 50 * 2**20), data)).model_doc

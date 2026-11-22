@@ -1,0 +1,101 @@
+{
+  "source": "materialy/1. Wniosek o ustalenie numeru porządkowego nieruchomości - materiał referencyjny dla Uczestników do zadania/Wniosek o ustalenie numeru porządkowego nieruchomości.xlsx",
+  "sourceFormat": "xlsx",
+  "seconds": 3.2,
+  "costUsd": 0.000257,
+  "errors": 0,
+  "issues": [
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Kod pocztowy"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Ulica"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer budynku"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Dane › Adres zamieszkania › Numer lokalu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Numer telefonu"
+    },
+    {
+      "level": "warning",
+      "code": "PREFILL_EDITABLE",
+      "message": "Pole zasilane z rejestru powinno być tylko do odczytu.",
+      "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
+    }
+  ],
+  "notes": [],
+  "proposedDictionaries": [],
+  "metrics": {
+    "sourceFormat": "xlsx",
+    "fileBytes": 12570,
+    "fileSha": "b41d0eadb569",
+    "blocks": 34,
+    "blocksToModel": 7,
+    "presort": {
+      "GDPR": 19,
+      "SKIP": 4,
+      "HEADING": 1,
+      "FIELD_LABEL": 3
+    },
+    "candidates": 3,
+    "steps": {
+      "check": 0.0,
+      "extract": 0.01,
+      "presort": 0.0,
+      "model": 3.07,
+      "compile": 0.0
+    },
+    "totalS": 3.1,
+    "modelCalls": 1,
+    "promptTokens": 5061,
+    "completionTokens": 355,
+    "costUsd": 0.000257,
+    "calls": [
+      {
+        "provider": "eden",
+        "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
+        "seconds": 3.07,
+        "firstTokenS": 1.36,
+        "promptChars": 15104,
+        "images": 0,
+        "imageBytes": 0,
+        "imageTokensEst": 0,
+        "promptTokens": 5061,
+        "completionTokens": 355,
+        "costUsd": 0.000256752,
+        "finishReason": "stop",
+        "maxTokens": 3000,
+        "answerChars": 1344,
+        "answerNulls": 0,
+        "answerEmptyLists": 0,
+        "answerFalse": 1,
+        "answerWhitespace": 664
+      }
+    ],
+    "pages": 1,
+    "sections": 1,
+    "fields": 4,
+    "lintErrors": 0,
+    "lintWarnings": 6,
+    "error": null
+  }
+}
