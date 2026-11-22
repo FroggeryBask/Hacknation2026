@@ -1,27 +1,82 @@
 {
-  "title": "Wniosek o wynajęcie/użyczenie świetlicy wiejskiej",
+  "title": "Wniosek o wynajęcie świetlicy wiejskiej",
   "authority_kind": "organ",
-  "authority_name": "Wójt Gminy Płoskinia",
+  "authority_name": "Urząd Gminy Płoskinia",
   "applicant": {
     "other_person": true,
     "entity": false,
-    "entity_nip_only": false
+    "entity_nip_only": false,
+    "pesel": false
   },
+  "block_roles": [
+    {
+      "block": "b2",
+      "to": "b3",
+      "role": "SKIP"
+    },
+    {
+      "block": "b4",
+      "to": "b9",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b28",
+      "to": "b29",
+      "role": "SKIP"
+    },
+    {
+      "block": "b1",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b10",
+      "to": "b12",
+      "role": "SKIP"
+    },
+    {
+      "block": "b18",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b22",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b23",
+      "to": null,
+      "role": "INSTRUCTION"
+    }
+  ],
+  "consents": [
+    "Znam warunki wynajmu świetlicy wiejskiej",
+    "W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym",
+    "Zobowiązuję się do przestrzegania przepisów sanitarnych, BHP i przeciwpożarowych",
+    "Na okres wynajmu ponoszę pełną odpowiedzialność za powierzone mienie"
+  ],
+  "optional_consents": [],
+  "summary": null,
+  "signed": true,
   "pages": [
     {
-      "title": "Informacje o wynajęciu świetlicy",
+      "title": "Informacje o wynajmie",
       "sections": [
         {
-          "title": "Dane wnioskodawcy",
+          "title": "Świetlica i termin",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Imię i nazwisko",
-              "kind": "TEXT",
+              "label": "Rodzaj umowy",
+              "kind": "SINGLE_CHOICE",
               "required": true,
               "description": null,
-              "options": [],
+              "options": [
+                "Wynajem",
+                "Użyczenie"
+              ],
               "dictionary": null,
               "prefill": null,
               "validators": [],
@@ -29,11 +84,11 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b5"
+                "b15"
               ]
             },
             {
-              "label": "Adres zamieszkania",
+              "label": "Świetlica wiejska",
               "kind": "TEXT",
               "required": true,
               "description": null,
@@ -45,12 +100,12 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b7"
+                "b16"
               ]
             },
             {
-              "label": "Numer telefonu",
-              "kind": "TEXT",
+              "label": "Termin od",
+              "kind": "DATE",
               "required": true,
               "description": null,
               "options": [],
@@ -61,7 +116,23 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b9"
+                "b16"
+              ]
+            },
+            {
+              "label": "Termin do",
+              "kind": "DATE",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b16"
               ]
             }
           ],
@@ -69,15 +140,15 @@
           "blocks": []
         },
         {
-          "title": "Informacje o wynajęciu",
+          "title": "Przebieg wydarzenia",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Lokalizacja świetlicy",
+              "label": "Cel wynajęcia świetlicy",
               "kind": "TEXT",
               "required": true,
-              "description": null,
+              "description": "Rodzaj uroczystości, np. wesele, urodziny, zabawa",
               "options": [],
               "dictionary": null,
               "prefill": null,
@@ -86,75 +157,12 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b16"
-              ]
-            },
-            {
-              "label": "Okres wynajęcia od",
-              "kind": "DATE",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b16"
-              ]
-            },
-            {
-              "label": "Okres wynajęcia do",
-              "kind": "DATE",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b16"
-              ]
-            },
-            {
-              "label": "Cel wynajęcia",
-              "kind": "LONG_TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b17"
-              ]
-            },
-            {
-              "label": "Rodzaj uroczystości",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
+                "b17",
                 "b18"
               ]
             },
             {
-              "label": "Przewidywana ilość uczestników",
+              "label": "Przewidywana liczba uczestników",
               "kind": "NUMBER",
               "required": true,
               "description": null,
@@ -168,21 +176,12 @@
               "blocks": [
                 "b19"
               ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        },
-        {
-          "title": "Osoba odpowiedzialna",
-          "repeating": false,
-          "description": null,
-          "fields": [
+            },
             {
-              "label": "Imię i nazwisko osoby odpowiedzialnej",
+              "label": "Osoba odpowiedzialna za utrzymanie porządku i bezpieczeństwa",
               "kind": "TEXT",
               "required": true,
-              "description": null,
+              "description": "Imię i nazwisko pełnoletniej osoby odpowiedzialnej; w przypadku innej osoby niż wnioskodawca dołącz jej zgodę",
               "options": [],
               "dictionary": null,
               "prefill": null,
@@ -191,25 +190,8 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b21"
-              ]
-            },
-            {
-              "label": "Zgoda osoby odpowiedzialnej",
-              "kind": "SINGLE_CHOICE",
-              "required": false,
-              "description": null,
-              "options": [
-                "Tak",
-                "Nie"
-              ],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
+                "b20",
+                "b21",
                 "b22"
               ]
             }
@@ -218,96 +200,6 @@
           "blocks": []
         }
       ]
-    }
-  ],
-  "consents": [
-    "Zapoznałem/am się z warunkami wynajmu świetlicy wiejskiej",
-    "W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym do świetlicy",
-    "Zachowuję się zgodnie z przepisami sanitarnymi, BHP i p.poż. w czasie trwania przedsięwzięcia",
-    "Na okres wynajmu ponoszę pełną odpowiedzialność za powierzone mienie"
-  ],
-  "summary": null,
-  "signed": true,
-  "block_roles": [
-    {
-      "block": "b3",
-      "role": "SKIP"
-    },
-    {
-      "block": "b23",
-      "role": "STATEMENT"
-    },
-    {
-      "block": "b24",
-      "role": "STATEMENT"
-    },
-    {
-      "block": "b25",
-      "role": "STATEMENT"
-    },
-    {
-      "block": "b26",
-      "role": "STATEMENT"
-    },
-    {
-      "block": "b27",
-      "role": "STATEMENT"
-    },
-    {
-      "block": "b28",
-      "role": "SKIP"
-    },
-    {
-      "block": "b29",
-      "role": "SKIP"
-    },
-    {
-      "block": "b1",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b2",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b13",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b14",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b15",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b16",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b17",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b18",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b19",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b20",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b21",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b22",
-      "role": "INSTRUCTION"
     }
   ]
 }

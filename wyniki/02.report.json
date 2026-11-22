@@ -1,7 +1,7 @@
 {
   "source": "materialy/2. Wniosek o zwrot opłaty skarbowej - formularze do cyfryzacji/Wniosek o zwrot opłaty skarbowej.docx",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,29 +41,23 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Sekcja „Dane identyfikacyjne” jest w części standardowej formularza (pominięta).",
-    "Sekcja „Adres siedziby lub miejsca zamieszkania wnioskodawcy” jest w części standardowej formularza (pominięta).",
-    "Sekcja „Dane kontaktowe wnioskodawcy” jest w części standardowej formularza (pominięta).",
-    "Sekcja „Dane pełnomocnika” jest w części standardowej formularza (pominięta).",
-    "Formularz pyta o NIP wnioskodawcy: wnioskodawcą może być firma lub instytucja."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 63,
     "referenced": 60,
     "unreferenced": [
-      "b1",
       "b2",
-      "b3"
+      "b3",
+      "b37"
     ],
     "candidates": 0,
     "candidatesWithoutField": [],
     "unknownRefs": []
   },
   "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
+    "calls": 3,
+    "promptTokens": 15336,
+    "completionTokens": 2613,
+    "costUsd": 0.002475
   }
 }

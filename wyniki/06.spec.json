@@ -1,23 +1,120 @@
 {
-  "title": "Wniosek o wydanie zezwolenia na zajęcie pasa drogowego",
+  "title": "Wniosek o wydanie zezwolenia na zajęcie pasa drogowego w celu prowadzenia robót",
   "authority_kind": "organ",
   "authority_name": "Urząd Miasta i Gminy Miasteczko",
   "applicant": {
     "other_person": true,
-    "entity": false,
-    "entity_nip_only": false
+    "entity": true,
+    "entity_nip_only": false,
+    "pesel": false
   },
+  "block_roles": [
+    {
+      "block": "b1",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b2",
+      "to": null,
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b3",
+      "to": null,
+      "role": "HEADING"
+    },
+    {
+      "block": "b4",
+      "to": "b8",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b43",
+      "to": "b46",
+      "role": "GDPR"
+    },
+    {
+      "block": "b49",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b9",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b10",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b11",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b12",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b13",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b15",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b19",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b31",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b33",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b36",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b47",
+      "to": null,
+      "role": "GDPR"
+    },
+    {
+      "block": "b48",
+      "to": null,
+      "role": "SKIP"
+    }
+  ],
+  "consents": [],
+  "optional_consents": [],
+  "summary": null,
+  "signed": true,
   "pages": [
     {
-      "title": "Informacje o wniosku",
+      "title": "Informacje o zajęciu pasa drogowego",
       "sections": [
         {
-          "title": "Dane wnioskodawcy",
+          "title": "Droga i cel zajęcia",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Imię i nazwisko lub nazwa firmy",
+              "label": "Nazwa drogi",
               "kind": "TEXT",
               "required": true,
               "description": null,
@@ -29,12 +126,13 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b4",
-                "b5"
+                "b13",
+                "b14",
+                "b15"
               ]
             },
             {
-              "label": "Adres zamieszkania/siedziby",
+              "label": "Numer drogi",
               "kind": "TEXT",
               "required": true,
               "description": null,
@@ -46,64 +144,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b6",
-                "b7"
-              ]
-            },
-            {
-              "label": "Numer telefonu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b8"
-              ]
-            },
-            {
-              "label": "Adres e-mail",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b8"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        },
-        {
-          "title": "Informacje o miejscu i celu zajęcia pasa drogowego",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Nazwa drogi oraz jej nr",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
+                "b13",
                 "b15"
               ]
             },
@@ -124,7 +165,7 @@
               ]
             },
             {
-              "label": "Działka nr ewidencyjny",
+              "label": "Numer działki ewidencyjnej",
               "kind": "TEXT",
               "required": true,
               "description": null,
@@ -152,6 +193,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
+                "b17",
                 "b18",
                 "b19"
               ]
@@ -161,14 +203,14 @@
           "blocks": []
         },
         {
-          "title": "Powierzchnia zajęcia pasa drogowego",
+          "title": "Powierzchnia pasa drogowego",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Długość jezdnia (do 20% szerokości)",
+              "label": "Jezdnia przy zajęciu do 20% szerokości – długość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -183,9 +225,9 @@
               ]
             },
             {
-              "label": "Szerokość jezdnia (do 20% szerokości)",
+              "label": "Jezdnia przy zajęciu do 20% szerokości – szerokość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -200,9 +242,9 @@
               ]
             },
             {
-              "label": "Razem m2 jezdnia (do 20% szerokości)",
+              "label": "Jezdnia przy zajęciu do 20% szerokości – razem m2",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -217,9 +259,9 @@
               ]
             },
             {
-              "label": "Długość jezdnia (powyżej 20% do 50% szerokości)",
+              "label": "Jezdnia przy zajęciu powyżej 20% do 50% szerokości – długość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -234,9 +276,9 @@
               ]
             },
             {
-              "label": "Szerokość jezdnia (powyżej 20% do 50% szerokości)",
+              "label": "Jezdnia przy zajęciu powyżej 20% do 50% szerokości – szerokość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -251,9 +293,9 @@
               ]
             },
             {
-              "label": "Razem m2 jezdnia (powyżej 20% do 50% szerokości)",
+              "label": "Jezdnia przy zajęciu powyżej 20% do 50% szerokości – razem m2",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -268,9 +310,9 @@
               ]
             },
             {
-              "label": "Długość jezdnia (powyżej 50% szerokości)",
+              "label": "Jezdnia przy zajęciu powyżej 50% szerokości – długość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -285,9 +327,9 @@
               ]
             },
             {
-              "label": "Szerokość jezdnia (powyżej 50% szerokości)",
+              "label": "Jezdnia przy zajęciu powyżej 50% szerokości – szerokość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -302,9 +344,9 @@
               ]
             },
             {
-              "label": "Razem m2 jezdnia (powyżej 50% szerokości)",
+              "label": "Jezdnia przy zajęciu powyżej 50% szerokości – razem m2",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -319,9 +361,9 @@
               ]
             },
             {
-              "label": "Długość chodnik",
+              "label": "Chodnik – długość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -336,9 +378,9 @@
               ]
             },
             {
-              "label": "Szerokość chodnik",
+              "label": "Chodnik – szerokość",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -353,9 +395,9 @@
               ]
             },
             {
-              "label": "Razem m2 chodnik",
+              "label": "Chodnik – razem m2",
               "kind": "NUMBER",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -370,7 +412,7 @@
               ]
             },
             {
-              "label": "Całkowita powierzchnia zajęcia",
+              "label": "Całkowita powierzchnia zajęcia w m2",
               "kind": "NUMBER",
               "required": true,
               "description": null,
@@ -390,12 +432,12 @@
           "blocks": []
         },
         {
-          "title": "Termin realizacji robót",
+          "title": "Termin i wykonawca robót",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Od dnia",
+              "label": "Roboty będą realizowane od dnia",
               "kind": "DATE",
               "required": true,
               "description": null,
@@ -411,7 +453,7 @@
               ]
             },
             {
-              "label": "Do dnia",
+              "label": "Roboty będą realizowane do dnia",
               "kind": "DATE",
               "required": true,
               "description": null,
@@ -427,7 +469,7 @@
               ]
             },
             {
-              "label": "Liczba dni",
+              "label": "Liczba dni realizacji robót",
               "kind": "NUMBER",
               "required": true,
               "description": null,
@@ -441,18 +483,9 @@
               "blocks": [
                 "b31"
               ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        },
-        {
-          "title": "Wykonawca robót",
-          "repeating": false,
-          "description": null,
-          "fields": [
+            },
             {
-              "label": "Nazwa przedsiębiorstwa lub osoby fizycznej",
+              "label": "Nazwa przedsiębiorstwa lub osoby fizycznej wykonawcy robót",
               "kind": "TEXT",
               "required": true,
               "description": null,
@@ -464,11 +497,12 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
+                "b32",
                 "b33"
               ]
             },
             {
-              "label": "Osoba odpowiedzialna za wykonanie robót",
+              "label": "Imię i nazwisko osoby odpowiedzialnej za wykonanie robót",
               "kind": "TEXT",
               "required": true,
               "description": null,
@@ -480,29 +514,14 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b34"
+                "b34",
+                "b35"
               ]
             },
             {
-              "label": "Zamówienie",
+              "label": "Telefon osoby odpowiedzialnej za wykonanie robót",
               "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b34"
-              ]
-            },
-            {
-              "label": "Numer telefonu",
-              "kind": "TEXT",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -518,14 +537,19 @@
           ],
           "show_if": null,
           "blocks": []
-        },
+        }
+      ]
+    },
+    {
+      "title": "Załączniki",
+      "sections": [
         {
-          "title": "Załączniki",
+          "title": "Załączniki do wniosku",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Ogólny plan orientacyjny w skali 1:10 000 lub 1:25 000",
+              "label": "Ogólny plan orientacyjny w skali 1:10 000 lub 1:25 000 z zaznaczeniem zajmowanego odcinka pasa drogowego",
               "kind": "FILE",
               "required": true,
               "description": null,
@@ -541,7 +565,7 @@
               ]
             },
             {
-              "label": "Szczegółowy plan sytuacyjny w skali 1:1000 lub 1:500",
+              "label": "Szczegółowy plan sytuacyjny w skali 1:1000 lub 1:500 z zaznaczeniem granic i wymiarów planowanej powierzchni zajęcia pasa drogowego",
               "kind": "FILE",
               "required": true,
               "description": null,
@@ -573,9 +597,9 @@
               ]
             },
             {
-              "label": "Zatwierdzony projekt organizacji ruchu",
+              "label": "Zatwierdzony projekt organizacji ruchu, jeżeli zajęcie pasa drogowego wpływa na ruch drogowy lub ogranicza widoczność na drodze albo powoduje zmiany w organizacji ruchu pojazdów lub pieszych",
               "kind": "FILE",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -589,9 +613,9 @@
               ]
             },
             {
-              "label": "Informacja o sposobie zabezpieczenia robót",
+              "label": "Informacja o sposobie zabezpieczenia robót, jeżeli nie jest wymagany projekt organizacji ruchu",
               "kind": "FILE",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -605,9 +629,9 @@
               ]
             },
             {
-              "label": "Oryginał lub poświadczony odpis pełnomocnictwa",
+              "label": "Oryginał pełnomocnictwa lub poświadczony odpis pełnomocnictwa wraz z opłatą skarbową w wysokości 17 zł, jeżeli w sprawie występuje pełnomocnik",
               "kind": "FILE",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -625,99 +649,6 @@
           "blocks": []
         }
       ]
-    }
-  ],
-  "consents": [
-    "Znam warunki przetwarzania danych osobowych przez Urząd Miasta i Gminy w Daleszycach.",
-    "Dane w formularzu są zgodne z prawdą.",
-    "Wyrażam zgodę na przetwarzanie moich danych osobowych przez Urząd Miasta i Gminy w Daleszycach."
-  ],
-  "summary": "Po przesłaniu wniosku, Urząd Miasta i Gminy w Daleszycach rozpatrzy jego treść i podejmie decyzję o wydaniu zezwolenia na zajęcie pasa drogowego.",
-  "signed": true,
-  "block_roles": [
-    {
-      "block": "b1",
-      "role": "SKIP"
-    },
-    {
-      "block": "b2",
-      "role": "SKIP"
-    },
-    {
-      "block": "b3",
-      "role": "SKIP"
-    },
-    {
-      "block": "b9",
-      "role": "SKIP"
-    },
-    {
-      "block": "b10",
-      "role": "SKIP"
-    },
-    {
-      "block": "b11",
-      "role": "SKIP"
-    },
-    {
-      "block": "b12",
-      "role": "SKIP"
-    },
-    {
-      "block": "b13",
-      "role": "SKIP"
-    },
-    {
-      "block": "b14",
-      "role": "SKIP"
-    },
-    {
-      "block": "b17",
-      "role": "SKIP"
-    },
-    {
-      "block": "b32",
-      "role": "SKIP"
-    },
-    {
-      "block": "b35",
-      "role": "SKIP"
-    },
-    {
-      "block": "b36",
-      "role": "SKIP"
-    },
-    {
-      "block": "b42",
-      "role": "SKIP"
-    },
-    {
-      "block": "b43",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b44",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b45",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b46",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b47",
-      "role": "STATEMENT"
-    },
-    {
-      "block": "b48",
-      "role": "SKIP"
-    },
-    {
-      "block": "b49",
-      "role": "SKIP"
     }
   ]
 }

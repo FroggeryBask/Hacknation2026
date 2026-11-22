@@ -1,7 +1,7 @@
 {
   "source": "materialy/4. Wniosek o wynajęcie lub użyczenie świetlicy wiejskiej - formularze do cyfryzacji/Wniosek o wynajęcie świetlicy.docx",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,33 +41,26 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Sekcja „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 29,
     "referenced": 23,
     "unreferenced": [
-      "b4",
-      "b6",
-      "b8",
-      "b10",
-      "b11",
-      "b12"
+      "b13",
+      "b14",
+      "b24",
+      "b25",
+      "b26",
+      "b27"
     ],
     "candidates": 13,
-    "candidatesWithoutField": [
-      "b2",
-      "b4",
-      "b6",
-      "b8"
-    ],
+    "candidatesWithoutField": [],
     "unknownRefs": []
   },
   "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
+    "calls": 3,
+    "promptTokens": 15375,
+    "completionTokens": 2229,
+    "costUsd": 0.001532
   }
 }

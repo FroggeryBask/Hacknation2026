@@ -1,7 +1,7 @@
 {
   "source": "materialy/7. Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanych za agresywne - formularze do cyfryzacji/Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanychza agresywne.DOC",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,30 +41,29 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Sekcja „Dane identyfikacyjne wnioskodawcy” jest w części standardowej formularza (pominięta)."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 68,
     "referenced": 64,
     "unreferenced": [
-      "b22",
-      "b24",
-      "b28",
-      "b30"
+      "b5",
+      "b6",
+      "b7",
+      "b14"
     ],
     "candidates": 26,
     "candidatesWithoutField": [
-      "b22",
-      "b24",
-      "b27"
+      "b27",
+      "b51",
+      "b56",
+      "b63"
     ],
     "unknownRefs": []
   },
   "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
+    "calls": 3,
+    "promptTokens": 15861,
+    "completionTokens": 2998,
+    "costUsd": 0.002041
   }
 }

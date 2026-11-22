@@ -1,7 +1,7 @@
 {
   "source": "materialy/8. Deklaracja o wysokości miesięcznej opłaty za gospodarowanie odpadami komunalnymi - formularze do cyfryzacji/Deklaracja o wysokości opłaty.docx",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,23 +41,10 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Z sekcji „Dane identyfikacyjne składającego deklarację” pominięto pola z części standardowej: Nazwisko, imię / Nazwa pełna, PESEL, NIP/REGON.",
-    "Formularz pyta o NIP, REGON wnioskodawcy: wnioskodawcą może być firma lub instytucja.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (38 zł): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (69 zł): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (81 zł): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (101 zł): informacja, nie pole.",
-    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (28 zł): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (59 zł): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (71 zł): informacja, nie pole.",
-    "„Stawka opłaty od gospodarstwa domowego” to stała kwota z druku (91 zł): informacja, nie pole.",
-    "„Stawka zwolnienia od gospodarstwa domowego” to stała kwota z druku (- 15 zł 00 gr): informacja, nie pole."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 318,
-    "referenced": 300,
+    "referenced": 282,
     "unreferenced": [
       "b2",
       "b3",
@@ -67,22 +54,37 @@
       "b15",
       "b16",
       "b17",
+      "b23",
+      "b24",
+      "b25",
       "b37",
+      "b41",
+      "b57",
+      "b58",
+      "b63",
+      "b64",
+      "b65",
+      "b68",
+      "b77",
+      "b78",
+      "b79",
+      "b80",
+      "b81",
       "b82",
+      "b85",
       "b136",
       "b137",
       "b138",
       "b188",
       "b189",
+      "b197",
+      "b198",
       "b199",
       "b200",
       "b206"
     ],
     "candidates": 15,
     "candidatesWithoutField": [
-      "b22",
-      "b47",
-      "b55",
       "b212",
       "b227",
       "b261",
@@ -92,9 +94,9 @@
     "unknownRefs": []
   },
   "edenUsage": {
-    "calls": 0,
-    "promptTokens": 0,
-    "completionTokens": 0,
-    "costUsd": 0
+    "calls": 5,
+    "promptTokens": 48055,
+    "completionTokens": 21697,
+    "costUsd": 0.013317
   }
 }

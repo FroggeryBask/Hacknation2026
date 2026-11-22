@@ -1,152 +1,107 @@
 {
   "title": "Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanych za agresywne",
   "authority_kind": "organ",
-  "authority_name": "Urząd Miejski Wrocławia",
+  "authority_name": "Urząd Miejski Wrocławia, Wydział Środowiska",
   "applicant": {
     "other_person": true,
     "entity": false,
-    "entity_nip_only": false
+    "entity_nip_only": false,
+    "pesel": false
   },
-  "pages": [
+  "block_roles": [
     {
-      "title": "Dane wnioskodawcy",
-      "sections": [
-        {
-          "title": "Dane identyfikacyjne wnioskodawcy",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Imię i nazwisko",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b9"
-              ]
-            },
-            {
-              "label": "Ulica",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b10"
-              ]
-            },
-            {
-              "label": "Nr domu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b10"
-              ]
-            },
-            {
-              "label": "Nr lokalu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b10"
-              ]
-            },
-            {
-              "label": "Miejscowość",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b11"
-              ]
-            },
-            {
-              "label": "Kod pocztowy",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b11"
-              ]
-            },
-            {
-              "label": "Telefon",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b12"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        }
-      ]
+      "block": "b2",
+      "to": "b4",
+      "role": "SKIP"
     },
+    {
+      "block": "b8",
+      "to": null,
+      "role": "HEADING"
+    },
+    {
+      "block": "b9",
+      "to": "b12",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b32",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b33",
+      "to": "b68",
+      "role": "GDPR"
+    },
+    {
+      "block": "b1",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b13",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b25",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b26",
+      "to": null,
+      "role": "INSTRUCTION"
+    },
+    {
+      "block": "b27",
+      "to": null,
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b28",
+      "to": null,
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b29",
+      "to": null,
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b30",
+      "to": null,
+      "role": "STATEMENT"
+    },
+    {
+      "block": "b31",
+      "to": null,
+      "role": "SKIP"
+    }
+  ],
+  "consents": [
+    "Psy nie będą wykorzystywane do polowań",
+    "Pies lub psy są zaszczepione przeciwko wściekliźnie, a kopie zaświadczeń dołączono do wniosku",
+    "Zapewniam warunki utrzymywania psa zgodne z rozporządzeniem Ministra Rolnictwa i Rozwoju Wsi z dnia 5 lipca 2010 r."
+  ],
+  "optional_consents": [],
+  "summary": null,
+  "signed": true,
+  "pages": [
     {
       "title": "Informacje o psie",
       "sections": [
         {
           "title": "Dane psa",
-          "repeating": false,
+          "repeating": true,
           "description": null,
           "fields": [
             {
-              "label": "Pochodzenie psa (metryka, numer rodowodu, imię, nazwisko i adres poprzedniego właściciela)",
+              "label": "Pochodzenie psa",
               "kind": "LONG_TEXT",
-              "required": true,
-              "description": null,
+              "required": false,
+              "description": "Metryka, numer rodowodu, imię, nazwisko i adres poprzedniego właściciela",
               "options": [],
               "dictionary": null,
               "prefill": null,
@@ -193,8 +148,8 @@
             {
               "label": "Data szczepienia",
               "kind": "DATE",
-              "required": true,
-              "description": null,
+              "required": false,
+              "description": "Wypełnij, jeśli pies nie ma szczepienia",
               "options": [],
               "dictionary": null,
               "prefill": null,
@@ -226,8 +181,8 @@
               ]
             },
             {
-              "label": "Sposób oznakowania psa / nr ident.",
-              "kind": "MULTI_CHOICE",
+              "label": "Sposób oznakowania psa",
+              "kind": "SINGLE_CHOICE",
               "required": true,
               "description": null,
               "options": [
@@ -246,35 +201,43 @@
               ]
             },
             {
-              "label": "Adres miejsca utrzymywania psa",
-              "kind": "LONG_TEXT",
-              "required": true,
+              "label": "Numer identyfikacyjny",
+              "kind": "TEXT",
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
               "prefill": null,
               "validators": [],
-              "show_if": null,
+              "show_if": {
+                "field": "Sposób oznakowania psa",
+                "equals": "mikroprocesor",
+                "negate": false
+              },
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b21"
+                "b20"
               ]
             },
             {
-              "label": "Opis miejsca i warunków w jakich wnioskodawca zamierza utrzymywać psa",
-              "kind": "LONG_TEXT",
-              "required": true,
+              "label": "Numer tatuażu",
+              "kind": "TEXT",
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
               "prefill": null,
               "validators": [],
-              "show_if": null,
+              "show_if": {
+                "field": "Sposób oznakowania psa",
+                "equals": "tatuaż",
+                "negate": false
+              },
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b23"
+                "b20"
               ]
             }
           ],
@@ -284,16 +247,16 @@
       ]
     },
     {
-      "title": "Załączniki",
+      "title": "Miejsce utrzymywania psa",
       "sections": [
         {
-          "title": "Załączniki",
+          "title": "Adres i warunki",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Kopia zaświadczenia o szczepieniu psa przeciwko wściekliźnie",
-              "kind": "FILE",
+              "label": "Adres miejsca utrzymywania psa lub psów",
+              "kind": "TEXT",
               "required": true,
               "description": null,
               "options": [],
@@ -304,7 +267,25 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
-                "b29"
+                "b21",
+                "b22"
+              ]
+            },
+            {
+              "label": "Opis miejsca i warunków utrzymywania psa lub psów",
+              "kind": "LONG_TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": null,
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b23",
+                "b24"
               ]
             }
           ],
@@ -312,219 +293,6 @@
           "blocks": []
         }
       ]
-    }
-  ],
-  "consents": [
-    "Oświadczam, że psy nie będą wykorzystywane do polowań",
-    "Oświadczam, że zaszczepiono psa/psy przeciwko wściekliźnie – w załączeniu kopia dla każdego psa",
-    "Oświadczam, że zapewniam warunki utrzymywania psa, zgodnie z rozporządzeniem Ministra Rolnictwa i Rozwoju Wsi z dnia 5 lipca 2010 r."
-  ],
-  "summary": null,
-  "signed": true,
-  "block_roles": [
-    {
-      "block": "b1",
-      "role": "SKIP"
-    },
-    {
-      "block": "b2",
-      "role": "SKIP"
-    },
-    {
-      "block": "b3",
-      "role": "SKIP"
-    },
-    {
-      "block": "b4",
-      "role": "SKIP"
-    },
-    {
-      "block": "b5",
-      "role": "SKIP"
-    },
-    {
-      "block": "b6",
-      "role": "SKIP"
-    },
-    {
-      "block": "b7",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b8",
-      "role": "HEADING"
-    },
-    {
-      "block": "b13",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b14",
-      "role": "HEADING"
-    },
-    {
-      "block": "b25",
-      "role": "SKIP"
-    },
-    {
-      "block": "b26",
-      "role": "SKIP"
-    },
-    {
-      "block": "b27",
-      "role": "HEADING"
-    },
-    {
-      "block": "b31",
-      "role": "SKIP"
-    },
-    {
-      "block": "b32",
-      "role": "SKIP"
-    },
-    {
-      "block": "b33",
-      "role": "HEADING"
-    },
-    {
-      "block": "b34",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b35",
-      "role": "HEADING"
-    },
-    {
-      "block": "b36",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b37",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b38",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b39",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b40",
-      "role": "HEADING"
-    },
-    {
-      "block": "b41",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b42",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b43",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b44",
-      "role": "HEADING"
-    },
-    {
-      "block": "b45",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b46",
-      "role": "HEADING"
-    },
-    {
-      "block": "b47",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b48",
-      "role": "HEADING"
-    },
-    {
-      "block": "b49",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b50",
-      "role": "HEADING"
-    },
-    {
-      "block": "b51",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b52",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b53",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b54",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b55",
-      "role": "HEADING"
-    },
-    {
-      "block": "b56",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b57",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b58",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b59",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b60",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b61",
-      "role": "HEADING"
-    },
-    {
-      "block": "b62",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b63",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b64",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b65",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b66",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b67",
-      "role": "HEADING"
-    },
-    {
-      "block": "b68",
-      "role": "FIELD_LABEL"
     }
   ]
 }

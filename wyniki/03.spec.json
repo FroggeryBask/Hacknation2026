@@ -5,110 +5,60 @@
   "applicant": {
     "other_person": true,
     "entity": false,
-    "entity_nip_only": false
+    "entity_nip_only": false,
+    "pesel": true
   },
-  "pages": [
+  "block_roles": [
     {
-      "title": "Informacje o wnioskodawcy",
-      "sections": [
-        {
-          "title": "Dane wnioskodawcy",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Imię i nazwisko",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b3"
-              ]
-            },
-            {
-              "label": "PESEL",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "PESEL"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b10"
-              ]
-            },
-            {
-              "label": "Adres",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b8"
-              ]
-            },
-            {
-              "label": "Numer telefonu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "EPUAP"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b12"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        }
-      ]
+      "block": "b1",
+      "to": null,
+      "role": "SKIP"
     },
     {
-      "title": "Zaświadczenie o użytkach rolnych",
+      "block": "b2",
+      "to": "b4",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b8",
+      "to": "b12",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b23",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b24",
+      "to": "b27",
+      "role": "INSTRUCTION"
+    }
+  ],
+  "consents": [],
+  "optional_consents": [],
+  "summary": null,
+  "signed": true,
+  "pages": [
+    {
+      "title": "Zakres zaświadczenia",
       "sections": [
         {
-          "title": "Typ zaświadczenia",
+          "title": "Zakres zaświadczenia",
           "repeating": false,
           "description": null,
           "fields": [
             {
-              "label": "Proszę o wydanie zaświadczenia o",
+              "label": "Zakres zaświadczenia",
               "kind": "SINGLE_CHOICE",
               "required": true,
               "description": null,
               "options": [
-                "ilości posiadanych użytków rolnych w hektarach fizycznych i przeliczeniowych",
-                "ilości dzierżawionych użytków rolnych w hektarach fizycznych i przeliczeniowych",
-                "okresie posiadania gospodarstwa rolnego",
-                "nieposiadaniu użytków rolnych / gospodarstwa rolnego na terenie Gminy Młynary",
-                "inne"
+                "Ilość posiadanych użytków rolnych w hektarach fizycznych i przeliczeniowych",
+                "Ilość dzierżawionych użytków rolnych w hektarach fizycznych i przeliczeniowych",
+                "Okres posiadania gospodarstwa rolnego",
+                "Nieposiadanie użytków rolnych lub gospodarstwa rolnego na terenie Gminy Młynary",
+                "Inne"
               ],
               "dictionary": null,
               "prefill": null,
@@ -126,8 +76,8 @@
               ]
             },
             {
-              "label": "Inne",
-              "kind": "LONG_TEXT",
+              "label": "Inny zakres zaświadczenia",
+              "kind": "TEXT",
               "required": false,
               "description": null,
               "options": [],
@@ -135,8 +85,8 @@
               "prefill": null,
               "validators": [],
               "show_if": {
-                "field": "Proszę o wydanie zaświadczenia o",
-                "equals": "inne",
+                "field": "Zakres zaświadczenia",
+                "equals": "Inne",
                 "negate": false
               },
               "allowed_formats": [],
@@ -155,8 +105,8 @@
           "description": null,
           "fields": [
             {
-              "label": "Zaświadczenie potrzebne jest celem przedłożenia w",
-              "kind": "LONG_TEXT",
+              "label": "Cel przedłożenia zaświadczenia",
+              "kind": "TEXT",
               "required": true,
               "description": null,
               "options": [],
@@ -176,70 +126,6 @@
           "blocks": []
         }
       ]
-    }
-  ],
-  "consents": [
-    "Znam warunki i sposób wydania zaświadczenia.",
-    "Dane w formularzu są zgodne z prawdą."
-  ],
-  "summary": "Zaświadczenie zostanie wydane po uiszczeniu opłaty skarbowej w wysokości 17 zł.",
-  "signed": true,
-  "block_roles": [
-    {
-      "block": "b1",
-      "role": "SKIP"
-    },
-    {
-      "block": "b2",
-      "role": "SKIP"
-    },
-    {
-      "block": "b4",
-      "role": "SKIP"
-    },
-    {
-      "block": "b5",
-      "role": "SKIP"
-    },
-    {
-      "block": "b6",
-      "role": "SKIP"
-    },
-    {
-      "block": "b7",
-      "role": "SKIP"
-    },
-    {
-      "block": "b9",
-      "role": "SKIP"
-    },
-    {
-      "block": "b11",
-      "role": "SKIP"
-    },
-    {
-      "block": "b13",
-      "role": "SKIP"
-    },
-    {
-      "block": "b23",
-      "role": "SKIP"
-    },
-    {
-      "block": "b24",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b25",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b26",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b27",
-      "role": "LEGAL_BASIS"
     }
   ]
 }

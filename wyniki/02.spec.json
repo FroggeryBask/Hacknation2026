@@ -1,302 +1,90 @@
 {
   "title": "Wniosek o zwrot opłaty skarbowej",
-  "authority_kind": "urząd",
+  "authority_kind": "organ",
   "authority_name": "Urząd Gminy Stawiguda",
   "applicant": {
     "other_person": true,
-    "entity": false,
-    "entity_nip_only": false
+    "entity": true,
+    "entity_nip_only": false,
+    "pesel": false
   },
-  "pages": [
+  "block_roles": [
     {
-      "title": "Dane wnioskodawcy",
-      "sections": [
-        {
-          "title": "Dane identyfikacyjne",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Nazwa / Imię i nazwisko",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b15"
-              ]
-            },
-            {
-              "label": "NIP",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "NIP"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b16"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        },
-        {
-          "title": "Adres siedziby lub miejsca zamieszkania wnioskodawcy",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Miejscowość",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b18"
-              ]
-            },
-            {
-              "label": "Ulica",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b19"
-              ]
-            },
-            {
-              "label": "Nr domu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b20"
-              ]
-            },
-            {
-              "label": "Nr lokalu",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b21"
-              ]
-            },
-            {
-              "label": "Kod pocztowy",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "ZIP_CODE"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b22"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        },
-        {
-          "title": "Dane kontaktowe wnioskodawcy",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Numer telefonu",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b26"
-              ]
-            },
-            {
-              "label": "Adres poczty elektronicznej",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "EMAIL"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b27"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        },
-        {
-          "title": "Dane pełnomocnika",
-          "repeating": false,
-          "description": null,
-          "fields": [
-            {
-              "label": "Imię i nazwisko",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b29"
-              ]
-            },
-            {
-              "label": "Miejscowość",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b30"
-              ]
-            },
-            {
-              "label": "Ulica",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b31"
-              ]
-            },
-            {
-              "label": "Nr domu",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b32"
-              ]
-            },
-            {
-              "label": "Nr lokalu",
-              "kind": "TEXT",
-              "required": false,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b33"
-              ]
-            },
-            {
-              "label": "Kod pocztowy",
-              "kind": "TEXT",
-              "required": true,
-              "description": null,
-              "options": [],
-              "dictionary": null,
-              "prefill": null,
-              "validators": [
-                "ZIP_CODE"
-              ],
-              "show_if": null,
-              "allowed_formats": [],
-              "max_files": null,
-              "blocks": [
-                "b34"
-              ]
-            }
-          ],
-          "show_if": null,
-          "blocks": []
-        }
-      ]
+      "block": "b1",
+      "to": null,
+      "role": "SKIP"
     },
+    {
+      "block": "b4",
+      "to": "b12",
+      "role": "SKIP"
+    },
+    {
+      "block": "b13",
+      "to": "b14",
+      "role": "HEADING"
+    },
+    {
+      "block": "b15",
+      "to": "b23",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b24",
+      "to": "b25",
+      "role": "HEADING"
+    },
+    {
+      "block": "b26",
+      "to": "b27",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b28",
+      "to": null,
+      "role": "HEADING"
+    },
+    {
+      "block": "b29",
+      "to": "b35",
+      "role": "FIELD_LABEL"
+    },
+    {
+      "block": "b36",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b58",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b62",
+      "to": null,
+      "role": "SKIP"
+    },
+    {
+      "block": "b51",
+      "to": null,
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b52",
+      "to": null,
+      "role": "LEGAL_BASIS"
+    },
+    {
+      "block": "b59",
+      "to": "b61",
+      "role": "SKIP"
+    }
+  ],
+  "consents": [],
+  "optional_consents": [],
+  "summary": null,
+  "signed": true,
+  "pages": [
     {
       "title": "Informacje o opłacie skarbowej",
       "sections": [
@@ -319,6 +107,7 @@
               "max_files": null,
               "blocks": [
                 "b38",
+                "b39",
                 "b40"
               ]
             },
@@ -359,9 +148,14 @@
           ],
           "show_if": null,
           "blocks": []
-        },
+        }
+      ]
+    },
+    {
+      "title": "Uzasadnienie wniosku",
+      "sections": [
         {
-          "title": "Uzasadnienie wniosku",
+          "title": "Uzasadnienie",
           "repeating": false,
           "description": null,
           "fields": [
@@ -369,7 +163,7 @@
               "label": "Uzasadnienie wniosku",
               "kind": "LONG_TEXT",
               "required": true,
-              "description": null,
+              "description": "Opisz, dlaczego opłata skarbowa, której dotyczy wniosek, została błędnie uiszczona",
               "options": [],
               "dictionary": null,
               "prefill": null,
@@ -384,9 +178,14 @@
           ],
           "show_if": null,
           "blocks": []
-        },
+        }
+      ]
+    },
+    {
+      "title": "Sposób zwrotu opłaty",
+      "sections": [
         {
-          "title": "Sposób zwrotu opłaty",
+          "title": "Forma zwrotu",
           "repeating": false,
           "description": null,
           "fields": [
@@ -406,6 +205,7 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
+                "b46",
                 "b47",
                 "b48"
               ]
@@ -418,9 +218,7 @@
               "options": [],
               "dictionary": null,
               "prefill": null,
-              "validators": [
-                "EPUAP"
-              ],
+              "validators": [],
               "show_if": {
                 "field": "Sposób zwrotu opłaty",
                 "equals": "Przelewem na rachunek w banku",
@@ -429,7 +227,28 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
+                "b49",
                 "b50"
+              ]
+            },
+            {
+              "label": "Dane właściciela rachunku",
+              "kind": "TEXT",
+              "required": true,
+              "description": null,
+              "options": [],
+              "dictionary": null,
+              "prefill": null,
+              "validators": [],
+              "show_if": {
+                "field": "Sposób zwrotu opłaty",
+                "equals": "Przelewem na rachunek w banku",
+                "negate": false
+              },
+              "allowed_formats": [],
+              "max_files": null,
+              "blocks": [
+                "b63"
               ]
             }
           ],
@@ -442,14 +261,14 @@
       "title": "Załączniki",
       "sections": [
         {
-          "title": "Dokumenty do załączenia",
+          "title": "Załączniki",
           "repeating": false,
           "description": null,
           "fields": [
             {
               "label": "Dokument stwierdzający udzielenie pełnomocnictwa",
               "kind": "FILE",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -459,13 +278,15 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
+                "b53",
+                "b54",
                 "b55"
               ]
             },
             {
               "label": "Dowód uiszczenia opłaty skarbowej za pełnomocnictwo",
               "kind": "FILE",
-              "required": true,
+              "required": false,
               "description": null,
               "options": [],
               "dictionary": null,
@@ -475,6 +296,8 @@
               "allowed_formats": [],
               "max_files": null,
               "blocks": [
+                "b53",
+                "b56",
                 "b57"
               ]
             }
@@ -483,254 +306,6 @@
           "blocks": []
         }
       ]
-    }
-  ],
-  "consents": [
-    "Dane w formularzu są zgodne z prawdą",
-    "Znam warunki zwrotu opłaty skarbowej"
-  ],
-  "summary": null,
-  "signed": true,
-  "block_roles": [
-    {
-      "block": "b4",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b5",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b6",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b7",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b8",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b9",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b10",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b11",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b12",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b13",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b14",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b15",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b16",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b17",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b18",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b19",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b20",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b21",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b22",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b23",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b24",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b25",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b26",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b27",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b28",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b29",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b30",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b31",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b32",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b33",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b34",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b35",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b36",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b37",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b38",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b39",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b40",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b41",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b42",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b43",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b44",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b45",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b46",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b47",
-      "role": "OPTION"
-    },
-    {
-      "block": "b48",
-      "role": "OPTION"
-    },
-    {
-      "block": "b49",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b50",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b51",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b52",
-      "role": "LEGAL_BASIS"
-    },
-    {
-      "block": "b53",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b54",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b55",
-      "role": "OPTION"
-    },
-    {
-      "block": "b56",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b57",
-      "role": "OPTION"
-    },
-    {
-      "block": "b58",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b59",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b60",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b61",
-      "role": "INSTRUCTION"
-    },
-    {
-      "block": "b62",
-      "role": "FIELD_LABEL"
-    },
-    {
-      "block": "b63",
-      "role": "INSTRUCTION"
     }
   ]
 }
