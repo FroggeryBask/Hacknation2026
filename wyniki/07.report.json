@@ -1,7 +1,7 @@
 {
   "source": "materialy/7. Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanych za agresywne - formularze do cyfryzacji/Wniosek o wydanie zezwolenia na hodowanie lub utrzymywanie psów ras uznawanychza agresywne.DOC",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,23 +41,22 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Sekcja „Dane identyfikacyjne wnioskodawcy” jest w części standardowej formularza (pominięta)."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 68,
     "referenced": 64,
     "unreferenced": [
-      "b22",
-      "b24",
-      "b28",
-      "b30"
+      "b5",
+      "b6",
+      "b7",
+      "b14"
     ],
     "candidates": 26,
     "candidatesWithoutField": [
-      "b22",
-      "b24",
-      "b27"
+      "b27",
+      "b51",
+      "b56",
+      "b63"
     ],
     "unknownRefs": []
   },
@@ -66,5 +65,85 @@
     "promptTokens": 0,
     "completionTokens": 0,
     "costUsd": 0
-  }
+  },
+  "proposedDictionaries": [
+    {
+      "dictionaryName": "RASY_PSOW_AGRESYWNYCH",
+      "title": "Rasy psów uznawanych za agresywne",
+      "description": "Wykaz z rozporządzenia MSWiA z 28 kwietnia 2003 r. w sprawie wykazu ras psów uznawanych za agresywne; pole „Rasa psa” na wniosku o zezwolenie na utrzymywanie takiego psa.",
+      "structure": [
+        {
+          "name": "kod",
+          "type": "string",
+          "description": "Stały identyfikator pozycji (wartość zapisywana w odpowiedzi)"
+        },
+        {
+          "name": "nazwa",
+          "type": "string",
+          "description": "Tekst widoczny na liście"
+        }
+      ],
+      "fieldTypes": [
+        "SELECT",
+        "RADIO",
+        "CHECKBOX"
+      ],
+      "entries": [
+        {
+          "kod": "AMERYKANSKI_PIT_BULL_TERIER",
+          "nazwa": "amerykański pit bull terier"
+        },
+        {
+          "kod": "PIES_Z_MAJORKI_PERRO_DE_PRESA_MALLORQUIN",
+          "nazwa": "pies z Majorki (Perro de Presa Mallorquin)"
+        },
+        {
+          "kod": "BULDOG_AMERYKANSKI",
+          "nazwa": "buldog amerykański"
+        },
+        {
+          "kod": "DOG_ARGENTYNSKI",
+          "nazwa": "dog argentyński"
+        },
+        {
+          "kod": "PIES_KANARYJSKI_PERRO_DE_PRESA_CANARIO",
+          "nazwa": "pies kanaryjski (Perro de Presa Canario)"
+        },
+        {
+          "kod": "TOSA_INU",
+          "nazwa": "tosa inu"
+        },
+        {
+          "kod": "ROTTWEILER",
+          "nazwa": "rottweiler"
+        },
+        {
+          "kod": "AKBASH_DOG",
+          "nazwa": "akbash dog"
+        },
+        {
+          "kod": "ANATOLIAN_KARABASH",
+          "nazwa": "anatolian karabash"
+        },
+        {
+          "kod": "MOSKIEWSKI_STROZUJACY",
+          "nazwa": "moskiewski stróżujący"
+        },
+        {
+          "kod": "OWCZAREK_KAUKASKI",
+          "nazwa": "owczarek kaukaski"
+        }
+      ],
+      "source": null,
+      "usage": [
+        {
+          "page": "Informacje o psie",
+          "section": "Dane psa",
+          "field": "Rasa psa",
+          "fieldType": "TEXT",
+          "change": "pole listy rozwijanej z dictionaryName „RASY_PSOW_AGRESYWNYCH” zamiast pola tekstowego"
+        }
+      ]
+    }
+  ]
 }

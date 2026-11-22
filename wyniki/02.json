@@ -12,10 +12,10 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "5c48fa50-f848-570a-902b-addfd68b9911",
+            "id": "76ff810c-b0a3-50b6-a3c0-2acc0bf5ddb8",
             "type": "SECTION",
-            "techName": "urzad_do_ktorego_jest_skladany_wniosek",
-            "title": "Urząd, do którego jest składany wniosek",
+            "techName": "organ_do_ktorego_jest_skladany_wniosek",
+            "title": "Organ, do którego jest składany wniosek",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -27,10 +27,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "bb10df8e-21e9-50f7-8b45-044a13154fd9",
+                  "id": "d8b3d0df-5fba-5f5c-841e-8c843417e91b",
                   "type": "TEXT_FIELD",
-                  "techName": "nazwa_urzedu",
-                  "title": "Nazwa urzędu",
+                  "techName": "nazwa_organu",
+                  "title": "Nazwa organu",
                   "description": "",
                   "options": [],
                   "validation": [
@@ -150,7 +150,7 @@
         {
           "x": 0,
           "y": 5,
-          "rows": 4,
+          "rows": 3,
           "cols": 3,
           "field": {
             "id": "85169f11-69ad-5f13-b8f4-92fcbcc6fe33",
@@ -209,31 +209,6 @@
                   "questionOrder": 1,
                   "tooltipMessage": ""
                 }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "afc5a608-6bfc-5120-aead-6d51b6aa25dc",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_pesel",
-                  "title": "Numer PESEL",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED",
-                    "PESEL"
-                  ],
-                  "readOnly": true,
-                  "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.pesel",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
-                  "states": [],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
               }
             ],
             "states": [],
@@ -243,7 +218,7 @@
         },
         {
           "x": 0,
-          "y": 9,
+          "y": 8,
           "rows": 10,
           "cols": 3,
           "field": {
@@ -508,7 +483,7 @@
         },
         {
           "x": 0,
-          "y": 19,
+          "y": 18,
           "rows": 3,
           "cols": 3,
           "field": {
@@ -579,7 +554,7 @@
         },
         {
           "x": 0,
-          "y": 22,
+          "y": 21,
           "rows": 10,
           "cols": 3,
           "field": {
@@ -841,7 +816,7 @@
         },
         {
           "x": 0,
-          "y": 32,
+          "y": 31,
           "rows": 2,
           "cols": 3,
           "field": {
@@ -889,8 +864,8 @@
         },
         {
           "x": 0,
-          "y": 34,
-          "rows": 4,
+          "y": 33,
+          "rows": 3,
           "cols": 3,
           "field": {
             "id": "a5dbfac2-5623-55e6-bdd0-bb2a5b9186b9",
@@ -945,29 +920,6 @@
                   "questionOrder": 1,
                   "tooltipMessage": ""
                 }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "ed777e45-8a5f-5c0e-b478-6fb9460bdb4f",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_pesel_inna_osoba",
-                  "title": "Numer PESEL",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED",
-                    "PESEL"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
               }
             ],
             "states": [
@@ -982,7 +934,7 @@
         },
         {
           "x": 0,
-          "y": 38,
+          "y": 36,
           "rows": 10,
           "cols": 3,
           "field": {
@@ -1244,7 +1196,7 @@
         },
         {
           "x": 0,
-          "y": 48,
+          "y": 46,
           "rows": 2,
           "cols": 3,
           "field": {
@@ -1292,7 +1244,7 @@
         },
         {
           "x": 0,
-          "y": 50,
+          "y": 48,
           "rows": 4,
           "cols": 3,
           "field": {
@@ -1403,7 +1355,7 @@
         },
         {
           "x": 0,
-          "y": 54,
+          "y": 52,
           "rows": 3,
           "cols": 3,
           "field": {
@@ -1482,10 +1434,10 @@
           "rows": 4,
           "cols": 3,
           "field": {
-            "id": "3e9e8d5e-c325-5115-80e7-37311d3d59f8",
+            "id": "67b7f2a7-c2a8-5077-b8a5-06a0adad3992",
             "type": "SECTION",
-            "techName": "dane_oplaty",
-            "title": "Dane opłaty",
+            "techName": "oplata_skarbowa",
+            "title": "Opłata skarbowa",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -1588,7 +1540,7 @@
                   "type": "TEXTAREA",
                   "techName": "uzasadnienie_wniosku_2",
                   "title": "Uzasadnienie wniosku",
-                  "description": "",
+                  "description": "<html><head></head><body><p>Opisz, dlaczego opłata skarbowa, której dotyczy wniosek, została błędnie uiszczona</p></body></html>",
                   "options": [],
                   "validation": [
                     "REQUIRED"
@@ -1609,13 +1561,13 @@
         {
           "x": 0,
           "y": 6,
-          "rows": 3,
+          "rows": 4,
           "cols": 3,
           "field": {
-            "id": "0afc802d-fa5f-5b59-a007-95815ab7d9e0",
+            "id": "f425a2cd-5404-5cc0-bfc2-86c74428f4e8",
             "type": "SECTION",
-            "techName": "sposob_zwrotu_oplaty",
-            "title": "Sposób zwrotu opłaty",
+            "techName": "sposob_zwrotu_oplaty_skarbowej",
+            "title": "Sposób zwrotu opłaty skarbowej",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -1627,10 +1579,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "704c8789-4d0e-5f71-83de-dbf2a0b81500",
+                  "id": "9fdc8bfe-0fe6-5b9b-a5d0-c9577e5b1c3f",
                   "type": "RADIO",
-                  "techName": "sposob_zwrotu_oplaty_2",
-                  "title": "Sposób zwrotu opłaty",
+                  "techName": "sposob_zwrotu_oplaty_skarbowej_2",
+                  "title": "Sposób zwrotu opłaty skarbowej",
                   "description": "",
                   "options": [
                     {
@@ -1667,18 +1619,44 @@
                   "description": "",
                   "options": [],
                   "validation": [
-                    "REQUIRED",
-                    "EPUAP"
+                    "REQUIRED"
                   ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [
                     {
                       "type": "SHOW",
-                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Informacje o opłacie skarbowej' in title].questions['sposob_zwrotu_oplaty' in field.techName].field.repeatingSectionGrid['sposob_zwrotu_oplaty_2' in field.techName].field.__userAnswer)"
+                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Informacje o opłacie skarbowej' in title].questions['sposob_zwrotu_oplaty_skarbowej' in field.techName].field.repeatingSectionGrid['sposob_zwrotu_oplaty_skarbowej_2' in field.techName].field.__userAnswer)"
                     }
                   ],
                   "questionOrder": 1,
+                  "tooltipMessage": ""
+                }
+              },
+              {
+                "x": 0,
+                "y": 2,
+                "rows": 1,
+                "cols": 3,
+                "field": {
+                  "id": "f9c5b70a-a702-5546-bb8f-24238bd333ca",
+                  "type": "TEXT_FIELD",
+                  "techName": "dane_wlasciciela_rachunku",
+                  "title": "Dane właściciela rachunku",
+                  "description": "",
+                  "options": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
+                  "readOnly": false,
+                  "repeatingSectionGrid": [],
+                  "states": [
+                    {
+                      "type": "SHOW",
+                      "query": "(\"Przelewem na rachunek w banku\" in tabs['Informacje o opłacie skarbowej' in title].questions['sposob_zwrotu_oplaty_skarbowej' in field.techName].field.repeatingSectionGrid['sposob_zwrotu_oplaty_skarbowej_2' in field.techName].field.__userAnswer)"
+                    }
+                  ],
+                  "questionOrder": 2,
                   "tooltipMessage": ""
                 }
               }
@@ -1687,24 +1665,17 @@
             "questionOrder": 2,
             "tooltipMessage": ""
           }
-        }
-      ]
-    },
-    {
-      "id": "1154f80c-aff4-5bdd-b97d-2c531777e3fc",
-      "title": "Załączniki",
-      "type": "MAIN",
-      "questions": [
+        },
         {
           "x": 0,
-          "y": 0,
+          "y": 10,
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "50e6a41c-4f27-52be-9199-26efcd89299f",
+            "id": "aaf82979-7266-55df-b3a2-93cae9d31abc",
             "type": "SECTION",
-            "techName": "dokumenty_do_zalaczenia",
-            "title": "Dokumenty do załączenia",
+            "techName": "zalaczniki",
+            "title": "Załączniki",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -1722,9 +1693,7 @@
                   "title": "Dokument stwierdzający udzielenie pełnomocnictwa",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -1744,9 +1713,7 @@
                   "title": "Dowód uiszczenia opłaty skarbowej za pełnomocnictwo",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -1756,7 +1723,7 @@
               }
             ],
             "states": [],
-            "questionOrder": 0,
+            "questionOrder": 3,
             "tooltipMessage": ""
           }
         }
@@ -1871,11 +1838,7 @@
                     "consents": [
                       {
                         "description": "<html><head></head><body><p>Dane w formularzu są zgodne z prawdą</p></body></html>",
-                        "required": true
-                      },
-                      {
-                        "description": "<html><head></head><body><p>Znam warunki zwrotu opłaty skarbowej</p></body></html>",
-                        "required": true
+                        "required": false
                       },
                       {
                         "description": "<html><head></head><body><p>Wyrażam zgodę na przetwarzanie moich danych osobowych zgodnie z <a href=\"#klauzula-informacyjna\" target=\"_blank\" rel=\"noopener noreferrer\" aria-label=\"Link otwiera się w nowej karcie\">klauzulą informacyjną</a></p></body></html>",
@@ -1923,9 +1886,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "074883a2-c288-5b15-a70d-d724756dc9f9",
-                  "type": "INFO_SECTION",
-                  "techName": "podglad",
+                  "id": "d17ffa6a-2c98-586f-9801-6a57a635c082",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podglad_1",
                   "title": "",
                   "description": "<html><head></head><body><p>Zanim przejdziesz do wyboru sposobu podpisu, sprawdź dane na podglądzie. Jeśli zobaczysz błędy, wróć do edycji.</p></body></html>",
                   "options": [],
@@ -1956,15 +1919,10 @@
       {
         "id": "d2cdef3a",
         "source": "e8c9c67b-92cc-53c8-af13-83bb3fe7a4db",
-        "target": "1154f80c-aff4-5bdd-b97d-2c531777e3fc"
-      },
-      {
-        "id": "bc6244c9",
-        "source": "1154f80c-aff4-5bdd-b97d-2c531777e3fc",
         "target": "d44f20fe-81a4-5549-bfa4-5316ace10299"
       },
       {
-        "id": "6ff145ea",
+        "id": "bc6244c9",
         "source": "d44f20fe-81a4-5549-bfa4-5316ace10299",
         "target": "4c77867a-2650-5f04-a646-49a13e52121c"
       }

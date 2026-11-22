@@ -10,6 +10,9 @@ from typing import Literal
 
 BlockKind = Literal["paragraph", "table_row", "heading"]
 
+# Zero-width and bidirectional control characters and soft hyphens: invisible on paper, they hide or reorder
+# text (a way to slip instructions to the model). Removed from every block, whatever the format.
+INVISIBLE = re.compile("[​-‏‪-‮⁠-⁤⁦-⁩﻿­]")
 # A hand-written line ("……………", "_____", ". . . . .") is only a place to fill in: its length says nothing
 # to the model. Form 9 has lines of 300-600 dots, a third of its prompt. The prompt shortens them to "……"
 # (llm.build_user_prompt); blocks keep the source text (presort, coverage and `?details=true` see it).
@@ -38,7 +41,9 @@ class FieldCandidate:
 class Document:
     blocks: list[Block] = field(default_factory=list)
     candidates: list[FieldCandidate] = field(default_factory=list)
-    images: list[bytes] = field(default_factory=list)  # PNG bytes, already downscaled (scans)
+    images: list[bytes] = field(
+        default_factory=list
+    )  # JPEG page images for the model, already downscaled (scans)
     notes: list[str] = field(default_factory=list)
     hint: str = ""  # one line for the model about blocks the code already handled (presort), not in the API
 
@@ -103,7 +108,7 @@ def build(lines: list[tuple[str, int | None]], **kw) -> Document:
     """Blocks from text lines in reading order: (text, page). Table rows are kept as one block."""
     doc = Document(**kw)
     for text, page in lines:
-        text = text.strip()
+        text = INVISIBLE.sub("", text).strip()
         if not text:
             continue
         kind: BlockKind = (

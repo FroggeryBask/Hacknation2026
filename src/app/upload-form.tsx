@@ -1,23 +1,10 @@
 "use client";
 
 import { cn } from "cn";
-import {
-  Check,
-  CircleCheck,
-  Download,
-  ExternalLink,
-  FileText,
-  LoaderCircle,
-  ShieldAlert,
-  TriangleAlert,
-  Upload,
-  X,
-} from "lucide-react";
+import { Check, FileText, LoaderCircle, Upload, X } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { AiIcon } from "@/components/form/ai-icon";
-import { ClauseContext, clauseLines } from "@/components/form/clause";
-import { CoiFormView } from "@/components/form/coi-form";
 import { FieldError, InfoSection } from "@/components/form/fields";
 import { FormSection, Stepper } from "@/components/form/layout";
 import {
@@ -32,62 +19,47 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import type { CoiForm } from "@/lib/form/coi";
-import { type Finding, scanForm } from "@/lib/form/safety";
-import { JsonView } from "./json-view";
-
-// Same list as api/src/autoformularz/upload.py (EXTENSIONS).
-const FORMATS = ["pdf", "doc", "docx", "ods", "xlsx", "jpg", "jpeg", "png"];
-// Formats a browser can show in a tab; the others would only download.
-const PREVIEWABLE = ["pdf", "jpg", "jpeg", "png"];
+import { scanForm } from "@/lib/form/safety";
+import { BatchList, batchSummary, type Item, isPending } from "./batch";
+import { checkFile, FileName, FORMATS, formatSize, sameFile } from "./files";
+import {
+  currentStage,
+  failureText,
+  type Progress,
+  type Result,
+  runJob,
+  runQueue,
+} from "./jobs";
+import {
+  checksText,
+  DownloadButton,
+  download,
+  downloadZip,
+  ResultChecks,
+  ResultPreview,
+  useChecks,
+} from "./result";
 
 const STEPS = [
   "Dodaj plik formularza",
   "Generowanie formularza",
   "Weryfikacja formularza",
 ];
+const STEPS_MANY = [
+  "Dodaj pliki formularzy",
+  "Generowanie formularzy",
+  "Weryfikacja formularzy",
+];
+// Several files at once (task 3.3.VI, batch). Each file costs one model call; the API runs at most
+// 4 jobs for all users (jobs.py MAX_RUNNING), so one page takes 2 and leaves room for others.
+const MAX_FILES = 20;
+const BATCH_CONCURRENCY = 2;
 
-type Issue = {
-  level: "error" | "warning";
-  code: string;
-  message: string;
-  path: string;
-};
-type Result = {
-  form: CoiForm;
-  issues: Issue[];
-  notes: string[];
-  // `?details=true`: source blocks and the model's spec (roles mark the GDPR clause).
-  document?: { blocks: { id: string; text: string }[] };
-  spec?: {
-    block_roles?: { block: string; to?: string | null; role: string }[];
-  };
-};
-/** A pipeline stage, or what the model or the code found in it (api progress.py). */
-type Progress = { kind: "stage" | "item"; text: string };
-type Job = {
-  status: "running" | "done" | "error" | "cancelled";
-  steps: Progress[];
-  result?: Result;
-  error?: { message: string };
-};
 type State =
   | { step: "idle" }
   | { step: "sending"; steps: Progress[] }
-  | { step: "done"; result: Result };
-
-const POLL_MS = 1500;
-// Polls that may fail in a row (e.g. a restarting proxy) before the page gives up.
-const POLL_RETRIES = 3;
-
-const wait = (ms: number, signal: AbortSignal) =>
-  new Promise<void>((resolve) => {
-    const t = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
-      clearTimeout(t);
-      resolve();
-    });
-  });
+  | { step: "done"; result: Result }
+  | { step: "batch"; items: Item[] };
 
 /** Stages with the items found in each, in the order they came. */
 function groupSteps(steps: Progress[]) {
@@ -150,96 +122,6 @@ function StepLog({ steps }: { steps: Progress[] }) {
   );
 }
 
-const formatSize = (b: number) =>
-  b < 1024 * 1024
-    ? `${Math.max(1, Math.round(b / 1024))} KB`
-    : `${(b / 1024 / 1024).toFixed(1).replace(".", ",")} MB`;
-
-const extension = (name: string) =>
-  name.includes(".") ? (name.split(".").pop()?.toLowerCase() ?? "") : "";
-
-// Task, "Walidacja nazwy pliku" (same rules as api/src/autoformularz/upload.py).
-const MAX_NAME_LENGTH = 250;
-const FORBIDDEN_CHARS = [
-  ";",
-  ":",
-  ">",
-  "<",
-  "/",
-  "\\",
-  "|",
-  "'",
-  "*",
-  "%",
-  "$",
-];
-
-function checkFile(f: File, maxSizeMb: number): string | undefined {
-  if (f.name.length > MAX_NAME_LENGTH)
-    return `Nazwa pliku jest za długa (${f.name.length} znaków). Może mieć najwyżej ${MAX_NAME_LENGTH} znaków. Zmień nazwę pliku i dodaj go ponownie.`;
-  const bad = FORBIDDEN_CHARS.filter((c) => f.name.includes(c));
-  if (bad.length)
-    return `Nazwa pliku zawiera niedozwolone znaki: ${bad.join(" ")}. Zmień nazwę pliku i dodaj go ponownie.`;
-  if (!FORMATS.includes(extension(f.name)))
-    return "Ten format pliku nie jest obsługiwany. Wybierz plik PDF, DOC, DOCX, ODS, XLSX, JPG lub PNG.";
-  if (f.size === 0) return "Plik jest pusty.";
-  if (f.size > maxSizeMb * 1024 * 1024)
-    return `Plik jest za duży. Maksymalny rozmiar: ${maxSizeMb} MB.`;
-}
-
-/** Message from the API (`{error: {message}}`) or FastAPI (`{detail}`). */
-async function errorMessage(res: Response): Promise<string> {
-  try {
-    const body = await res.json();
-    const msg = body?.error?.message ?? body?.detail;
-    if (typeof msg === "string") return msg;
-  } catch {}
-  return `Nie udało się utworzyć formularza (błąd ${res.status}). Spróbuj ponownie.`;
-}
-
-function download(form: CoiForm, sourceName: string) {
-  const base = sourceName.replace(/\.[^.]+$/, "") || "formularz";
-  const url = URL.createObjectURL(
-    new Blob([JSON.stringify(form, null, 2)], { type: "application/json" }),
-  );
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${base}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/** Findings of the safety scan: what and where, to check before publishing. */
-function Findings({ findings }: { findings: Finding[] }) {
-  return (
-    <section
-      aria-labelledby="findings-title"
-      className="flex flex-col gap-2 rounded-lg border-2 border-warning p-4"
-    >
-      <h3
-        id="findings-title"
-        className="flex items-center gap-2 text-sm font-bold"
-      >
-        <ShieldAlert className="size-4 shrink-0 text-warning" aria-hidden />
-        Treść do sprawdzenia: {findings.length}
-      </h3>
-      <p className="text-sm text-muted-foreground">
-        Te fragmenty nie wyglądają na zwykłą treść formularza urzędowego. Mogą
-        pochodzić z dokumentu, który próbuje wpłynąć na model AI (prompt
-        injection), albo z błędu modelu.
-      </p>
-      <ul className="flex flex-col gap-2 text-sm">
-        {findings.map((f) => (
-          <li key={`${f.code}-${f.where}-${f.message}`}>
-            {f.message}
-            <span className="block text-muted-foreground">{f.where}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 function useElapsed(running: boolean) {
   const [seconds, setSeconds] = useState(0);
   useEffect(() => {
@@ -254,26 +136,12 @@ function useElapsed(running: boolean) {
 const elapsedText = (s: number) =>
   s < 60 ? `${s} s` : `${Math.floor(s / 60)} min ${s % 60} s`;
 
-/** File name; for PDF and images a link that opens the file in a new tab. */
-function FileName({ file, url }: { file: File; url?: string }) {
-  if (!url || !PREVIEWABLE.includes(extension(file.name)))
-    return <span className="block truncate font-bold">{file.name}</span>;
+/** Ticking timer, visual only, so screen readers hear the status once. */
+function Elapsed({ seconds }: { seconds: number }) {
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      title="Otwórz podgląd pliku w nowej karcie"
-      className="group inline-flex max-w-full items-center gap-1 rounded-xs font-bold text-link underline underline-offset-4 outline-none hover:decoration-2 focus-visible:ring-3 focus-visible:ring-ring/50"
-    >
-      <span className="truncate">{file.name}</span>
-      {/* Shown on hover and keyboard focus; always on touch screens (no hover). */}
-      <ExternalLink
-        className="size-3.5 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 [@media(hover:none)]:opacity-100"
-        aria-hidden
-      />
-      <span className="sr-only">(podgląd otwiera się w nowej karcie)</span>
-    </a>
+    <span className="block text-muted-foreground" aria-hidden>
+      Upłynęło: {elapsedText(seconds)}
+    </span>
   );
 }
 
@@ -312,28 +180,76 @@ function StepPanel({
   );
 }
 
+/** A destructive button that asks before it acts. */
+function ConfirmButton({
+  label,
+  title,
+  description,
+  cancel,
+  confirm,
+  onConfirm,
+}: {
+  label: string;
+  title: string;
+  description: string;
+  cancel: string;
+  confirm: string;
+  onConfirm: () => void;
+}) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger
+        render={<Button variant="destructive">{label}</Button>}
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{cancel}</AlertDialogCancel>
+          <AlertDialogAction variant="destructive" onClick={onConfirm}>
+            {confirm}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
-  const [file, setFile] = useState<File>();
-  const [fileUrl, setFileUrl] = useState<string>();
-  const [error, setError] = useState<string>();
+  const [files, setFiles] = useState<File[]>([]);
+  const [objectUrls, setObjectUrls] = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
   const [state, setState] = useState<State>({ step: "idle" });
   const [run, setRun] = useState(0);
-  const [view, setView] = useState<"form" | "json">("form");
+  // The file whose form is shown below the list (several files).
+  const [selected, setSelected] = useState<number>();
   const input = useRef<HTMLInputElement>(null);
   const abort = useRef<AbortController>(null);
   // Move focus to the new step only after a user action, not on page load.
   const moved = useRef(false);
+  const many = files.length > 1;
+  const steps = many ? STEPS_MANY : STEPS;
   const sending = state.step === "sending";
-  const elapsed = useElapsed(sending);
-  const step = state.step === "idle" ? 0 : sending ? 1 : 2;
+  const items = state.step === "batch" ? state.items : [];
+  const batchRunning = items.some(isPending);
+  const elapsed = useElapsed(sending || batchRunning);
+  const step = state.step === "idle" ? 0 : sending || batchRunning ? 1 : 2;
+  // The links are made after a render with the new files: until then a row would open another file.
+  const urls = objectUrls.length === files.length ? objectUrls : [];
 
   useEffect(() => {
-    if (!file) return setFileUrl(undefined);
-    const url = URL.createObjectURL(file);
-    setFileUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+    const list = files.map((f) => URL.createObjectURL(f));
+    setObjectUrls(list);
+    return () => {
+      for (const u of list) URL.revokeObjectURL(u);
+    };
+  }, [files]);
+
+  // Leaving the page stops its jobs: the model stops writing, no more tokens are paid.
+  useEffect(() => () => abort.current?.abort(), []);
 
   const goTo = (next: State) => {
     moved.current = true;
@@ -341,104 +257,172 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const pick = (f?: File) => {
-    if (!f) return;
+  const add = (picked: File[]) => {
+    if (!picked.length) return;
     setState({ step: "idle" });
-    const problem = checkFile(f, maxSizeMb);
-    setError(problem);
-    setFile(problem ? undefined : f);
+    const problems: string[] = [];
+    const next = [...files];
+    // With several files the message says which one.
+    const named = files.length + picked.length > 1;
+    for (const f of picked) {
+      const problem = checkFile(f, maxSizeMb);
+      if (problem) problems.push(named ? `${f.name}: ${problem}` : problem);
+      else if (!next.some((g) => sameFile(f, g))) next.push(f);
+    }
+    if (next.length > MAX_FILES)
+      problems.push(
+        `Możesz dodać najwyżej ${MAX_FILES} plików naraz. Pominięto: ${next
+          .splice(MAX_FILES)
+          .map((f) => f.name)
+          .join(", ")}.`,
+      );
+    setErrors(problems);
+    setFiles(next);
   };
 
-  const submit = async () => {
-    if (!file) {
-      setError("Wybierz plik formularza.");
-      return;
-    }
-    setError(undefined);
-    goTo({ step: "sending", steps: [] });
-    const body = new FormData();
-    body.append("file", file);
+  const remove = (i: number) => {
+    setErrors([]);
+    setFiles((fs) => fs.filter((_, j) => j !== i));
+  };
+
+  const reset = () => {
+    setFiles([]);
+    setErrors([]);
+    setSelected(undefined);
+    goTo({ step: "idle" });
+  };
+
+  /** Starts a new controller for the page's jobs; the cancel button aborts it. */
+  const control = () => {
     const controller = new AbortController();
     abort.current = controller;
-    const { signal } = controller;
-    let id: string | undefined;
-    // Cancelling stops the job on the server too: the model stops writing, no more tokens are paid.
-    signal.addEventListener("abort", () => {
-      if (id) fetch(`/api/forms/${id}`, { method: "DELETE" }).catch(() => {});
-    });
+    return controller;
+  };
+  const release = (controller: AbortController) => {
+    if (abort.current === controller) abort.current = null;
+  };
+
+  const submitOne = async (file: File) => {
+    goTo({ step: "sending", steps: [] });
+    const controller = control();
     try {
-      const res = await fetch("/api/forms", { method: "POST", body, signal });
-      if (!res.ok) throw new Error(await errorMessage(res));
-      id = ((await res.json()) as { id: string }).id;
-      let failures = 0;
-      let job: Job | undefined;
-      while (!signal.aborted) {
-        await wait(POLL_MS, signal);
-        if (signal.aborted) break;
-        const poll = await fetch(`/api/forms/${id}`, { signal }).catch(
-          () => undefined,
-        );
-        if (!poll?.ok) {
-          if (poll && poll.status < 500)
-            throw new Error(await errorMessage(poll));
-          if (++failures > POLL_RETRIES)
-            throw new Error(
-              poll ? await errorMessage(poll) : "Failed to fetch",
-            );
-          continue;
-        }
-        failures = 0;
-        job = (await poll.json()) as Job;
-        const steps = job.steps;
+      const result = await runJob(file, controller.signal, (steps) =>
         setState((s) =>
           s.step === "sending" ? { step: "sending", steps } : s,
-        );
-        if (job.status !== "running") break;
-      }
-      if (signal.aborted) throw new Error("Anulowano.");
-      if (job?.status !== "done" || !job.result)
-        throw new Error(
-          job?.error?.message ??
-            "Nie udało się utworzyć formularza. Spróbuj ponownie.",
-        );
-      const result = job.result;
+        ),
+      );
       setRun((r) => r + 1);
       goTo({ step: "done", result });
     } catch (e) {
       goTo({ step: "idle" });
-      if (controller.signal.aborted) return;
-      setError(
-        e instanceof Error && e.message !== "Failed to fetch"
-          ? e.message
-          : "Brak połączenia z serwerem. Spróbuj ponownie.",
-      );
+      if (!controller.signal.aborted) setErrors([failureText(e)]);
     } finally {
-      if (abort.current === controller) abort.current = null;
+      release(controller);
     }
+  };
+
+  /** Runs (or runs again) the files at `indexes` of the batch, BATCH_CONCURRENCY at a time. */
+  const runBatch = async (list: File[], indexes: number[]) => {
+    const controller = control();
+    const { signal } = controller;
+    const update = (pick: (it: Item, i: number) => Partial<Item> | undefined) =>
+      setState((s) =>
+        s.step === "batch"
+          ? {
+              ...s,
+              items: s.items.map((it, i) => {
+                const patch = pick(it, i);
+                return patch ? { ...it, ...patch } : it;
+              }),
+            }
+          : s,
+      );
+    const one = (i: number, patch: Partial<Item>) =>
+      update((_, j) => (j === i ? patch : undefined));
+    const again = new Set(indexes);
+    update((_, i) =>
+      again.has(i)
+        ? { status: "queued", steps: [], result: undefined, error: undefined }
+        : undefined,
+    );
+    await runQueue(indexes, BATCH_CONCURRENCY, signal, async (i) => {
+      one(i, { status: "running" });
+      try {
+        const result = await runJob(list[i], signal, (steps) =>
+          one(i, { steps }),
+        );
+        one(i, { status: "done", result });
+      } catch (e) {
+        one(
+          i,
+          signal.aborted
+            ? { status: "cancelled" }
+            : { status: "error", error: failureText(e) },
+        );
+      }
+    });
+    // Files the queue had not started when it was cancelled.
+    if (signal.aborted)
+      update((it) =>
+        it.status === "queued" ? { status: "cancelled" } : undefined,
+      );
+    release(controller);
+  };
+
+  const submit = () => {
+    if (!files.length) {
+      setErrors(["Wybierz plik formularza."]);
+      return;
+    }
+    setErrors([]);
+    if (files.length === 1) return submitOne(files[0]);
+    setRun((r) => r + 1);
+    setSelected(undefined);
+    goTo({
+      step: "batch",
+      items: files.map((file) => ({ file, status: "queued", steps: [] })),
+    });
+    return runBatch(
+      files,
+      files.map((_, i) => i),
+    );
   };
 
   const cancel = () => abort.current?.abort();
 
-  const reset = () => {
-    setFile(undefined);
-    setError(undefined);
-    goTo({ step: "idle" });
-  };
-
-  const result = state.step === "done" ? state.result : undefined;
-  // Content the model may have copied from a hostile document (safety.ts).
-  const findings = useMemo(
-    () => (result ? scanForm(result.form) : []),
-    [result],
+  const result =
+    state.step === "done"
+      ? state.result
+      : selected !== undefined
+        ? items[selected]?.result
+        : undefined;
+  const checks = useChecks(result);
+  const finished = items.filter((it) => it.status === "done");
+  const retry = items.flatMap((it, i) =>
+    it.status === "error" || it.status === "cancelled" ? [i] : [],
   );
-  // The information clause cut from the document: shown behind the consent's link.
-  const clause = useMemo(
-    () => clauseLines(result?.document?.blocks, result?.spec?.block_roles),
-    [result],
+  const findingsTotal = useMemo(
+    () =>
+      batchRunning
+        ? 0
+        : items.reduce(
+            (n, it) => n + (it.result ? scanForm(it.result.form).length : 0),
+            0,
+          ),
+    [items, batchRunning],
   );
-  const errors = result?.issues.filter((i) => i.level === "error") ?? [];
-  const warnings = result?.issues.filter((i) => i.level === "warning") ?? [];
-  const stepLabel = (i: number) => `Krok ${i + 1}: ${STEPS[i]}`;
+  const downloadAll = () =>
+    downloadZip(
+      finished.flatMap((it) =>
+        it.result ? [{ form: it.result.form, sourceName: it.file.name }] : [],
+      ),
+    );
+  const stepLabel = (i: number) => `Krok ${i + 1}: ${steps[i]}`;
+  const submitLabel = many
+    ? `Utwórz formularze (${files.length})`
+    : "Utwórz formularz";
+  const selectedName =
+    selected !== undefined ? items[selected]?.file.name : undefined;
 
   return (
     <MotionConfig reducedMotion="user">
@@ -449,7 +433,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
               Stwórz e-formularz
             </h1>
             <Stepper
-              steps={STEPS}
+              steps={steps}
               current={step}
               label="Kroki tworzenia e-formularza"
             />
@@ -469,7 +453,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                       className={cn(
                         "flex cursor-pointer flex-col items-center gap-3 rounded-sm border border-dashed border-input px-4 py-8 text-center transition-colors hover:bg-secondary",
                         dragging && "border-primary bg-secondary",
-                        error && "border-destructive",
+                        errors.length > 0 && "border-destructive",
                       )}
                       onDragOver={(e) => {
                         e.preventDefault();
@@ -479,7 +463,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                       onDrop={(e) => {
                         e.preventDefault();
                         setDragging(false);
-                        pick(e.dataTransfer.files[0]);
+                        add([...e.dataTransfer.files]);
                       }}
                     >
                       <span className="grid size-12 place-items-center rounded-full bg-secondary text-primary">
@@ -493,62 +477,82 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                       </p>
                       <Button
                         variant="outline"
-                        aria-describedby={error ? "plik-err" : undefined}
+                        aria-describedby={
+                          errors.length
+                            ? errors.map((_, i) => `plik-err-${i}`).join(" ")
+                            : undefined
+                        }
                       >
-                        Wybierz plik z dysku
+                        Wybierz pliki z dysku
                       </Button>
                       <input
                         ref={input}
                         id="plik"
                         type="file"
+                        multiple
                         className="sr-only"
                         tabIndex={-1}
                         accept={FORMATS.map((f) => `.${f}`).join(",")}
                         onChange={(e) => {
-                          pick(e.target.files?.[0]);
+                          add([...(e.target.files ?? [])]);
                           e.target.value = "";
                         }}
                       />
                     </div>
 
-                    {file && (
-                      <div className="flex items-center gap-2 rounded-sm bg-secondary px-3 py-2 text-sm">
-                        <FileText
-                          className="size-4 shrink-0 text-primary"
-                          aria-hidden
-                        />
-                        <span className="min-w-0 flex-1">
-                          <FileName file={file} url={fileUrl} />
-                        </span>
-                        <span className="text-muted-foreground">
-                          {formatSize(file.size)}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          aria-label={`Usuń plik ${file.name}`}
-                          onClick={reset}
-                        >
-                          <X className="text-primary" />
-                        </Button>
-                      </div>
+                    {files.length > 0 && (
+                      <ul
+                        className="flex flex-col gap-2"
+                        aria-label="Wybrane pliki"
+                      >
+                        {files.map((f, i) => (
+                          <li
+                            key={`${f.name}-${f.size}-${f.lastModified}`}
+                            className="flex items-center gap-2 rounded-sm bg-secondary px-3 py-2 text-sm"
+                          >
+                            <FileText
+                              className="size-4 shrink-0 text-primary"
+                              aria-hidden
+                            />
+                            <span className="min-w-0 flex-1">
+                              <FileName file={f} url={urls[i]} />
+                            </span>
+                            <span className="text-muted-foreground">
+                              {formatSize(f.size)}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              aria-label={`Usuń plik ${f.name}`}
+                              onClick={() => remove(i)}
+                            >
+                              <X className="text-primary" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
                     )}
 
-                    <FieldError id="plik-err" error={error} />
+                    {errors.map((e, i) => (
+                      // biome-ignore lint/suspicious/noArrayIndexKey: two files may have the same name and problem
+                      <FieldError key={i} id={`plik-err-${i}`} error={e} />
+                    ))}
 
                     <InfoSection>
-                      Po kliknięciu „Utwórz formularz” plik przeanalizuje model
-                      sztucznej inteligencji. Może to potrwać kilka minut.
+                      Możesz dodać kilka plików naraz (najwyżej {MAX_FILES}). Po
+                      kliknięciu „{submitLabel}” każdy plik przeanalizuje model
+                      sztucznej inteligencji, po {BATCH_CONCURRENCY}{" "}
+                      jednocześnie. Może to potrwać kilka minut.
                     </InfoSection>
                   </FormSection>
 
                   <div className="flex justify-end">
-                    <Button onClick={submit}>Utwórz formularz</Button>
+                    <Button onClick={submit}>{submitLabel}</Button>
                   </div>
                 </StepPanel>
               )}
 
-              {step === 1 && file && (
+              {sending && files[0] && (
                 <StepPanel
                   key="tworzenie"
                   label={stepLabel(1)}
@@ -556,7 +560,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                 >
                   <FormSection
                     title="Generowanie formularza"
-                    description={<FileName file={file} url={fileUrl} />}
+                    description={<FileName file={files[0]} url={urls[0]} />}
                   >
                     <div className="flex items-center gap-3 text-sm">
                       <LoaderCircle
@@ -564,55 +568,29 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                         aria-hidden
                       />
                       <output>
-                        {state.step === "sending" && state.steps.length
-                          ? `Trwa: ${groupSteps(state.steps).at(-1)?.stage}.`
+                        {state.steps.length
+                          ? `Trwa: ${currentStage(state.steps)}.`
                           : "Trwa tworzenie formularza."}{" "}
                         Może to potrwać kilka minut.
-                        {/* Ticking timer is visual only, so screen readers hear the status once. */}
-                        <span
-                          className="block text-muted-foreground"
-                          aria-hidden
-                        >
-                          Upłynęło: {elapsedText(elapsed)}
-                        </span>
+                        <Elapsed seconds={elapsed} />
                       </output>
                     </div>
-                    {state.step === "sending" && (
-                      <StepLog steps={state.steps} />
-                    )}
+                    <StepLog steps={state.steps} />
                   </FormSection>
                   <div className="flex justify-end">
-                    <AlertDialog>
-                      <AlertDialogTrigger
-                        render={<Button variant="destructive">Anuluj</Button>}
-                      />
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Czy na pewno chcesz anulować?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Tworzenie formularza zostanie przerwane, a
-                            dotychczasowe postępy zostaną utracone. Plik
-                            pozostanie wybrany i możesz spróbować ponownie.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Nie, kontynuuj</AlertDialogCancel>
-                          <AlertDialogAction
-                            variant="destructive"
-                            onClick={cancel}
-                          >
-                            Tak, anuluj
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    <ConfirmButton
+                      label="Anuluj"
+                      title="Czy na pewno chcesz anulować?"
+                      description="Tworzenie formularza zostanie przerwane, a dotychczasowe postępy zostaną utracone. Plik pozostanie wybrany i możesz spróbować ponownie."
+                      cancel="Nie, kontynuuj"
+                      confirm="Tak, anuluj"
+                      onConfirm={cancel}
+                    />
                   </div>
                 </StepPanel>
               )}
 
-              {result && (
+              {state.step === "done" && files[0] && (
                 <StepPanel
                   key={`wynik-${run}`}
                   label={stepLabel(2)}
@@ -622,11 +600,11 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                     title="Formularz jest gotowy"
                     description={
                       <p>
-                        <span className="font-bold">{result.form.title}</span>
+                        <span className="font-bold">
+                          {state.result.form.title}
+                        </span>
                         {" · "}
-                        Błędy: {errors.length} · Ostrzeżenia: {warnings.length}
-                        {findings.length > 0 &&
-                          ` · Treść do sprawdzenia: ${findings.length}`}
+                        {checksText(checks)}
                       </p>
                     }
                   >
@@ -634,141 +612,114 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                       Formularz utworzył model sztucznej inteligencji. Może
                       zawierać błędy. Sprawdź go przed publikacją.
                     </InfoSection>
-                    {errors.length + warnings.length > 0 ? (
-                      <ul className="flex flex-col gap-2 text-sm">
-                        {[...errors, ...warnings].map((i) => (
-                          <li
-                            key={`${i.code}-${i.path}-${i.message}`}
-                            className={cn(
-                              "flex items-start gap-2",
-                              i.level === "error" && "text-destructive",
-                            )}
-                          >
-                            <TriangleAlert
-                              className={cn(
-                                "mt-0.5 size-4 shrink-0",
-                                i.level === "warning" && "text-warning",
-                              )}
-                              aria-hidden
-                            />
-                            <span>
-                              <span className="sr-only">
-                                {i.level === "error"
-                                  ? "Błąd: "
-                                  : "Ostrzeżenie: "}
-                              </span>
-                              {i.message}
-                              {i.path && (
-                                <span className="text-muted-foreground">
-                                  {" "}
-                                  ({i.path})
-                                </span>
-                              )}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="flex items-center gap-2 text-sm">
-                        <CircleCheck
-                          className="size-4 text-success"
-                          aria-hidden
-                        />
-                        JSON spełnia reguły techniczne.
-                      </p>
-                    )}
-                    {result.notes.length > 0 && (
-                      <InfoSection title="Uwagi">
-                        <ul className="list-disc pl-4">
-                          {result.notes.map((n) => (
-                            <li key={n}>{n}</li>
-                          ))}
-                        </ul>
-                      </InfoSection>
-                    )}
-                    {findings.length > 0 && <Findings findings={findings} />}
+                    <ResultChecks result={state.result} />
                     <div className="flex flex-wrap gap-3">
-                      {findings.length > 0 ? (
-                        <AlertDialog>
-                          <AlertDialogTrigger
-                            render={
-                              <Button>
-                                <Download
-                                  data-icon="inline-start"
-                                  aria-hidden
-                                />
-                                Pobierz JSON
-                              </Button>
-                            }
-                          />
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Formularz zawiera treść do sprawdzenia
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Znaleźliśmy miejsca do sprawdzenia:{" "}
-                                {findings.length}. Mogą pochodzić z dokumentu
-                                źródłowego, który próbuje wpłynąć na model AI.
-                                Sprawdź je przed publikacją formularza.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>
-                                Wróć i sprawdź
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() =>
-                                  file && download(result.form, file.name)
-                                }
-                              >
-                                Pobierz mimo to
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      ) : (
-                        <Button
-                          onClick={() =>
-                            file && download(result.form, file.name)
-                          }
-                        >
-                          <Download data-icon="inline-start" aria-hidden />
-                          Pobierz JSON
-                        </Button>
-                      )}
-                      <AlertDialog>
-                        <AlertDialogTrigger
-                          render={
-                            <Button variant="destructive">
-                              Przeanalizuj inny formularz
-                            </Button>
-                          }
-                        />
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Czy na pewno chcesz przeanalizować inny formularz?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Utworzony formularz i jego podgląd zostaną
-                              utracone. Jeśli chcesz go zachować, najpierw
-                              pobierz JSON.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Nie, wróć</AlertDialogCancel>
-                            <AlertDialogAction
-                              variant="destructive"
-                              onClick={reset}
-                            >
-                              Tak, przeanalizuj inny
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <DownloadButton
+                        findings={checks.findings.length}
+                        onDownload={() =>
+                          download(state.result.form, files[0].name)
+                        }
+                      />
+                      <ConfirmButton
+                        label="Przeanalizuj inny formularz"
+                        title="Czy na pewno chcesz przeanalizować inny formularz?"
+                        description="Utworzony formularz i jego podgląd zostaną utracone. Jeśli chcesz go zachować, najpierw pobierz JSON."
+                        cancel="Nie, wróć"
+                        confirm="Tak, przeanalizuj inny"
+                        onConfirm={reset}
+                      />
                     </div>
                   </FormSection>
+                </StepPanel>
+              )}
+
+              {state.step === "batch" && (
+                <StepPanel
+                  key={`partia-${run}`}
+                  label={stepLabel(step)}
+                  focus={moved.current}
+                >
+                  <FormSection
+                    title={
+                      batchRunning
+                        ? "Tworzymy formularze"
+                        : finished.length
+                          ? "Formularze są gotowe"
+                          : "Nie udało się utworzyć formularzy"
+                    }
+                    description={
+                      <output className="block">
+                        {batchSummary(items)}
+                        {batchRunning && <Elapsed seconds={elapsed} />}
+                      </output>
+                    }
+                  >
+                    {finished.length > 0 && (
+                      <InfoSection icon={<AiIcon className="mt-0.5" />}>
+                        Formularze utworzył model sztucznej inteligencji. Mogą
+                        zawierać błędy. Sprawdź każdy przed publikacją.
+                      </InfoSection>
+                    )}
+                    <BatchList
+                      items={items}
+                      urls={urls}
+                      selected={selected}
+                      onSelect={setSelected}
+                    />
+                  </FormSection>
+
+                  {result && selectedName && (
+                    <FormSection
+                      title={`Sprawdź formularz: ${result.form.title}`}
+                      description={
+                        <p>
+                          {selectedName} · {checksText(checks)}
+                        </p>
+                      }
+                    >
+                      <ResultChecks result={result} />
+                    </FormSection>
+                  )}
+
+                  <div className="flex flex-wrap justify-end gap-3">
+                    {batchRunning ? (
+                      <ConfirmButton
+                        label="Anuluj"
+                        title="Czy na pewno chcesz anulować?"
+                        description="Tworzenie formularzy, które jeszcze trwa lub czeka w kolejce, zostanie przerwane. Gotowe formularze zostaną zachowane."
+                        cancel="Nie, kontynuuj"
+                        confirm="Tak, anuluj"
+                        onConfirm={cancel}
+                      />
+                    ) : (
+                      <>
+                        {retry.length > 0 && (
+                          <Button
+                            variant="outline"
+                            onClick={() => runBatch(files, retry)}
+                          >
+                            Ponów nieudane ({retry.length})
+                          </Button>
+                        )}
+                        {finished.length > 1 && (
+                          <DownloadButton
+                            findings={findingsTotal}
+                            onDownload={downloadAll}
+                          >
+                            Pobierz wszystkie w ZIP ({finished.length})
+                          </DownloadButton>
+                        )}
+                        <ConfirmButton
+                          label="Przeanalizuj inne formularze"
+                          title="Czy na pewno chcesz przeanalizować inne formularze?"
+                          description="Utworzone formularze i ich podgląd zostaną utracone. Jeśli chcesz je zachować, najpierw pobierz pliki JSON."
+                          cancel="Nie, wróć"
+                          confirm="Tak, przeanalizuj inne"
+                          onConfirm={reset}
+                        />
+                      </>
+                    )}
+                  </div>
                 </StepPanel>
               )}
             </AnimatePresence>
@@ -776,42 +727,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
         </div>
 
         {result && (
-          <motion.div
-            key={`podglad-${run}`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className="flex flex-1 flex-col border-t"
-          >
-            <fieldset className="mx-auto flex w-full max-w-2xl gap-2 px-4 pt-8">
-              <legend className="sr-only">Widok wyniku</legend>
-              <Button
-                variant={view === "form" ? "default" : "outline"}
-                size="sm"
-                aria-pressed={view === "form"}
-                onClick={() => setView("form")}
-              >
-                Podgląd e-formularza
-              </Button>
-              <Button
-                variant={view === "json" ? "default" : "outline"}
-                size="sm"
-                aria-pressed={view === "json"}
-                onClick={() => setView("json")}
-              >
-                JSON
-              </Button>
-            </fieldset>
-            {view === "form" ? (
-              <ClauseContext.Provider value={clause}>
-                <CoiFormView key={run} form={result.form} />
-              </ClauseContext.Provider>
-            ) : (
-              <div className="mx-auto w-full max-w-2xl px-4 py-6">
-                <JsonView data={result.form} />
-              </div>
-            )}
-          </motion.div>
+          <ResultPreview key={`podglad-${run}-${selected}`} result={result} />
         )}
       </div>
     </MotionConfig>

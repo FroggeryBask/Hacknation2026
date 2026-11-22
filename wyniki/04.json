@@ -1,8 +1,8 @@
 {
-  "title": "Wniosek o wynajęcie/użyczenie świetlicy wiejskiej",
+  "title": "Wniosek o wynajęcie lub użyczenie świetlicy wiejskiej",
   "tabs": [
     {
-      "id": "13c4a4dc-0795-54ff-b274-b94d60fdc8f2",
+      "id": "dc47e8e3-c31d-5135-a5df-d2e95356e53a",
       "title": "Dane",
       "type": "MAIN",
       "questions": [
@@ -12,7 +12,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "6d269a43-cea8-51f1-9a9a-f70e13061101",
+            "id": "2ab4d44e-22cf-5b0e-9cda-7a5be2ed0db5",
             "type": "SECTION",
             "techName": "organ_do_ktorego_jest_skladany_wniosek",
             "title": "Organ, do którego jest składany wniosek",
@@ -27,7 +27,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "2c06d406-e19a-5f9f-baff-36f408904927",
+                  "id": "771bc72d-f858-563d-9bdc-43c4add4cd09",
                   "type": "TEXT_FIELD",
                   "techName": "nazwa_organu",
                   "title": "Nazwa organu",
@@ -38,7 +38,7 @@
                   ],
                   "readOnly": true,
                   "repeatingSectionGrid": [],
-                  "defaultValue": "Wójt Gminy Płoskinia",
+                  "defaultValue": "Urząd Gminy Płoskinia",
                   "states": [],
                   "questionOrder": 0,
                   "tooltipMessage": ""
@@ -53,64 +53,10 @@
         {
           "x": 0,
           "y": 2,
-          "rows": 2,
+          "rows": 3,
           "cols": 3,
           "field": {
-            "id": "c8b2abc0-fb7b-589e-a73f-feba1a7a3269",
-            "type": "SECTION",
-            "techName": "podmiot_wniosku",
-            "title": "Podmiot wniosku",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "5e992408-5697-5d3c-8605-986f63870c9c",
-                  "type": "RADIO",
-                  "techName": "wybierz_w_czyim_imieniu_wnioskujesz",
-                  "title": "Wybierz, w czyim imieniu wnioskujesz",
-                  "description": "",
-                  "options": [
-                    {
-                      "id": "Swoim",
-                      "name": "Swoim",
-                      "techName": "swoim"
-                    },
-                    {
-                      "id": "Innej osoby",
-                      "name": "Innej osoby",
-                      "techName": "innej_osoby"
-                    }
-                  ],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [],
-            "questionOrder": 1,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 4,
-          "rows": 4,
-          "cols": 3,
-          "field": {
-            "id": "3978f88e-ac1e-561c-b44c-a1a7852947d6",
+            "id": "0d831ee7-fa6a-57ab-b5c2-cdbb4579c103",
             "type": "SECTION",
             "techName": "twoje_dane",
             "title": "Twoje dane",
@@ -125,7 +71,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "90f71c22-43e5-5575-b1f1-4d8dd237c965",
+                  "id": "7bb772d3-c58a-5e77-abdd-53234d20a1e4",
                   "type": "TEXT_FIELD",
                   "techName": "imie",
                   "title": "Imię",
@@ -149,7 +95,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3650c15d-c3f8-577c-8d69-fbf8997c3daf",
+                  "id": "7b4e081b-ff3e-53e5-bdf8-48ff717b119a",
                   "type": "TEXT_FIELD",
                   "techName": "nazwisko",
                   "title": "Nazwisko",
@@ -166,45 +112,20 @@
                   "questionOrder": 1,
                   "tooltipMessage": ""
                 }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "651badd7-5497-522b-96df-ac2771ec5f6f",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_pesel",
-                  "title": "Numer PESEL",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED",
-                    "PESEL"
-                  ],
-                  "readOnly": true,
-                  "repeatingSectionGrid": [],
-                  "defaultValue": "MLPZ.pesel",
-                  "defaultValueType": "EXTERNAL_SYSTEM",
-                  "states": [],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
               }
             ],
             "states": [],
-            "questionOrder": 2,
+            "questionOrder": 1,
             "tooltipMessage": ""
           }
         },
         {
           "x": 0,
-          "y": 8,
+          "y": 5,
           "rows": 10,
           "cols": 3,
           "field": {
-            "id": "692268c6-b767-51d6-ae6c-75ba421ce52b",
+            "id": "82470ed1-0a38-5b7c-826e-20eaa1a84332",
             "type": "SECTION",
             "techName": "adres_zamieszkania",
             "title": "Adres zamieszkania",
@@ -219,7 +140,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "3e9885bb-db2e-5466-a639-8e0a458f7d83",
+                  "id": "1f022862-fba4-54ee-adab-df15b5b796a4",
                   "type": "SELECT",
                   "techName": "kraj",
                   "title": "Kraj",
@@ -246,7 +167,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "25aff298-77e0-527b-ad5c-a758aad0564e",
+                  "id": "d639b2dc-03c6-5db5-a425-561b4231cb1f",
                   "type": "TEXT_FIELD",
                   "techName": "miejscowosc_zagranica",
                   "title": "Miejscowość",
@@ -273,7 +194,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "4949c802-6935-5e34-a481-7e0c6863afe1",
+                  "id": "0ed8005f-43ad-592f-8979-75dafba8ed74",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy_zagranica",
                   "title": "Kod pocztowy",
@@ -300,7 +221,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "c44d5af7-47ca-5393-a556-c82a6a8a2c30",
+                  "id": "5cd0730c-85dc-54d0-bcb3-3c396760be89",
                   "type": "TEXT_FIELD",
                   "techName": "ulica_zagranica",
                   "title": "Ulica",
@@ -327,7 +248,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "dd68b993-0e20-53ee-9f90-9df88a3695ee",
+                  "id": "6a8ff6c1-8917-5dc8-9e7c-e4d2c544dba9",
                   "type": "SELECT",
                   "techName": "wojewodztwo",
                   "title": "Województwo, powiat, gmina i miejscowość",
@@ -358,7 +279,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "1e79d9ce-a2e4-5bb9-8a72-991dd16ac5f7",
+                  "id": "9d634a8a-8244-5147-8091-1ba1fa38cc0a",
                   "type": "TEXT_FIELD",
                   "techName": "kod_pocztowy",
                   "title": "Kod pocztowy",
@@ -388,7 +309,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "83bd4b93-b714-5377-bb07-f3ce4d61135a",
+                  "id": "40b86871-2d2f-52fc-bfa4-f4570aeea2a6",
                   "type": "TEXT_FIELD",
                   "techName": "ulica",
                   "title": "Ulica",
@@ -417,7 +338,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "ba72ff57-9645-5a95-b9b0-c97813793924",
+                  "id": "99bbadf1-c1cb-553f-b58f-ca3c76b5df89",
                   "type": "TEXT_FIELD",
                   "techName": "numer_budynku",
                   "title": "Numer budynku",
@@ -441,7 +362,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e660ee7e-6d7f-56fd-a631-1cb714b3b7c8",
+                  "id": "f54ff7e9-98e3-5a22-b3c8-c500deda1787",
                   "type": "TEXT_FIELD",
                   "techName": "numer_lokalu",
                   "title": "Numer lokalu",
@@ -459,529 +380,15 @@
               }
             ],
             "states": [],
-            "questionOrder": 3,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 18,
-          "rows": 4,
-          "cols": 3,
-          "field": {
-            "id": "11bebda6-8a3f-53da-b1d4-6953de9c787f",
-            "type": "SECTION",
-            "techName": "dane_innej_osoby",
-            "title": "Dane innej osoby",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "30c8dff8-6042-5f4a-8497-0af7a75e0aef",
-                  "type": "TEXT_FIELD",
-                  "techName": "imie_inna_osoba",
-                  "title": "Imię",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "be4c44ef-76a5-50d4-ae26-03ce7362cca2",
-                  "type": "TEXT_FIELD",
-                  "techName": "nazwisko_inna_osoba",
-                  "title": "Nazwisko",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 1,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "1ff7aceb-5d71-5e29-b150-766518a69802",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_pesel_inna_osoba",
-                  "title": "Numer PESEL",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED",
-                    "PESEL"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [
-              {
-                "type": "SHOW",
-                "query": "(\"Innej osoby\" in tabs['Dane' in title].questions['podmiot_wniosku' in field.techName].field.repeatingSectionGrid['wybierz_w_czyim_imieniu_wnioskujesz' in field.techName].field.__userAnswer)"
-              }
-            ],
-            "questionOrder": 4,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 22,
-          "rows": 10,
-          "cols": 3,
-          "field": {
-            "id": "614c1ca9-7c59-5544-9f63-3bc6df794fb3",
-            "type": "SECTION",
-            "techName": "adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem",
-            "title": "Adres zamieszkania innej osoby",
-            "description": "<html><head></head><body></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "25aaaaa0-e93c-5bbf-a566-90b93f14af71",
-                  "type": "SELECT",
-                  "techName": "kraj_inna_osoba",
-                  "title": "Kraj",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "dictionaryName": "Kraje",
-                  "defaultValue": [
-                    "Polska"
-                  ],
-                  "searchEnabled": true,
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "98c0e1d8-4167-51b6-8054-70fcd425b83b",
-                  "type": "TEXT_FIELD",
-                  "techName": "miejscowosc_inna_osoba_zagranica",
-                  "title": "Miejscowość",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "$not(\"Polska\" in tabs['Dane' in title].questions['adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem' in field.techName].field.repeatingSectionGrid['kraj_inna_osoba' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 1,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "a0177117-26f0-57ea-af6b-267ca7157646",
-                  "type": "TEXT_FIELD",
-                  "techName": "kod_pocztowy_inna_osoba_zagranica",
-                  "title": "Kod pocztowy",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "$not(\"Polska\" in tabs['Dane' in title].questions['adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem' in field.techName].field.repeatingSectionGrid['kraj_inna_osoba' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 3,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "57b09c79-9cc3-5b98-8be8-84ea78a5110c",
-                  "type": "TEXT_FIELD",
-                  "techName": "ulica_inna_osoba_zagranica",
-                  "title": "Ulica",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "$not(\"Polska\" in tabs['Dane' in title].questions['adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem' in field.techName].field.repeatingSectionGrid['kraj_inna_osoba' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 3,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 4,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "99858dc5-c7e0-588b-ba75-f1acde6f138a",
-                  "type": "SELECT",
-                  "techName": "wojewodztwo_inna_osoba",
-                  "title": "Województwo, powiat, gmina i miejscowość",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "dictionaryName": "TERYT_4G_DOWODOWY",
-                  "defaultValue": [],
-                  "searchEnabled": true,
-                  "multiLevelTree": true,
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "(\"Polska\" in tabs['Dane' in title].questions['adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem' in field.techName].field.repeatingSectionGrid['kraj_inna_osoba' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 4,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 5,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "2b660cc2-b9c0-5819-a1e8-2ab98d8759a8",
-                  "type": "TEXT_FIELD",
-                  "techName": "kod_pocztowy_inna_osoba",
-                  "title": "Kod pocztowy",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED",
-                    "ZIP_CODE"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "(\"Polska\" in tabs['Dane' in title].questions['adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem' in field.techName].field.repeatingSectionGrid['kraj_inna_osoba' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 5,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 6,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "0b36d5c2-8243-5dde-8f16-147584756d76",
-                  "type": "TEXT_FIELD",
-                  "techName": "ulica_inna_osoba",
-                  "title": "Ulica",
-                  "description": "<html><head></head><body><p>Np. Polna, Aleja Leśna, Plac Lipowy, Skwer Słoneczny</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "(\"Polska\" in tabs['Dane' in title].questions['adres_zamieszkania_osoby_ktorej_jestes_pelnomocnikiem' in field.techName].field.repeatingSectionGrid['kraj_inna_osoba' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 6,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 7,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "1ad10b4d-c9eb-5a78-af7b-f4537ea90c06",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_budynku_inna_osoba",
-                  "title": "Numer budynku",
-                  "description": "",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 7,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 8,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "92e68ef3-a417-5fc8-89a8-3ef81b9a51a3",
-                  "type": "TEXT_FIELD",
-                  "techName": "numer_lokalu_inna_osoba",
-                  "title": "Numer lokalu",
-                  "description": "",
-                  "options": [],
-                  "validation": [],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 8,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [
-              {
-                "type": "SHOW",
-                "query": "(\"Innej osoby\" in tabs['Dane' in title].questions['podmiot_wniosku' in field.techName].field.repeatingSectionGrid['wybierz_w_czyim_imieniu_wnioskujesz' in field.techName].field.__userAnswer)"
-              }
-            ],
-            "questionOrder": 5,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 32,
-          "rows": 2,
-          "cols": 3,
-          "field": {
-            "id": "a40fe286-2008-58c3-ae61-500aa4d1f831",
-            "type": "SECTION",
-            "techName": "pelnomocnictwo",
-            "title": "Pełnomocnictwo",
-            "description": "<html><head></head><body><p>Dodaj dokument potwierdzający, że jesteś pełnomocnikiem.</p></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "6ea5cb74-009b-52f3-be2b-7b9f87469046",
-                  "type": "FILE_UPLOADER",
-                  "techName": "plik_dokumentu_z_pelnomocnictwem",
-                  "title": "Plik dokumentu z pełnomocnictwem",
-                  "description": "<html><head></head><body><p>Dopuszczalne formaty: jpg, pdf, xml, PAdES, png, jpeg, CAdES, XAdES. Maksymalny rozmiar pliku: 10 MB. Maksymalna liczba plików: 1.</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [
-              {
-                "type": "SHOW",
-                "query": "(\"Innej osoby\" in tabs['Dane' in title].questions['podmiot_wniosku' in field.techName].field.repeatingSectionGrid['wybierz_w_czyim_imieniu_wnioskujesz' in field.techName].field.__userAnswer)"
-              }
-            ],
-            "questionOrder": 6,
-            "tooltipMessage": ""
-          }
-        },
-        {
-          "x": 0,
-          "y": 34,
-          "rows": 4,
-          "cols": 3,
-          "field": {
-            "id": "845d169f-2811-534f-ac07-d235259cb020",
-            "type": "SECTION",
-            "techName": "oplata_skarbowa_pelnomocnictwo_1",
-            "title": "Opłata skarbowa",
-            "description": "<html><head></head><body><p>Nie musisz płacić za złożenie pełnomocnictwa wystawionego przez najbliższą rodzinę: małżonka, dzieci, rodziców, dziadków, wnuków, rodzeństwo. Więcej informacji na stronie biznes.gov.pl</p></body></html>",
-            "options": [],
-            "validation": [],
-            "readOnly": false,
-            "repeatingSectionGrid": [
-              {
-                "x": 0,
-                "y": 0,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "7989f893-aee8-5210-854c-561b1dc604ca",
-                  "type": "RADIO",
-                  "techName": "czy_zlozenie_pelnomocnictwa_wymaga_oplaty_skarbowej",
-                  "title": "Czy złożenie pełnomocnictwa wymaga opłaty skarbowej?",
-                  "description": "",
-                  "options": [
-                    {
-                      "id": "Tak",
-                      "name": "Tak",
-                      "techName": "tak"
-                    },
-                    {
-                      "id": "Nie",
-                      "name": "Nie",
-                      "techName": "nie"
-                    }
-                  ],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "a638e933-8cd5-50b6-bbfa-f48ac832ef4d",
-                  "type": "TEXT_BLOCK",
-                  "techName": "oplata_info_1",
-                  "title": "",
-                  "description": "<html><head></head><body><p>Opłata skarbowa wynosi 17 zł.</p><p>Przelej ją na konto urzędu miasta lub gminy właściwego dla adresu zamieszkania osoby, która udzieliła pełnomocnictwa. Jeśli adres nie jest w Polsce, opłatę przelej na konto Urzędu Miasta Stołecznego Warszawy – Centrum Obsługi Podatnika.</p><p>W tytule przelewu wpisz „Wniosek o wynajęcie/użyczenie świetlicy wiejskiej – opłata skarbowa za pełnomocnictwo”.</p><p>Dodaj plik z potwierdzeniem przelewu. Znajdziesz go na stronie lub w aplikacji swojego banku.</p></body></html>",
-                  "options": [],
-                  "validation": [],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "(\"Tak\" in tabs['Dane' in title].questions['oplata_skarbowa_pelnomocnictwo_1' in field.techName].field.repeatingSectionGrid['czy_zlozenie_pelnomocnictwa_wymaga_oplaty_skarbowej' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 1,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 2,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "c6ea095b-6d11-5c6a-af75-1a3f4e44f5d6",
-                  "type": "FILE_UPLOADER",
-                  "techName": "plik_z_potwierdzeniem_przelewu",
-                  "title": "Plik z potwierdzeniem przelewu",
-                  "description": "<html><head></head><body><p>Dopuszczalny format: pdf. Maksymalny rozmiar pliku: 10 MB. Maksymalna liczba plików: 1.</p></body></html>",
-                  "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [
-                    {
-                      "type": "SHOW",
-                      "query": "(\"Tak\" in tabs['Dane' in title].questions['oplata_skarbowa_pelnomocnictwo_1' in field.techName].field.repeatingSectionGrid['czy_zlozenie_pelnomocnictwa_wymaga_oplaty_skarbowej' in field.techName].field.__userAnswer)"
-                    }
-                  ],
-                  "questionOrder": 2,
-                  "tooltipMessage": ""
-                }
-              }
-            ],
-            "states": [
-              {
-                "type": "SHOW",
-                "query": "(\"Innej osoby\" in tabs['Dane' in title].questions['podmiot_wniosku' in field.techName].field.repeatingSectionGrid['wybierz_w_czyim_imieniu_wnioskujesz' in field.techName].field.__userAnswer)"
-              }
-            ],
-            "questionOrder": 7,
+            "questionOrder": 2,
             "tooltipMessage": ""
           }
         }
       ]
     },
     {
-      "id": "92c93b7e-ae65-543d-81e4-6739aa93cfd3",
-      "title": "Informacje o wynajęciu świetlicy",
+      "id": "96ff3f80-bf05-5e43-8cd6-eba948a30204",
+      "title": "Informacje o wynajmie świetlicy",
       "type": "MAIN",
       "questions": [
         {
@@ -990,10 +397,10 @@
           "rows": 7,
           "cols": 3,
           "field": {
-            "id": "ed230647-43f2-5a8e-9da8-8f11949e17e8",
+            "id": "282f3532-9d50-5c99-9936-4920bcbf82f6",
             "type": "SECTION",
-            "techName": "informacje_o_wynajeciu",
-            "title": "Informacje o wynajęciu",
+            "techName": "swietlica_i_termin",
+            "title": "Świetlica i termin",
             "description": "<html><head></head><body></body></html>",
             "options": [],
             "validation": [],
@@ -1005,12 +412,23 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a033db6b-1b6c-50bc-9fe8-96b903b774bd",
-                  "type": "TEXT_FIELD",
-                  "techName": "lokalizacja_swietlicy",
-                  "title": "Lokalizacja świetlicy",
+                  "id": "0cd2ca04-be85-5198-a5e3-79144654e5de",
+                  "type": "RADIO",
+                  "techName": "rodzaj_umowy",
+                  "title": "Rodzaj umowy",
                   "description": "",
-                  "options": [],
+                  "options": [
+                    {
+                      "id": "Wynajem",
+                      "name": "Wynajem",
+                      "techName": "wynajem"
+                    },
+                    {
+                      "id": "Użyczenie",
+                      "name": "Użyczenie",
+                      "techName": "uzyczenie"
+                    }
+                  ],
                   "validation": [
                     "REQUIRED"
                   ],
@@ -1027,10 +445,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "02697c39-4fa0-57fd-8530-1f65d8f93f7f",
-                  "type": "DATEPICKER",
-                  "techName": "okres_wynajecia_od",
-                  "title": "Okres wynajęcia od",
+                  "id": "a1028175-c5e6-5790-acb8-80b99e57d32f",
+                  "type": "TEXT_FIELD",
+                  "techName": "swietlica_wiejska",
+                  "title": "Świetlica wiejska",
                   "description": "",
                   "options": [],
                   "validation": [
@@ -1049,10 +467,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "1cc1161a-c5c1-5bb2-bcb4-a2062a76957d",
+                  "id": "4dc0d6bf-765a-5930-922f-10565f336a0b",
                   "type": "DATEPICKER",
-                  "techName": "okres_wynajecia_do",
-                  "title": "Okres wynajęcia do",
+                  "techName": "okres_korzystania_ze_swietlicy_od",
+                  "title": "Okres korzystania ze świetlicy – od",
                   "description": "",
                   "options": [],
                   "validation": [
@@ -1071,15 +489,13 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "500a8d04-594b-5ced-a06f-6f3e919258cc",
-                  "type": "TEXTAREA",
-                  "techName": "cel_wynajecia",
-                  "title": "Cel wynajęcia",
+                  "id": "b52c2fd2-da3b-5bd5-9a83-5ebba6baa6bd",
+                  "type": "DATEPICKER",
+                  "techName": "okres_korzystania_ze_swietlicy_do",
+                  "title": "Okres korzystania ze świetlicy – do",
                   "description": "",
                   "options": [],
-                  "validation": [
-                    "REQUIRED"
-                  ],
+                  "validation": [],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -1093,13 +509,15 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "fd6a24f8-e0d0-52bf-a067-aa11137218b8",
+                  "id": "215bc010-d29b-50a4-876c-95502ef196e1",
                   "type": "TEXT_FIELD",
-                  "techName": "rodzaj_uroczystosci",
-                  "title": "Rodzaj uroczystości",
-                  "description": "",
+                  "techName": "cel_wynajecia_swietlicy",
+                  "title": "Cel wynajęcia świetlicy",
+                  "description": "<html><head></head><body><p>Rodzaj uroczystości, np. wesele, urodziny, zabawa</p></body></html>",
                   "options": [],
-                  "validation": [],
+                  "validation": [
+                    "REQUIRED"
+                  ],
                   "readOnly": false,
                   "repeatingSectionGrid": [],
                   "states": [],
@@ -1113,10 +531,10 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "81b6f19f-2219-55de-9df0-ea6c2a4315a5",
+                  "id": "3ddac8c0-3f65-5b9e-83ea-e30432b53a86",
                   "type": "NUMBER",
-                  "techName": "przewidywana_ilosc_uczestnikow",
-                  "title": "Przewidywana ilość uczestników",
+                  "techName": "przewidywana_liczba_uczestnikow",
+                  "title": "Przewidywana liczba uczestników",
                   "description": "",
                   "options": [],
                   "validation": [
@@ -1138,10 +556,10 @@
         {
           "x": 0,
           "y": 7,
-          "rows": 3,
+          "rows": 2,
           "cols": 3,
           "field": {
-            "id": "e416d527-357c-5231-af47-54e2f499f66f",
+            "id": "2d3fa36f-166a-54c7-92bb-a32652da3635",
             "type": "SECTION",
             "techName": "osoba_odpowiedzialna",
             "title": "Osoba odpowiedzialna",
@@ -1156,11 +574,11 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "47d1a2bc-068f-50e4-a447-9e6492e5ab9c",
+                  "id": "8209993b-dcba-5882-803c-02d28d4ee947",
                   "type": "TEXT_FIELD",
-                  "techName": "imie_i_nazwisko_osoby_odpowiedzialnej",
-                  "title": "Imię i nazwisko osoby odpowiedzialnej",
-                  "description": "",
+                  "techName": "imie_i_nazwisko_osoby_odpowiedzialnej_za_utrzymanie_porzadku",
+                  "title": "Imię i nazwisko osoby odpowiedzialnej za utrzymanie porządku i bezpieczeństwa",
+                  "description": "<html><head></head><body><p>Osoba pełnoletnia. Jeśli to nie wnioskodawca, dołącz zgodę tej osoby</p></body></html>",
                   "options": [],
                   "validation": [
                     "REQUIRED"
@@ -1169,37 +587,6 @@
                   "repeatingSectionGrid": [],
                   "states": [],
                   "questionOrder": 0,
-                  "tooltipMessage": ""
-                }
-              },
-              {
-                "x": 0,
-                "y": 1,
-                "rows": 1,
-                "cols": 3,
-                "field": {
-                  "id": "ba16d4df-8e5c-5eaf-ae2f-7897e8b3abbf",
-                  "type": "RADIO",
-                  "techName": "zgoda_osoby_odpowiedzialnej",
-                  "title": "Zgoda osoby odpowiedzialnej",
-                  "description": "",
-                  "options": [
-                    {
-                      "id": "Tak",
-                      "name": "Tak",
-                      "techName": "tak"
-                    },
-                    {
-                      "id": "Nie",
-                      "name": "Nie",
-                      "techName": "nie"
-                    }
-                  ],
-                  "validation": [],
-                  "readOnly": false,
-                  "repeatingSectionGrid": [],
-                  "states": [],
-                  "questionOrder": 1,
                   "tooltipMessage": ""
                 }
               }
@@ -1212,7 +599,7 @@
       ]
     },
     {
-      "id": "4f993c52-d22b-58ee-b866-f2c294820899",
+      "id": "2adb79c4-5e47-5608-9f26-21761cda5f7c",
       "title": "Kontakt i zgody",
       "type": "MAIN",
       "questions": [
@@ -1222,7 +609,7 @@
           "rows": 3,
           "cols": 3,
           "field": {
-            "id": "c15a32ac-1736-5fc0-8b56-e5e60ca479c2",
+            "id": "8d799b10-81c5-5797-b8b1-afbffd0ec325",
             "type": "SECTION",
             "techName": "dane_do_kontaktu",
             "title": "Dane do kontaktu",
@@ -1237,7 +624,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "a648c886-b2be-5d90-96b4-e35c2cd73a48",
+                  "id": "cef96fb2-3ff5-5275-9e17-663b79734185",
                   "type": "TEXT_FIELD",
                   "techName": "numer_telefonu",
                   "title": "Numer telefonu",
@@ -1259,7 +646,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "e5417709-a220-5c7c-9109-d79fcd30b72f",
+                  "id": "db761c9d-278e-52d3-a227-8f53ebc719dc",
                   "type": "TEXT_FIELD",
                   "techName": "adres_e_mail",
                   "title": "Adres e-mail",
@@ -1289,7 +676,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "49d7887a-1c67-5e0b-99ad-59875d3b7654",
+            "id": "8bcd3057-1edd-5f94-94a2-125de86ead1f",
             "type": "SECTION",
             "techName": "zgoda_wyrazenie",
             "title": "Zgody i oświadczenia",
@@ -1304,7 +691,7 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "52cf1055-9794-5f07-b750-7058a1fbb974",
+                  "id": "61c24d4c-3f8b-5c77-b9aa-1d222adb60d5",
                   "type": "CONSENT_SECTION",
                   "techName": "zgoda",
                   "title": "",
@@ -1319,15 +706,15 @@
                   "consentSectionConfig": {
                     "consents": [
                       {
-                        "description": "<html><head></head><body><p>Zapoznałem/am się z warunkami wynajmu świetlicy wiejskiej</p></body></html>",
+                        "description": "<html><head></head><body><p>Znam warunki wynajmu świetlicy wiejskiej</p></body></html>",
                         "required": true
                       },
                       {
-                        "description": "<html><head></head><body><p>W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym do świetlicy</p></body></html>",
+                        "description": "<html><head></head><body><p>W czasie najmu odpowiadam za ład i porządek w świetlicy oraz na terenie przyległym</p></body></html>",
                         "required": true
                       },
                       {
-                        "description": "<html><head></head><body><p>Zachowuję się zgodnie z przepisami sanitarnymi, BHP i p.poż. w czasie trwania przedsięwzięcia</p></body></html>",
+                        "description": "<html><head></head><body><p>Zobowiązuję się do przestrzegania przepisów sanitarnych, BHP i przeciwpożarowych</p></body></html>",
                         "required": true
                       },
                       {
@@ -1355,7 +742,7 @@
       ]
     },
     {
-      "id": "6a4694cd-010f-51be-a305-e5bcffc56426",
+      "id": "5b38a4d7-49ff-5910-9ffe-b5edac6dedb8",
       "title": "Strona końcowa",
       "type": "FINISH",
       "questions": [
@@ -1365,7 +752,7 @@
           "rows": 2,
           "cols": 3,
           "field": {
-            "id": "a7db72af-57c6-566a-93e7-0081280729e8",
+            "id": "bd6d912e-a1a7-58a0-8de6-6a335439dab0",
             "type": "SECTION",
             "techName": "podglad_uzupelnionego_wniosku",
             "title": "Podgląd uzupełnionego wniosku",
@@ -1380,9 +767,9 @@
                 "rows": 1,
                 "cols": 3,
                 "field": {
-                  "id": "2c3c98ed-4553-54cb-86c7-50d4a81e7abf",
-                  "type": "INFO_SECTION",
-                  "techName": "podglad",
+                  "id": "70881b64-6ef6-5364-a1d4-f6c8169e3276",
+                  "type": "TEXT_BLOCK",
+                  "techName": "podglad_1",
                   "title": "",
                   "description": "<html><head></head><body><p>Zanim przejdziesz do wyboru sposobu podpisu, sprawdź dane na podglądzie. Jeśli zobaczysz błędy, wróć do edycji.</p></body></html>",
                   "options": [],
@@ -1406,19 +793,19 @@
   "flow": {
     "links": [
       {
-        "id": "0bf7b312",
-        "source": "13c4a4dc-0795-54ff-b274-b94d60fdc8f2",
-        "target": "92c93b7e-ae65-543d-81e4-6739aa93cfd3"
+        "id": "047719e9",
+        "source": "dc47e8e3-c31d-5135-a5df-d2e95356e53a",
+        "target": "96ff3f80-bf05-5e43-8cd6-eba948a30204"
       },
       {
-        "id": "c8d81b29",
-        "source": "92c93b7e-ae65-543d-81e4-6739aa93cfd3",
-        "target": "4f993c52-d22b-58ee-b866-f2c294820899"
+        "id": "86c401cf",
+        "source": "96ff3f80-bf05-5e43-8cd6-eba948a30204",
+        "target": "2adb79c4-5e47-5608-9f26-21761cda5f7c"
       },
       {
-        "id": "a5d398cc",
-        "source": "4f993c52-d22b-58ee-b866-f2c294820899",
-        "target": "6a4694cd-010f-51be-a305-e5bcffc56426"
+        "id": "966ae758",
+        "source": "2adb79c4-5e47-5608-9f26-21761cda5f7c",
+        "target": "5b38a4d7-49ff-5910-9ffe-b5edac6dedb8"
       }
     ]
   }

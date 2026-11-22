@@ -198,3 +198,14 @@ def test_cancelled_job_stops_at_next_step(client, monkeypatch):
     assert view["status"] == "cancelled"
     assert "after cancel" not in [s["text"] for s in view["steps"]]
     assert jobs.get(job_id) is not None
+
+
+def test_file_name_limit_is_250_characters_end_to_end(client):
+    """Task: the name may have at most 250 characters (counted as characters, so Polish letters count once)."""
+    path = material("5. */*nadpłaty podatku.docx")
+    data = path.read_bytes()
+    ok = "ś" * 245 + ".docx"  # 250 characters, 495 bytes in UTF-8
+    r = client.post("/api/v1/forms", headers=auth(), files={"file": (ok, data)})
+    assert r.status_code == 200, r.text
+    r = client.post("/api/v1/forms", headers=auth(), files={"file": ("ś" + ok, data)})
+    assert r.status_code == 422 and r.json()["error"]["code"] == "FILENAME_TOO_LONG"

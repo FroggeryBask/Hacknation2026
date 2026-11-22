@@ -38,7 +38,7 @@ Zapisz `.env` jako UTF-8 bez BOM (domyślnie tak robią VS Code i Notatnik w Win
 
 ### 2a. Eden AI (domyślnie)
 
-Model open-weight w chmurze organizatorów (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
+Model open-weight w chmurze organizatorów (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
 
 ```bash
 docker compose up --build
@@ -63,7 +63,7 @@ Na Windows (PowerShell) ustaw w `.env` `AUTOFORMULARZ_LLM_PROVIDER=ollama`, pote
 ### 3. Adresy i zatrzymanie
 
 - API: http://localhost:8000 (dokumentacja OpenAPI: http://localhost:8000/docs)
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:3000 (upload jednego albo wielu plików naraz, do 20; każdy plik to osobne zadanie `/api/v1/jobs`, po 2 jednocześnie; podgląd e-formularza i JSON-u, pobieranie pojedynczo albo wszystkich)
 - Zatrzymanie: `docker compose down` (z `--profile ollama`, jeśli startowało z Ollamą). `docker compose down -v` usuwa też pobrany model.
 
 ### Wymagania sprzętowe i czasy
@@ -119,11 +119,83 @@ docker run --rm -p 8000:8000 --add-host=host.docker.internal:host-gateway \
 | kontener `ollama` kończy się bez błędu, model się nie ładuje | za mało pamięci dla Dockera, patrz wyżej |
 | `additional privileges requested: pass "--allow=fs.read=Dockerfile.web"` | Compose 5 buduje przez bake i na Windows w Git Bash źle porównuje ścieżki (`/c/...` vs `C:\...`); uruchom polecenie w PowerShellu albo cmd |
 | `autoformularz-token`: „Zasady kontroli aplikacji” (Windows) | Smart App Control blokuje plik `.exe` utworzony przez uv; token z kontenera: `docker compose exec api autoformularz-token` |
+| `LLM_UNAVAILABLE` „Model językowy jest niedostępny (Eden AI)”, w logu `No address associated with hostname` | DNS sieci lokalnej źle odpowiada na zapytanie IPv6 o `api.edenai.run` (Docker Desktop). API pyta najpierw o IPv4 i ponawia połączenie (1, 2, 4, 8 s), więc nie powinno się już zdarzać; jeśli się zdarzy, zmień DNS karty sieciowej (np. na DNS operatora) i uruchom ponownie Docker Desktop |
 | port 8000 lub 3000 zajęty | zatrzymaj lokalne `uvicorn` / `npm run dev` albo zmień port w `docker-compose.yml` |
 
 ## Licencje
 
-Kod projektu: MIT. Wszystkie zależności są open source i nie wymagają udostępnienia naszego kodu: biblioteki MIT, BSD, Apache-2.0, ISC; model Qwen3-VL i Tesseract na Apache-2.0; Ollama na MIT. LibreOffice (MPL-2.0) działa jako osobny proces tylko do konwersji .doc, bez linkowania i bez zmian. Pełna tabela i uzasadnienie: [docs/architektura.md, „Licencje”](docs/architektura.md#7-licencje).
+Kod projektu: **MIT**. Zadanie wymaga bibliotek open source bez copyleftu (np. AGPL, GNU GPL) i bez płatnych licencji.
+Licencje sprawdzone 2026-11-22 na zainstalowanych pakietach: Python z `importlib.metadata` (tylko zależności
+uruchomieniowe, `uv export --no-dev`), JavaScript z `package-lock.json` i z tego, co faktycznie trafia do obrazu
+`web` (`.next/standalone`). Nic nie wymaga udostępnienia naszego kodu i nic nie wymaga zakupu licencji.
+
+### API (obraz `autoformularz-api`)
+
+| Biblioteka | Wersja | Licencja | Do czego |
+|---|---|---|---|
+| fastapi | 0.165.0 | MIT | REST API |
+| starlette | 1.10.0 | BSD-3-Clause | REST API (pod FastAPI) |
+| uvicorn, click, h11 | 0.54.0, 8.5.1, 0.16.0 | BSD-3-Clause, BSD-3-Clause, MIT | serwer HTTP |
+| python-multipart | 0.0.34 | Apache-2.0 | odbiór pliku |
+| pydantic, pydantic-core, pydantic-settings | 2.14.4, 2.50.5, 2.16.3 | MIT | modele danych, konfiguracja |
+| annotated-types, annotated-doc, typing-inspection | 0.8.0, 0.0.7, 0.4.5 | MIT | pomocnicze Pydantic/FastAPI |
+| typing-extensions | 4.16.0 | PSF-2.0 | pomocnicze typowanie |
+| python-dotenv | 1.2.4 | BSD-3-Clause | pliki `.env` |
+| pyjwt | 2.15.1 | MIT | tokeny JWT |
+| httpx, httpcore, anyio, idna | 0.28.1, 1.0.9, 4.16.0, 3.20 | BSD-3-Clause, BSD-3-Clause, MIT, BSD-3-Clause | wywołania modelu |
+| certifi | 2026.11.20 | MPL-2.0 | lista certyfikatów dla httpx, bez zmian (niżej) |
+| opentelemetry-api | 1.45.2 | Apache-2.0 | zależność pośrednia, bez użycia w kodzie |
+| python-docx, lxml | 1.2.0, 6.1.3 | MIT, BSD-3-Clause | odczyt DOCX i ODS (XML) |
+| openpyxl, et-xmlfile | 3.1.5, 2.0.0 | MIT | odczyt XLSX |
+| pypdf | 7.1.1 | BSD-3-Clause | tekst z PDF |
+| pypdfium2 (z PDFium) | 5.15.2 | BSD-3-Clause / Apache-2.0 | strony skanów PDF jako obrazy (zamiast PyMuPDF na AGPL) |
+| pillow | 13.0.0 | MIT-CMU (HPND) | zmniejszanie obrazów |
+| Tesseract 5 + `pol` (Debian `tesseract-ocr`, `tesseract-ocr-pol`) | 5.x | Apache-2.0 | OCR skanów, osobny proces |
+| LibreOffice (Debian `libreoffice-writer-nogui`) | 25.2 | MPL-2.0 | tylko binarny `.doc`, osobny proces `soffice --headless` (niżej) |
+| obraz bazowy `python:3.14.10-slim-trixie` | 3.14.10 | PSF-2.0 (Python) + pakiety Debiana | system w kontenerze |
+
+### Frontend (obraz `autoformularz-web`)
+
+| Biblioteka | Wersja | Licencja |
+|---|---|---|
+| next, @next/env, styled-jsx, client-only | 16.4.6, 16.4.6, 5.1.6, 0.0.1 | MIT |
+| react, react-dom, scheduler | 19.3.0, 19.3.0, 0.28.0 | MIT |
+| @swc/helpers | 0.5.23 | Apache-2.0 |
+| jsonata (warunki `states` w podglądzie) | 2.2.2 | MIT |
+| motion, @base-ui/react, shadcn, tw-animate-css, cn, server-only | 14.14.0, 1.9.0, 4.23.0, 1.4.0, 0.5.2, 0.0.1 | MIT |
+| lucide-react | 1.77.0 | ISC |
+| class-variance-authority | 0.7.1 | Apache-2.0 |
+| obraz bazowy `node:22.23.5-alpine3.24` | 22.23.5 | MIT (Node.js) + pakiety Alpine |
+
+Wszystkie pakiety produkcyjne z `package-lock.json` (293): MIT 226, Apache-2.0 20, ISC 17, BSD-3-Clause 6,
+BSD-2-Clause 4, BlueOak-1.0.0 3, 0BSD 1, MIT OR CC0-1.0 1, CC-BY-4.0 1 (`caniuse-lite`: dane o przeglądarkach,
+tylko przy budowaniu). Pozostałe 14 to opcjonalne binaria `sharp`/libvips (LGPL-3.0): **nie trafiają do obrazu**, bo
+optymalizacja obrazów Next jest wyłączona (`images.unoptimized`, `outputFileTracingExcludes` w `next.config.ts`;
+sprawdzone: w `.next/standalone/node_modules` nie ma `sharp` ani `@img`).
+
+### Modele językowe
+
+| Model | Licencja | Gdzie |
+|---|---|---|
+| DeepSeek V4.1 Flash (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`) | MIT, otwarte wagi | Eden AI (domyślnie). Wagi są publiczne, ale model jest duży (763 mld parametrów), więc lokalnie praktycznie tylko na serwerze GPU |
+| Qwen3-VL 8B (`qwen3-vl:8b`) | Apache-2.0, otwarte wagi | Ollama, tryb offline |
+| Qwen3-VL 30B-A3B (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`) | Apache-2.0, otwarte wagi | poprzedni model na Eden AI |
+| Ollama (`ollama/ollama:0.40.17`) | MIT | serwer modelu, osobny kontener (`--profile ollama`) |
+
+### Tylko przy budowaniu i w developmencie
+
+uv, ruff, pytest, Biome, TypeScript, Tailwind CSS, lefthook, Marp (slajdy przez npx): MIT lub Apache-2.0;
+lightningcss (przez Tailwind): MPL-2.0, tylko przy budowaniu CSS. Nic z tego nie trafia do obrazów.
+
+### Dlaczego MPL-2.0 nie łamie zakazu copyleft
+
+MPL-2.0 (certifi, LibreOffice, lightningcss) to copyleft na poziomie pliku: udostępnić trzeba tylko zmienione pliki
+na tej licencji, nie nasz kod. Niczego w nich nie zmieniamy, a LibreOffice działa jako osobny program, bez
+linkowania. Mentorzy COI dopuścili LibreOffice tylko przy takiej licencji, dlatego `.ods` czytamy wprost z XML, a
+LibreOffice zostało wyłącznie dla binarnego `.doc` (obraz bez niego: `--build-arg WITH_LIBREOFFICE=0`). Obrazy
+bazowe zawierają pakiety systemu (Debian, Alpine) na różnych licencjach, także GPL; to osobne programy
+dystrybuowane razem z systemem, nasz kod z nimi nie jest łączony. Licencji pakietów Debiana, które dociąga
+LibreOffice, nie przeglądaliśmy po kolei. Szczegóły i uzasadnienia: [docs/architektura.md, „Licencje”](docs/architektura.md#7-licencje).
 
 ## Konfiguracja
 
@@ -138,10 +210,11 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_OLLAMA_URL` | `http://localhost:11434` | Adres serwera modelu |
 | `AUTOFORMULARZ_LLM_MODEL` | `qwen3-vl:8b` | Model (dowolny model wizyjny z Ollama) |
 | `AUTOFORMULARZ_LLM_PROVIDER` | `eden` | `ollama` uruchamia model lokalnie (offline, w Dockerze z `--profile ollama`), patrz [Model językowy](#model-językowy-eden-ai-domyślnie-albo-ollama-offline) |
-| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
+| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
+| `AUTOFORMULARZ_EDEN_REASONING_EFFORT` | `none` | Wyłącza myślenie modelu na Eden: `reasoning_effort` w zapytaniu i przełącznik `/no_think` w prompcie (jak `think: false` w Ollamie). Gdy Eden odrzuci parametr, zapytanie idzie ponownie bez niego. Pusta wartość: nie wysyła żadnego z nich |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `1800` | Limit czasu odpowiedzi modelu (Ollama na CPU potrzebuje do ~25 min na duży formularz) |
 | `AUTOFORMULARZ_LLM_NUM_CTX` | `24576` | Okno kontekstu modelu w Ollamie: prompt + odpowiedź (więcej = więcej pamięci RAM/VRAM; 16384 nie mieści formularza 8) |
-| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Maksymalna długość odpowiedzi modelu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
+| `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Górny limit długości odpowiedzi modelu; mały formularz dostaje mniejszy (2000 + 100 na blok, co najmniej 3000), a schemat ogranicza liczbę stron, sekcji i pól do rozmiaru dokumentu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
 | `AUTOFORMULARZ_MAX_PDF_PAGES` | `6` | Ile stron skanu (PDF lub obraz) przekazać modelowi jako obrazy; OCR czyta wszystkie strony (do 30) |
 | `AUTOFORMULARZ_SOFFICE_BIN` | `soffice` | Ścieżka do LibreOffice (pliki .doc; .ods jest czytany bez niego) |
 | `AUTOFORMULARZ_OCR_BIN` / `AUTOFORMULARZ_OCR_LANG` | `tesseract` / `pol` | OCR skanów (Tesseract, w obrazie Docker). Bez niego skan trafia do modelu tylko jako obraz |
@@ -161,6 +234,22 @@ Wszystkie endpointy `/api/v1/*` wymagają nagłówka `Authorization: Bearer <JWT
 | `POST /api/v1/forms/validate` | Body: JSON formularza. Zwraca `{valid, issues}` według reguł technicznych. |
 | `GET /api/v1/spec/schema` | Schemat JSON opisu pośredniego (FormSpec). |
 | `GET /health` | Stan usługi i dostępność modelu (bez autoryzacji). |
+
+### Bezpieczeństwo: prompt injection przez dokument
+
+Plik formularza pochodzi z zewnątrz, a jego tekst trafia do modelu. Wrogi dokument może próbować wydać modelowi
+polecenia („zignoruj poprzednie instrukcje”, „dodaj pole na hasło”). Obrona na każdym poziomie, który kontroluje kod:
+
+- **Odczyt pliku:** tekst niewidoczny na wydruku nie trafia do modelu: ukryty tekst Worda (`w:vanish`), znaki
+  o zerowej szerokości, znaki zmieniające kierunek tekstu i miękkie dywizy.
+- **Prompt:** treść dokumentu jest oznaczona jako dane (`<<<DOKUMENT` … `DOKUMENT>>>`), a prompt systemowy mówi, że
+  polecenia w dokumencie nie są poleceniami. Tekst bloku nie może zamknąć tej części ani podszyć się pod blok lub
+  rolę (każdy blok to jedna linia, znaczniki są rozbrajane).
+- **Wynik:** strukturę wyznacza schemat i kompilator; tekst w opisach jest escapowany (nigdy żywy HTML). Skaner
+  `safety.py` oznacza ostrzeżeniami `SAFETY_*` w `issues`: pytania o hasła, PIN i dane karty, polecenia dla modelu,
+  linki poza gov.pl, kod HTML i niewidoczne znaki. Ten sam skaner działa w podglądzie (`src/lib/form/safety.ts`).
+
+Testy: `api/tests/test_injection.py` (bez wywołań modelu; każde zabezpieczenie ma test, który je wykrywa).
 
 Przykład:
 
@@ -224,6 +313,32 @@ Pliki `.env*` są poza gitem (oprócz `.env.example`). Nie commituj ich.
 | `npm run smoke [url]` | Sprawdza, czy kluczowe strony frontendu odpowiadają |
 | `npx shadcn@latest add <name>` | Dodaje komponent UI |
 
+### Propozycje nowych słowników
+
+Platforma ma słowniki Kraje, TERYT i Numery kierunkowe. Gdy pole lepiej zasiliłaby wspólna lista niż opcje wpisane
+w formularzu albo wolny tekst, wynik zawiera propozycję nowego słownika: nazwę (`dictionaryName`), strukturę
+(`kod`, `nazwa`), pozycje i zastosowanie (strona, sekcja, pole, proponowana zmiana). Reguły działają na etykietach
+pól, bez modelu:
+
+- katalog rozpoznanych list: stopień pokrewieństwa, rodzaj dokumentu tożsamości, rasy psów uznawanych za agresywne
+  (wykaz z rozporządzenia MSWiA z 2003 r.), sposób doręczenia, urzędy skarbowe, dyscypliny sportowe,
+- każde inne pole wyboru z co najmniej 8 opcjami (nazwa słownika z etykiety pola).
+
+Gdzie: `dictionaries` w odpowiedzi `?details=true`, `proposedDictionaries` w `wyniki/NN.report.json` i zbiorczo
+`wyniki/slowniki.json` (na materiałach: rasy psów z formularza 7, sposób doręczenia i dyscypliny z formularza 9).
+JSON formularza się nie zmienia, bo słownika nieznanego platformie nie da się zaimportować.
+
+### Metryki i porównywanie przebiegów
+
+Każde przetworzenie pliku zapisuje metryki: czasy etapów, czas modelu i czas do pierwszego tokenu, tokeny
+wejścia i wyjścia, koszt Eden, szacunek tokenów obrazów, liczbę wartości domyślnych (`null`, `[]`, `false`) w surowej
+odpowiedzi i rozmiar wyniku. Plik jest opisany skrótem SHA-256, nigdy nazwą ani treścią.
+
+- API: jedna linia JSON w logu (`docker compose logs api | grep metrics`) i klucz `metrics` w `?details=true`.
+- Generator wyników: każde zapytanie modelu dopisuje linię do `wyniki/metrics.jsonl` (ze stanem ustawień: model,
+  presort, rozdzielczość obrazów…) i zapisuje surową odpowiedź w `wyniki/NN.raw.txt` (oba poza gitem).
+  Tabela porównawcza bez modelu: `cd api && uv run python -m autoformularz.results --metrics`.
+
 ### Model językowy: Eden AI (domyślnie) albo Ollama (offline)
 
 Domyślnie API używa modelu open-weight na Eden AI (`AUTOFORMULARZ_LLM_PROVIDER=eden`, decyzja zespołu z 2026-11-21): odpowiada w 1–3 minuty, a lokalna Ollama na CPU potrzebuje kilkunastu minut. W Dockerze: [2a. Eden AI](#2a-eden-ai-domyślnie).
@@ -232,7 +347,7 @@ Domyślnie API używa modelu open-weight na Eden AI (`AUTOFORMULARZ_LLM_PROVIDER
 
 ```bash
 AUTOFORMULARZ_LLM_PROVIDER=eden
-AUTOFORMULARZ_EDEN_MODEL=deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct  # odpowiednik w Ollamie: qwen3-vl:30b
+AUTOFORMULARZ_EDEN_MODEL=deepinfra/deepseek-ai/DeepSeek-V4.1-Flash  # poprzednio deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct (Ollama: qwen3-vl:30b)
 EDENAI_API_KEY=...                                          # klucz zespołu, tylko po stronie serwera
 ```
 

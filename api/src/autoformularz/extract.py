@@ -29,7 +29,12 @@ from autoformularz.document import Document, build
 from autoformularz.ocr import Ocr, OcrError, page_lines
 from autoformularz.upload import Kind, UploadError
 
-MAX_IMAGE_SIDE = 1600
+# Page images for the vision model (OCR reads the full-resolution page separately). Qwen3-VL turns ~28 px
+# into one token, so 1280 px instead of 1600 is ~1.6x fewer input tokens per page; the text comes from OCR,
+# the image is there for what OCR misses (empty tick boxes). JPEG ~80% is several times smaller than PNG
+# to send (tokens depend on pixels, not on the file size).
+MAX_IMAGE_SIDE = 1280
+JPEG_QUALITY = 80
 SCANNED_CHARS_PER_PAGE = 80
 MAX_OCR_PAGES = 30  # ~1 s per page; the longest material (form 9) has 16 pages
 PDF_RENDER_SCALE = 3  # 216 dpi: enough detail for OCR (images for the model are downscaled anyway)
@@ -92,7 +97,7 @@ def scanned_pages(pages: Iterator[Image.Image], total: int, max_pages: int, ocr:
         if n > needed:
             break
         if n <= max_pages:
-            images.append(_png(page))
+            images.append(_model_image(page))
         if ocr is not None and ocr_ok and n <= MAX_OCR_PAGES:
             try:
                 lines += [(line, n) for line in page_lines(page, ocr)]
@@ -154,6 +159,7 @@ def docx_text(data: bytes) -> str:
     Footnote and endnote marks get their numbers and the notes' text comes at the end, as on a printed
     page (`_number_note_references`, `_note_lines`)."""
     body = docx.Document(io.BytesIO(data)).element.body
+    _drop_hidden_runs(body)
     notes = _number_note_references(body)
     items: list[str | Placed] = []
     for el in body:
@@ -162,6 +168,18 @@ def docx_text(data: bytes) -> str:
         elif el.tag == f"{W}tbl":
             items.extend(_table_rows(el))
     return "\n".join(_dedupe(_join_placed(items)) + _note_lines(data, notes))
+
+
+def _drop_hidden_runs(body) -> None:
+    """Hidden text (Word "Ukryty", `w:vanish`) is not on the printed form, so nobody filling it in sees it;
+    it is also a way to slip instructions to the model (prompt injection). It is removed before reading."""
+    for vanish in list(body.iter(f"{W}vanish")):
+        if (vanish.get(f"{W}val") or "true").lower() in ("0", "false", "off"):
+            continue
+        props = vanish.getparent()
+        run = props.getparent() if props is not None else None
+        if props is not None and props.tag == f"{W}rPr" and run is not None and run.tag == f"{W}r":
+            run.getparent().remove(run)
 
 
 NOTE_PARTS = {f"{W}footnoteReference": "word/footnotes.xml", f"{W}endnoteReference": "word/endnotes.xml"}
@@ -410,11 +428,12 @@ def render_pdf(data: bytes) -> Iterator[Image.Image]:
         yield page.render(scale=PDF_RENDER_SCALE, grayscale=True).to_pil()
 
 
-def _png(img: Image.Image) -> bytes:
+def _model_image(img: Image.Image) -> bytes:
+    """A page image for the model: longer side at most MAX_IMAGE_SIDE, JPEG (RGB: every provider reads it)."""
     img = img.convert("RGB")
-    img.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
+    img.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE), Image.Resampling.LANCZOS)
     buf = io.BytesIO()
-    img.save(buf, format="PNG", optimize=True)
+    img.save(buf, format="JPEG", quality=JPEG_QUALITY, optimize=True)
     return buf.getvalue()
 
 

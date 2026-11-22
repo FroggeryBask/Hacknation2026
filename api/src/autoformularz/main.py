@@ -1,5 +1,6 @@
 """REST API."""
 
+import logging
 from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI, File, Query, Request, UploadFile
@@ -7,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
-from autoformularz import jobs, pipeline
+from autoformularz import jobs, net, pipeline
 from autoformularz.auth import require_jwt
 from autoformularz.config import Settings, get_settings
 from autoformularz.lint import as_dicts, lint
@@ -29,6 +30,21 @@ app.add_middleware(
     expose_headers=["X-Autoformularz-Errors", "X-Autoformularz-Warnings"],
 )
 
+
+def setup_logging() -> None:
+    """INFO logs of the app (metrics line per conversion, Eden usage) to stderr next to uvicorn's log.
+    Without a handler Python shows only warnings, so these lines were lost."""
+    app_log = logging.getLogger("autoformularz")
+    if not app_log.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+        app_log.addHandler(handler)
+        app_log.setLevel(logging.INFO)
+        app_log.propagate = False
+
+
+setup_logging()
+net.install()  # IPv4-first host lookups: Docker Desktop DNS fails Eden's lookup otherwise (net.py)
 warn_if_dev_provider(get_settings())
 
 Auth = Annotated[dict | None, Depends(require_jwt)]
@@ -57,6 +73,10 @@ def body(result: pipeline.Result, details: bool) -> dict[str, Any]:
         "sourceFormat": result.source_format,
         "document": result.document.as_dict() if result.document else None,
         "coverage": result.coverage.as_dict() if result.coverage else None,
+        # Speed, tokens and cost of this conversion (null for /compile): to compare runs.
+        "metrics": result.metrics.as_dict() if result.metrics else None,
+        # New dictionaries this form would use (name, structure, entries, which fields): extension II.
+        "dictionaries": result.dictionaries,
     }
 
 

@@ -373,6 +373,63 @@ def _words(text: str) -> set[str]:
     return {w for w in re.findall(r"\w+", text.lower()) if len(w) > 2}
 
 
+# A period written as text ("Okres sprawowania opieki", "podaj datę lub daty od–do"): two dates, not a textbox.
+RANGE = re.compile(r"\bod\s*[-–—]\s*do\b|\(od\s*[-–—]\s*do\)|\bod (dnia )?\S+ do (dnia )?", re.IGNORECASE)
+DATE_WORDS = re.compile(r"\bdat[aęy]?\b|\bdni|\bokres|\btermin", re.IGNORECASE)
+
+
+def date_ranges(spec: FormSpec) -> tuple[FormSpec, list[str]]:
+    """TEXT or DATE fields that ask for a period from-to become DATE_RANGE (two date pickers)."""
+    notes: list[str] = []
+
+    def fix(f: FieldSpec) -> FieldSpec:
+        text = f"{f.label} {f.description or ''}"
+        if f.kind in (Kind.TEXT, Kind.DATE) and RANGE.search(text) and DATE_WORDS.search(text):
+            notes.append(f"Pole „{f.label}” to okres od–do: dwa pola daty zamiast pola tekstowego.")
+            return f.model_copy(update={"kind": Kind.DATE_RANGE})
+        return f
+
+    pages = [
+        p.model_copy(
+            update={
+                "sections": [s.model_copy(update={"fields": [fix(f) for f in s.fields]}) for s in p.sections]
+            }
+        )
+        for p in spec.pages
+    ]
+    return spec.model_copy(update={"pages": pages}), notes
+
+
+MIN_PAGE_FIELDS = 3  # a step with fewer fields to fill joins its neighbour (one "Uwagi" box is not a step)
+
+
+def merge_small_pages(spec: FormSpec) -> tuple[FormSpec, list[str]]:
+    """Pages with fewer than MIN_PAGE_FIELDS fields to fill become sections of the previous page (the first
+    page: of the next one). Every page is a step of the form; a step for one or two fields is only one more
+    click. Sections keep their titles and conditions; the page limit (MAX_SECTIONS) is kept."""
+    from autoformularz.spec import MAX_SECTIONS
+
+    def inputs(page) -> int:
+        return sum(f.kind != Kind.INFO for s in page.sections for f in s.fields)
+
+    pages = list(spec.pages)
+    notes: list[str] = []
+    i = 0
+    while len(pages) > 1 and i < len(pages):
+        page = pages[i]
+        j = i - 1 if i > 0 else i + 1
+        if inputs(page) >= MIN_PAGE_FIELDS or len(pages[j].sections) + len(page.sections) > MAX_SECTIONS:
+            i += 1
+            continue
+        target = pages[j]
+        sections = [*target.sections, *page.sections] if j < i else [*page.sections, *target.sections]
+        pages[j] = target.model_copy(update={"sections": sections})
+        notes.append(f"Strona „{page.title}” ma mało pól: jej sekcje są na stronie „{target.title}”.")
+        del pages[i]
+        i = max(0, i - 1)
+    return spec.model_copy(update={"pages": pages}), notes
+
+
 def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) -> tuple[FormSpec, list[str]]:
     """Canon, fifth rule (before the conditions check, which then frees what referred to a dropped field):
     - a field made only from `paper` blocks is not something to fill in: form 1's model turned the end of
@@ -385,6 +442,7 @@ def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) 
       condition refers to it.
     A section left without fields is dropped."""
     title = _words(spec.title)
+    consent_words = [_words(c) for c in spec.consents]
     referred = {
         _key(c.field)
         for p in spec.pages
@@ -397,6 +455,13 @@ def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) 
     def drop(f: FieldSpec, section: str) -> bool:
         if f.blocks and all(b in paper for b in f.blocks):
             notes.append(f"Pominięto pole „{f.label}” w sekcji „{section}”: z tekstu tylko na papierze.")
+            return True
+        # A statement written both as a consent and as a field (form 7: "Oświadczam, że psy nie będą
+        # wykorzystywane do polowań" twice; the field's condition pointed to itself).
+        label_words = _words(f.label)
+        choice = f.kind in (Kind.SINGLE_CHOICE, Kind.MULTI_CHOICE) and len(label_words) >= 3
+        if choice and any(len(label_words & c) >= 0.8 * len(label_words) for c in consent_words):
+            notes.append(f"Pominięto pole „{f.label}”: to oświadczenie jest w sekcji zgód.")
             return True
         if f.kind is Kind.SINGLE_CHOICE and len(f.options) == 1 and _key(f.label) not in referred:
             option = _words(f.options[0])

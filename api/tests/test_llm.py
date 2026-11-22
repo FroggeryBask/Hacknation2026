@@ -7,7 +7,7 @@ import json
 import httpx
 import pytest
 
-from autoformularz import llm, progress
+from autoformularz import llm, metrics, progress
 from autoformularz.config import Settings
 from autoformularz.document import Document, build
 from autoformularz.llm import LLMError, generate_spec, llm_status
@@ -25,7 +25,7 @@ def eden(**kw) -> Settings:
     base = {
         "llm_provider": "eden",
         "eden_api_key": KEY,
-        "eden_model": "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct",
+        "eden_model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash",
     }
     return Settings(_env_file=None, **(base | kw))
 
@@ -72,7 +72,7 @@ def test_default_provider_is_eden(monkeypatch):
         monkeypatch.delenv(name, raising=False)
     s = Settings(_env_file=None)
     assert s.llm_provider == "eden"
-    assert s.eden_model == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"  # open-weight, the team's model
+    assert s.eden_model == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash"  # open-weight, the team's model
     assert s.llm_max_tokens == 12000
 
 
@@ -83,16 +83,18 @@ def test_eden_key_read_from_unprefixed_env(monkeypatch):
 
 def test_eden_request_shape(post, nadplata_spec):
     rec = post(completion(spec_json(nadplata_spec)))
-    out = generate_spec(doc(text="Wniosek", images=[PNG]), eden())
+    d = doc(text="Wniosek", images=[PNG])
+    out = generate_spec(d, eden())
     assert out == nadplata_spec
     call = rec.calls[0]
     assert call["url"].endswith("/chat/completions")
     assert call["headers"]["Authorization"] == f"Bearer {KEY}"
     body = call["json"]
-    assert body["model"] == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+    assert body["model"] == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash"
     assert body["temperature"] == 0
     assert body["response_format"]["type"] == "json_schema"
-    assert body["response_format"]["json_schema"]["schema"] == model_schema()
+    assert body["response_format"]["json_schema"]["schema"] == model_schema(llm.model_limits(d))
+    assert body["max_tokens"] == llm.answer_budget(d, eden()) < eden().llm_max_tokens  # one-line form
     parts = body["messages"][1]["content"]
     assert parts[0] == {"type": "text", "text": parts[0]["text"]} and "Wniosek" in parts[0]["text"]
     assert parts[1]["type"] == "image_url"
@@ -140,10 +142,12 @@ def test_ollama_retry_and_payload(post, nadplata_spec):
     bad = httpx.Response(200, json={"message": {"content": "{}"}})
     rec = post(bad, ok)
     s = Settings(_env_file=None, llm_provider="ollama")
-    assert generate_spec(doc(text="x", images=[PNG]), s) == nadplata_spec
+    d = doc(text="x", images=[PNG])
+    assert generate_spec(d, s) == nadplata_spec
     body = rec.calls[0]["json"]
     assert rec.calls[0]["url"].endswith("/api/chat")
-    assert body["format"] == model_schema()
+    assert body["format"] == model_schema(llm.model_limits(d)) == rec.calls[1]["json"]["format"]
+    assert body["options"]["num_predict"] == llm.answer_budget(d, s)
     assert body["messages"][1]["images"]
     assert "Authorization" not in rec.calls[0]["headers"]
 
@@ -166,13 +170,18 @@ def test_key_never_in_errors(post, monkeypatch):
             generate_spec(doc(text="x"), eden())
         errors.append(e.value)
 
+    tries: list[int] = []
+
     def down(*_, **__):
+        tries.append(1)
         raise httpx.ConnectError("boom")
 
     monkeypatch.setattr(llm.httpx, "stream", down)
+    monkeypatch.setattr(llm, "EDEN_CONNECT_RETRY_S", (0, 0))
     with pytest.raises(LLMError) as e:
         generate_spec(doc(text="x"), eden())
     errors.append(e.value)
+    assert len(tries) == 3  # the first try and one after each pause
     assert [x.code for x in errors] == [
         "LLM_ERROR",
         "LLM_BAD_OUTPUT",
@@ -252,6 +261,50 @@ def test_eden_truncated_answer_fails_without_retry(post, monkeypatch):
     assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1
     assert llm.EDEN_USAGE[0]["cost"] == 0.0054
     assert e.value.partial == '{"title": "x", "pages": [{"ti'
+
+
+def test_connect_error_is_retried_after_pauses():
+    """No connection (Docker Desktop DNS: "[Errno -5] No address associated with hostname"): nothing was
+    sent, so the call is made again after each pause."""
+    slept: list[float] = []
+    tries = iter([httpx.ConnectError("dns"), httpx.ConnectError("dns"), "ok"])
+
+    def connect():
+        outcome = next(tries)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+    assert llm.connect_with_retry(connect, (1, 2, 4), sleep=slept.append) == "ok"
+    assert slept == [1, 2]
+
+
+def test_only_connect_errors_are_retried():
+    """A read timeout or a dropped stream may come after the request reached the model (paid): no retry."""
+    slept: list[float] = []
+
+    def timeout():
+        raise httpx.ReadTimeout("slow")
+
+    with pytest.raises(httpx.ReadTimeout):
+        llm.connect_with_retry(timeout, (1, 2), sleep=slept.append)
+    assert slept == []
+
+
+def test_eden_call_retried_after_connect_error(post, nadplata_spec, monkeypatch):
+    rec = post(completion(spec_json(nadplata_spec)))
+    stream = llm.httpx.stream
+    failures = iter([httpx.ConnectError("dns")])
+
+    def flaky(*a, **k):
+        if (err := next(failures, None)) is not None:
+            raise err
+        return stream(*a, **k)
+
+    monkeypatch.setattr(llm.httpx, "stream", flaky)
+    monkeypatch.setattr(llm, "EDEN_CONNECT_RETRY_S", (0,))
+    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+    assert len(rec.calls) == 1
 
 
 def test_ollama_truncated_answer_fails_without_retry(post):
@@ -488,8 +541,10 @@ def test_eden_looping_stream_stops_early(post, nadplata_spec):
     twice = {**page, "sections": page["sections"] * 2 + page["sections"] * 50}
     head = nadplata_spec.model_dump(mode="json") | {"pages": [twice]}
     rec = post(sse(json.dumps(head, ensure_ascii=False), size=50))
-    spec = generate_spec(doc(text="x"), eden())
+    with metrics.collecting() as m:
+        spec = generate_spec(doc(text="x"), eden())
     assert len(rec.calls) == 1 and spec.pages[0].sections == nadplata_spec.pages[0].sections
+    assert m.calls[0].finish_reason == "repeat"  # stopped by us: Eden sent no finish reason nor usage
 
 
 def test_cancel_stops_the_stream(post, nadplata_spec):
@@ -503,3 +558,71 @@ def test_cancel_stops_the_stream(post, nadplata_spec):
     post(sse(spec_json(nadplata_spec)))
     with progress.reporting(sink), pytest.raises(Stop):
         generate_spec(doc(text="x"), eden())
+
+
+QWEN = "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+
+
+def test_eden_thinking_off(post, nadplata_spec):
+    """Like `think: false` for Ollama: reasoning_effort none and, for Qwen, the Qwen3 /no_think switch."""
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="Wniosek", images=[PNG]), eden(eden_model=QWEN))
+    body = rec.calls[0]["json"]
+    assert body["reasoning_effort"] == "none"
+    user = body["messages"][-1]["content"]
+    text = user[0]["text"] if isinstance(user, list) else user
+    assert text.rstrip().endswith("/no_think")
+    assert body["messages"][0]["role"] == "system" and "/no_think" not in body["messages"][0]["content"]
+
+
+def test_default_model_gets_reasoning_effort_only(post, nadplata_spec):
+    """DeepSeek has no /no_think switch: the text would only be noise in the prompt."""
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="Wniosek"), eden())
+    body = rec.calls[0]["json"]
+    assert body["model"] == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash" and body["reasoning_effort"] == "none"
+    assert "/no_think" not in body["messages"][-1]["content"]
+
+
+def test_eden_reasoning_refused_retries_without_it(post, nadplata_spec):
+    refused = httpx.Response(400, json={"error": "Unsupported parameter: reasoning_effort"})
+    rec = post(refused, completion(spec_json(nadplata_spec)))
+    assert generate_spec(doc(text="x"), eden(eden_model=QWEN)) == nadplata_spec
+    assert "reasoning_effort" in rec.calls[0]["json"] and "reasoning_effort" not in rec.calls[1]["json"]
+    assert rec.calls[1]["json"]["messages"][-1]["content"].endswith("/no_think")  # the switch stays
+
+
+def test_eden_thinking_switch_can_be_turned_off(post, nadplata_spec):
+    rec = post(completion(spec_json(nadplata_spec)))
+    generate_spec(doc(text="x"), eden(eden_reasoning_effort=""))
+    body = rec.calls[0]["json"]
+    assert "reasoning_effort" not in body and "/no_think" not in body["messages"][-1]["content"]
+
+
+# ---------------------------------------------------------------- answer size per document
+
+
+def test_small_form_gets_small_limits():
+    small = build([("Wniosek", None), ("Imię", None), ("Nazwisko", None)])
+    big = build([(f"Pole {i}", None) for i in range(400)])
+    s, b = llm.model_limits(small), llm.model_limits(big)
+    assert (s.pages, s.sections, s.fields) == (4, 8, 12)  # a looping answer must close the JSON early
+    assert (b.pages, b.sections, b.fields) == (10, 15, 40)  # never above the static bounds
+    settings = eden()
+    assert llm.answer_budget(small, settings) == llm.ANSWER_TOKENS_MIN
+    assert llm.answer_budget(big, settings) == settings.llm_max_tokens  # the setting stays the ceiling
+    schema = model_schema(s)
+    assert schema["properties"]["pages"]["maxItems"] == 4
+    assert schema["$defs"]["PageSpec"]["properties"]["sections"]["maxItems"] == 8
+    assert schema["$defs"]["SectionSpec"]["properties"]["fields"]["maxItems"] == 12
+
+
+def test_scan_without_ocr_is_sized_by_its_pages():
+    one, three = doc(images=[PNG]), doc(images=[PNG] * 3)
+    assert llm.size_units(one) == llm.SCAN_PAGE_UNITS and llm.size_units(three) == 3 * llm.SCAN_PAGE_UNITS
+    assert llm.answer_budget(three, eden()) > llm.answer_budget(one, eden()) > llm.ANSWER_TOKENS_MIN
+
+
+def test_table_cells_count_towards_the_limits():
+    row = "| " + " | ".join(f"kol {i}" for i in range(30)) + " |"
+    assert llm.model_limits(doc(text=row)).fields > llm.model_limits(doc(text="kol 1")).fields

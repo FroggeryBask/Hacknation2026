@@ -49,3 +49,5 @@ __pycache__/
 
 # cut model answers kept by `autoformularz.results` for diagnosis
 /wyniki/*.truncated.txt
+/wyniki/*.raw.txt
+/wyniki/metrics.jsonl

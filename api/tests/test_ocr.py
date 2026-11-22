@@ -75,3 +75,34 @@ def test_broken_tesseract_falls_back_to_images(tmp_path):
     doc = extract(Kind.PNG, material("3. */*.png").read_bytes(), ocr=fake)
     assert not doc.blocks and doc.images
     assert doc.notes == ["OCR nie powiódł się: skan przekazano modelowi tylko jako obraz."]
+
+
+def test_sparse_pass_restores_words_after_a_dotted_leader():
+    """--psm 4 drops what follows a long dotted line ("w miejscowości …… przy ulicy"): the sparse pass's
+    words come back into the same row, after a place to fill in, in left-to-right order."""
+    from autoformularz.ocr import FILL, Row, merge_sparse, row_text
+
+    main = [Row([(100, "w"), (130, "miejscowości")], 500, 540, 400)]
+    sparse = [Row([(900, "przy"), (980, "ulicy")], 505, 538, 1100)]
+    out = merge_sparse(main, sparse)
+    assert [row_text(r) for r in out] == [f"w miejscowości {FILL} przy ulicy"]
+
+
+def test_sparse_pass_adds_missing_rows_in_place_and_skips_known_text():
+    from autoformularz.ocr import Row, merge_sparse, row_text
+
+    main = [Row([(10, "Imię")], 100, 130, 200), Row([(10, "Adres")], 300, 330, 200)]
+    sparse = [
+        Row([(10, "Imię")], 100, 130, 200),  # already read
+        Row([(10, "Nazwisko")], 200, 230, 200),  # dropped by the column pass: goes between the two
+        Row([(10, "|")], 400, 410, 20),  # a box border read as text
+    ]
+    assert [row_text(r) for r in merge_sparse(main, sparse)] == ["Imię", "Nazwisko", "Adres"]
+
+
+def test_sparse_pass_does_not_double_a_row_read_differently():
+    from autoformularz.ocr import Row, merge_sparse, row_text
+
+    main = [Row([(10, "art."), (60, "6m"), (100, "ust."), (150, "1a")], 100, 130, 300)]
+    sparse = [Row([(10, "art."), (60, "6m"), (100, "ust."), (150, "lai")], 100, 130, 300)]
+    assert [row_text(r) for r in merge_sparse(main, sparse)] == ["art. 6m ust. 1a"]

@@ -64,3 +64,49 @@ def test_model_schema_is_stricter_than_saved_specs():
         "block_roles": [{"block": "b1", "role": "HEADING"}],
     }
     assert FormSpec.model_validate(old).roles() == {"b1": Role.HEADING}
+
+
+def _optional_props(schema):
+    for obj in (schema, *schema["$defs"].values()):
+        required = set(obj.get("required", []))
+        for name, prop in (obj.get("properties") or {}).items():
+            if name not in required:
+                yield name, prop
+
+
+def test_model_schema_allows_no_default_values():
+    """The model leaves defaults out instead of writing them: no null, no [], no default flag value."""
+    import json
+
+    from autoformularz.spec import model_schema
+
+    schema = model_schema()
+    assert '"null"' not in json.dumps(schema)
+    for name, prop in _optional_props(schema):
+        assert "default" not in prop, name
+        if prop.get("type") == "array":
+            assert prop["minItems"] >= 1, name
+        if prop.get("type") == "boolean":
+            assert len(prop["enum"]) == 1, name
+    assert schema["properties"]["authority_kind"]["enum"] == ["organ"]
+    assert schema["properties"]["signed"]["enum"] == [False]
+    assert schema["$defs"]["SectionSpec"]["properties"]["repeating"]["enum"] == [True]
+    assert "required" in schema["$defs"]["FieldSpec"]["required"]  # still written for every field
+
+
+def test_left_out_defaults_read_back_the_same(nadplata_spec):
+    """Every saved result, written without its default values, reads back identical: leaving them out
+    loses nothing."""
+    import glob
+    from pathlib import Path
+
+    from autoformularz.spec import FormSpec
+
+    root = Path(__file__).resolve().parents[2] / "wyniki"
+    specs = [
+        FormSpec.model_validate_json(Path(p).read_text(encoding="utf-8"))
+        for p in glob.glob(str(root / "*.spec.json"))
+    ]
+    for spec in [nadplata_spec, *specs]:
+        lean = spec.model_dump(mode="json", exclude_defaults=True)
+        assert FormSpec.model_validate(lean) == spec

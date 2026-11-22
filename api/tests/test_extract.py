@@ -30,7 +30,36 @@ def test_xlsx_rows():
 
 def test_image_is_downscaled():
     out = extract(Kind.PNG, material("2. */*.png").read_bytes())
-    assert out.images and out.images[0].startswith(b"\x89PNG") and not out.text
+    assert out.images and out.images[0].startswith(b"\xff\xd8\xff") and not out.text  # JPEG for the model
+
+
+def test_model_images_are_small_jpegs_and_ocr_gets_the_full_page():
+    """1280 px JPEG for the model (~1.6x fewer image tokens, several times less to send); OCR still reads
+    the page at full resolution."""
+    from autoformularz.extract import JPEG_QUALITY
+
+    seen: list[tuple[int, int]] = []
+
+    class FakeOcr:  # records the size of the page OCR gets
+        def __call__(self, img):
+            seen.append(img.size)
+            return ""
+
+    import autoformularz.extract as ex
+
+    orig = ex.page_lines
+    ex.page_lines = lambda page, ocr: (ocr(page), [])[1]
+    try:
+        data = material("2. */*.png").read_bytes()
+        out = extract(Kind.PNG, data, ocr=FakeOcr())
+    finally:
+        ex.page_lines = orig
+    assert MAX_IMAGE_SIDE == 1280 and JPEG_QUALITY == 80
+    for jpg, full in zip(out.images, seen, strict=True):
+        img = Image.open(io.BytesIO(jpg))
+        assert img.format == "JPEG" and max(img.size) == MAX_IMAGE_SIDE
+        assert max(full) > MAX_IMAGE_SIDE  # OCR got the page before downscaling
+    assert sum(len(i) for i in out.images) < len(data)
 
 
 def stacked(pages: int, w: int = 200) -> Image.Image:
@@ -69,8 +98,8 @@ def test_split_is_deterministic():
 def test_material_scans_are_split_into_readable_pages(pattern, pages):
     out = extract(Kind.PNG, material(pattern).read_bytes(), max_pages=20)
     assert len(out.images) == pages
-    for png in out.images:  # each page keeps A4 proportions after downscaling (not a thin strip)
-        w, h = Image.open(io.BytesIO(png)).size
+    for page in out.images:  # each page keeps A4 proportions after downscaling (not a thin strip)
+        w, h = Image.open(io.BytesIO(page)).size
         assert max(w, h) <= MAX_IMAGE_SIDE and 1.3 < h / w < 1.5
 
 
