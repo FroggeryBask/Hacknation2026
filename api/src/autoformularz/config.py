@@ -43,6 +43,14 @@ class Settings(BaseSettings):
     # Ollama keeps the model loaded this long after a request (its default is 5m): the next form skips
     # loading the model and reuses the cached system prompt. Ollama duration format ("30m", "1h", "-1").
     llm_keep_alive: str = "30m"
+    # Best of N: the model answers N times and the code keeps the answer with the best score (pipeline.score:
+    # lint errors, places to fill in on the paper without a field, elements the canon had to drop, fields).
+    # The same paper comes out well on one run and badly on another (forms 2, 3, 9); N=3 costs 3 calls.
+    # 1 for the live API (speed), 3 for the delivered results (`results`). Answers after the first are
+    # sampled with `llm_sample_temperature`, so they differ; the first stays deterministic (temperature 0).
+    llm_samples: int = 1
+    llm_temperature: float = 0.0
+    llm_sample_temperature: float = 0.4
     max_pdf_pages: int = 6
     # Copy INSTRUCTION / LEGAL_BASIS blocks verbatim to the finish page. Off until the model's block roles
     # are reliable: on saved results it copied paper instructions and the GDPR clause (docs/decisions.md).
@@ -59,7 +67,11 @@ class Settings(BaseSettings):
     # Read from EDENAI_API_KEY (no prefix: the organizers' name, already in .env.local)
     eden_api_key: SecretStr | None = Field(default=None, validation_alias="EDENAI_API_KEY")
     # The team's model on Eden (docs/eden-budzet.md: ~0.005 USD per form); its local pair is qwen3-vl.
-    eden_model: str | None = "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+    eden_model: str | None = "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash"
+    # Thinking off on Eden (like `think: false` for Ollama): `reasoning_effort` in the request and the Qwen3
+    # soft switch `/no_think` in the prompt. A thinking model would spend time and paid tokens on reasoning
+    # before the JSON. Empty = send neither. Eden enum: none, disable, minimal, low, medium, high, ...
+    eden_reasoning_effort: str = "none"
 
     # LibreOffice binary for legacy formats (.doc, .ods)
     soffice_bin: str = "soffice"

@@ -4,6 +4,7 @@ The LLM never writes the target JSON directly (1-2k lines with UUIDs and jsonata
 WHAT the form asks for; `compiler.py` deterministically turns this into the COI import format,
 adding the predefined sections from the design standard."""
 
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
 
@@ -15,6 +16,7 @@ class Kind(StrEnum):
     LONG_TEXT = "LONG_TEXT"  # description, justification -> TEXTAREA
     NUMBER = "NUMBER"  # numbers only (amounts, counts) -> NUMBER
     DATE = "DATE"  # -> DATEPICKER
+    DATE_RANGE = "DATE_RANGE"  # period from-to -> two DATEPICKERs, "od" and "do" (COI has no range type)
     SINGLE_CHOICE = "SINGLE_CHOICE"  # one of <=5 options -> RADIO
     MULTI_CHOICE = "MULTI_CHOICE"  # one or more options -> CHECKBOX
     SELECT = "SELECT"  # one of >5 options or a dictionary -> SELECT
@@ -204,6 +206,9 @@ class FormSpec(BaseModel):
     consents: list[str] = Field(
         default_factory=list, description="Statements the applicant confirms (besides the GDPR consent)."
     )
+    # Set by the code (presort), not by the model: statements the paper makes conditional ("dotyczy
+    # wyłącznie …", "zaznacza się, jeżeli …"), so ticking them is optional (form 8: the compost bin).
+    optional_consents: list[str] = Field(default_factory=list)
     summary: str | None = Field(default=None, description="Optional info on what happens after sending.")
     signed: bool = True
     pages: list[PageSpec] = Field(
@@ -232,7 +237,21 @@ MODEL_ROLES = [Role.INSTRUCTION, Role.LEGAL_BASIS, Role.STATEMENT, Role.GDPR, Ro
 MODEL_MAX_ROLES = 40  # with ranges a whole form fits; forces one entry per run of blocks
 
 
-def model_schema() -> dict:
+@dataclass(frozen=True)
+class Limits:
+    """Per-document size of the answer (`maxItems` in the model schema, see `llm.model_limits`). The static
+    MAX_* bounds fit the largest form; a small form gets small ones, so a looping answer has to close the
+    JSON after a few items instead of writing up to 15 sections per page."""
+
+    pages: int
+    sections: int
+    fields: int
+    options: int
+    consents: int
+    refs: int
+
+
+def model_schema(limits: Limits | None = None) -> dict:
     """JSON Schema sent to the model (Ollama `format`, Eden `json_schema`). Both providers enforce it, so
     rules that must hold go here, not only in the prompt. Stricter than `FormSpec` itself, which still
     loads saved specs:
@@ -247,4 +266,51 @@ def model_schema() -> dict:
     field["required"] = [*field.get("required", []), "required"]
     field["properties"]["required"].pop("default", None)
     defs["ApplicantSpec"]["properties"].pop("pesel", None)  # the code decides (presort)
+    schema["properties"].pop("optional_consents", None)  # the code decides (presort)
+    for obj in (schema, *defs.values()):
+        _only_non_defaults(obj)
+    defs["ApplicantSpec"]["minProperties"] = 1  # an empty "applicant": {} is the default: leave it out
+    if limits is not None:
+        _cap(schema["properties"]["pages"], limits.pages)
+        _cap(schema["properties"]["consents"], limits.consents)
+        _cap(defs["PageSpec"]["properties"]["sections"], limits.sections)
+        _cap(defs["SectionSpec"]["properties"]["fields"], limits.fields)
+        _cap(defs["FieldSpec"]["properties"]["options"], limits.options)
+        for name in ("FieldSpec", "SectionSpec"):
+            _cap(defs[name]["properties"]["blocks"], limits.refs)
     return schema
+
+
+def _cap(prop: dict, n: int) -> None:
+    """maxItems at most n (never above the static bound, never below minItems)."""
+    prop["maxItems"] = max(prop.get("minItems", 0), min(prop.get("maxItems", n), n))
+
+
+def _only_non_defaults(obj: dict) -> None:
+    """An optional key may be written only with a value that differs from its default; otherwise it is left
+    out (Pydantic fills the default when reading). A default value is output time and cost for nothing:
+    the saved specs are ~45% default values (null, [], false) when every key is written.
+    - `null` is not allowed (description, dictionary, prefill, show_if, max_files, to, summary),
+    - a list needs at least one item (options, validators, allowed_formats, blocks, consents, block_roles),
+    - a flag can only be written as the non-default value (repeating, negate, entity: true; signed,
+      other_person: false), a string with a default only as another value (authority_kind: "organ")."""
+    required = set(obj.get("required", []))
+    for name, prop in (obj.get("properties") or {}).items():
+        if name in required:
+            continue
+        default = prop.pop("default", None)
+        if "anyOf" in prop:
+            options = [o for o in prop["anyOf"] if o.get("type") != "null"]
+            if len(options) == 1:
+                prop.pop("anyOf")
+                prop.update(options[0])
+            else:
+                prop["anyOf"] = options
+        if prop.get("type") == "array":
+            prop["minItems"] = max(prop.get("minItems", 0), 1)
+        elif prop.get("type") == "boolean" and isinstance(default, bool):
+            prop["enum"] = [not default]
+        elif isinstance(default, str) and "enum" in prop:
+            prop["enum"] = [v for v in prop["enum"] if v != default]
+        elif isinstance(default, str) and "$ref" in prop:
+            pass  # an enum class by reference: kept as is (not used for optional keys today)

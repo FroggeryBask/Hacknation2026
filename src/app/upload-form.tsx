@@ -437,7 +437,11 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
     [result],
   );
   const errors = result?.issues.filter((i) => i.level === "error") ?? [];
-  const warnings = result?.issues.filter((i) => i.level === "warning") ?? [];
+  // SAFETY_* warnings are the API's copy of the same scan (for other clients): shown once, in `findings`.
+  const warnings =
+    result?.issues.filter(
+      (i) => i.level === "warning" && !i.code.startsWith("SAFETY_"),
+    ) ?? [];
   const stepLabel = (i: number) => `Krok ${i + 1}: ${STEPS[i]}`;
 
   return (

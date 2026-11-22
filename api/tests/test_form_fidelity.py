@@ -8,7 +8,7 @@ from conftest import material
 
 from autoformularz.check import dedupe, drop_paper_only_fields
 from autoformularz.document import build
-from autoformularz.extract import docx_text, extract
+from autoformularz.extract import docx_text, extract, find_soffice
 from autoformularz.llm import Answer, LLMError, field_loop, salvage
 from autoformularz.presort import apply, drop_ungrounded, presort
 from autoformularz.spec import FieldSpec, FormSpec, Kind, PageSpec, Role, SectionSpec
@@ -238,7 +238,11 @@ def test_docx_without_footnotes_reads_as_before():
 
 def test_material_1_reads_the_same_in_every_text_format():
     found = {}
-    for ext in ("pdf", "docx", "doc", "ods", "xlsx"):
+    # binary .doc needs LibreOffice (in the Docker image); without it the other four formats are checked
+    formats = (
+        ("pdf", "docx", "doc", "ods", "xlsx") if find_soffice("soffice") else ("pdf", "docx", "ods", "xlsx")
+    )
+    for ext in formats:
         name = f"Wniosek o ustalenie numeru porządkowego nieruchomości.{ext}"
         data = material(f"1. */{name}").read_bytes()
         p = presort(extract(validate_upload(name, data, 50 * 2**20), data))
@@ -294,3 +298,199 @@ def test_template_sections_after_the_form_stop_the_stream():
     out, _ = drop_paper_only_fields(spec)
     titles = [s.title for p in out.pages for s in p.sections]
     assert titles[:2] == ["Opłata skarbowa", "Uzasadnienie"] and "Podpis" not in titles
+
+
+# ---------------------------------------------------------------- answer size per document
+
+
+def test_every_saved_result_fits_its_document_limits():
+    """The per-document maxItems and max_tokens never cut a correct answer: each saved spec (forms 2-9)
+    fits the limits computed from the blocks the model gets for it, with room to spare."""
+    from autoformularz import llm, results
+    from autoformularz.config import Settings
+
+    settings = Settings(_env_file=None)
+    for n in results.FORMS:
+        src = results.source_file(n)
+        data = src.read_bytes()
+        model_doc = presort(extract(validate_upload(src.name, data, 50 * 2**20), data)).model_doc
+        spec = FormSpec.model_validate_json((results.OUT / f"{n:02d}.spec.json").read_text(encoding="utf-8"))
+        lim = llm.model_limits(model_doc)
+        sections = [s for p in spec.pages for s in p.sections]
+        fields = [f for s in sections for f in s.fields]
+        assert len(spec.pages) <= lim.pages, n
+        assert max(len(p.sections) for p in spec.pages) <= lim.sections, n
+        assert max(len(s.fields) for s in sections) <= lim.fields, n
+        assert max([len(f.options) for f in fields] or [0]) <= lim.options, n
+        assert len(spec.consents) <= lim.consents, n
+        assert max(len(x.blocks) for x in [*sections, *fields]) <= lim.refs, n
+        answer = spec.model_dump_json(exclude_defaults=True)
+        assert len(answer) / 2.5 < llm.answer_budget(model_doc, settings), n  # ~2.5+ characters per token
+
+
+# ---------------------------------------------------------------- forms outside the materials (ZUS Z-15)
+
+
+def date_field(label: str, description: str | None = None, kind: Kind = Kind.TEXT) -> FieldSpec:
+    return FieldSpec(label=label, kind=kind, required=True, description=description)
+
+
+def test_period_from_to_is_two_dates():
+    from autoformularz.check import date_ranges
+    from autoformularz.compiler import compile_form
+
+    fields = [
+        date_field(
+            "Okres sprawowania opieki", "Podaj datę lub daty (od–do), w których będziesz sprawować opiekę"
+        ),
+        date_field("Godziny otwarcia od-do"),  # no date words: stays text
+        date_field("Okres najmu od dnia do dnia", kind=Kind.DATE),
+    ]
+    spec = FormSpec(
+        title="Wniosek o zasiłek opiekuńczy",
+        authority_name="ZUS",
+        pages=[PageSpec(title="Okres opieki", sections=[SectionSpec(title="Okres", fields=fields)])],
+    )
+    spec, notes = date_ranges(spec)
+    kinds = [f.kind for f in spec.pages[0].sections[0].fields]
+    assert kinds == [Kind.DATE_RANGE, Kind.TEXT, Kind.DATE_RANGE] and len(notes) == 2
+    form, _ = compile_form(spec)
+    text = json.dumps(form, ensure_ascii=False)
+    assert text.count('"DATEPICKER"') == 4 and "Okres sprawowania opieki – od" in text
+    assert "Okres sprawowania opieki – do" in text
+
+
+def test_small_pages_join_their_neighbour():
+    from autoformularz.check import merge_small_pages
+
+    def page(title: str, n: int) -> PageSpec:
+        fields = [FieldSpec(label=f"{title} {i}", kind=Kind.TEXT, required=True) for i in range(n)]
+        return PageSpec(title=title, sections=[SectionSpec(title=title, fields=fields)])
+
+    spec = FormSpec(
+        title="Wniosek",
+        authority_name="ZUS",
+        pages=[page("Rodzaj", 1), page("Dane osoby", 6), page("Oświadczenia", 5), page("Uwagi", 1)],
+    )
+    spec, notes = merge_small_pages(spec)
+    assert [p.title for p in spec.pages] == ["Dane osoby", "Oświadczenia"] and len(notes) == 2
+    assert [s.title for s in spec.pages[0].sections] == ["Rodzaj", "Dane osoby"]  # first page: into the next
+    assert [s.title for s in spec.pages[1].sections] == ["Oświadczenia", "Uwagi"]
+
+
+def test_natural_person_form_offers_self_and_another_person():
+    """Standard p. 10 ("Ważne"): only a natural person's data on paper (ZUS Z-15) -> "Swoim" and "Innej osoby",
+    with the other person's data, power of attorney and stamp duty, though the paper names no proxy."""
+    from autoformularz.compiler import compile_form
+
+    form, _ = compile_form(FormSpec(title="Wniosek o zasiłek opiekuńczy", authority_name="ZUS", pages=[]))
+    text = json.dumps(form, ensure_ascii=False)
+    for title in ("Podmiot wniosku", "Innej osoby", "Dane innej osoby", "Pełnomocnictwo", "Opłata skarbowa"):
+        assert title in text, title
+    assert "Osoby prawnej" not in text  # no company data on paper
+
+
+def test_scan_of_material_1_keeps_street_and_precinct():
+    """OCR's second (sparse) pass restores the words after dotted leaders, as the PDF reads them."""
+    import subprocess
+
+    import pytest
+
+    from autoformularz.config import Settings
+    from autoformularz.ocr import ocr_from
+
+    s = Settings()
+    ocr = ocr_from(s.ocr_bin, s.ocr_lang, s.tessdata_dir)
+    if ocr is None:
+        pytest.skip("brak Tesseracta")
+    langs = [ocr.binary, "--list-langs"] + (["--tessdata-dir", ocr.tessdata_dir] if ocr.tessdata_dir else [])
+    if "pol" not in subprocess.run(langs, capture_output=True, text=True).stdout.split():
+        pytest.skip("brak polskiego modelu Tesseracta (pol.traineddata)")
+    path = material("1. */Wniosek o ustalenie numeru porządkowego nieruchomości.jpg")
+    data = path.read_bytes()
+    p = presort(extract(validate_upload(path.name, data, 50 * 2**20), data, ocr=ocr))
+    seen = " ".join(b.text for b in p.model_doc.blocks)
+    assert "przy ulicy" in seen and "w obrębie" in seen
+    assert p.entity
+    assert ["przy ulicy"] in p.optional.values()  # OCR's quote for the raised "1)"
+
+
+def test_statement_the_paper_makes_conditional_is_optional():
+    from autoformularz.presort import conditional_consents
+
+    texts = {
+        "b1": "D.4 OŚWIADCZENIE (DOTYCZY WYŁĄCZNIE WŁAŚCICIELI NIERUCHOMOŚCI ZABUDOWANYCH BUDYNKAMI",
+        "b2": "Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są",
+        "b3": "wytworzone na jej terenie bioodpady stanowiące odpady komunalne.",
+        "b4": "",  # a GDPR block, blanked: windows never join lines apart on paper
+        "b5": "Załączniki, jeżeli dotyczy.",
+        "b6": "Psy nie będą wykorzystywane do polowań.",
+    }
+    statements = [
+        "Nieruchomość jest wyposażona w przydomowy kompostownik, w którym kompostowane są bioodpady",
+        "Psy nie będą wykorzystywane do polowań",
+    ]
+    assert conditional_consents(statements, texts) == statements[:1]
+
+
+def test_best_answer_is_completed_with_sections_other_answers_wrote():
+    """Answers skip different things (form 9): the best one gets the sections another answer wrote for
+    places to fill in it left out, placed in the part of the paper they belong to (after the heading)."""
+    from autoformularz.pipeline import complete_from
+
+    d = build(
+        [
+            (t, None)
+            for t in (
+                "Wniosek o stypendium",  # b1
+                "Rodzaj: ☐ stypendium ☐ nagroda",  # b2
+                "1. Wnioskodawca",  # b3: a heading starts the next part
+                "Imię reprezentanta ……………",  # b4
+                "Nazwisko reprezentanta ……………",  # b5
+                "Nazwa klubu ……………",  # b6
+                "Adres siedziby ……………",  # b7
+            )
+        ]
+    )
+    best = FormSpec(
+        title="Wniosek o stypendium",
+        authority_name="Urząd",
+        pages=[
+            PageSpec(
+                title="Rodzaj",
+                sections=[
+                    SectionSpec(
+                        title="Rodzaj",
+                        fields=[
+                            field("Rodzaj", ["b2"], Kind.SINGLE_CHOICE, options=["stypendium", "nagroda"])
+                        ],
+                    )
+                ],
+            ),
+            PageSpec(
+                title="Klub",
+                sections=[
+                    SectionSpec(
+                        title="Klub", fields=[field("Nazwa klubu", ["b6"]), field("Adres siedziby", ["b7"])]
+                    )
+                ],
+            ),
+        ],
+    )
+    other = best.model_copy(
+        update={
+            "pages": [
+                PageSpec(
+                    title="X",
+                    sections=[
+                        SectionSpec(
+                            title="Reprezentant", fields=[field("Imię", ["b4"]), field("Nazwisko", ["b5"])]
+                        )
+                    ],
+                )
+            ]
+        }
+    )
+    merged, added = complete_from(best, [other], d)
+    assert added == ["Reprezentant"]
+    assert [s.title for s in merged.pages[1].sections] == ["Reprezentant", "Klub"]

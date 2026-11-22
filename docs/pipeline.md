@@ -89,7 +89,8 @@ Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Z
   `table_row` (cały wiersz tabeli jako `| a | b |`), `heading`. `page` od 1 dla PDF, `null` dla DOCX/XLSX.
 - `candidates`: `{block, kind, text}`, miejsca do wypełnienia. `kind` = `blank` (`____`), `dots` (`......`),
   `checkbox` (`☐ opcja`), `colon` („Etykieta:” bez wartości).
-- `images`: obrazy stron skanów (nie trafiają do odpowiedzi API). Skany nie mają jeszcze bloków.
+- `images`: obrazy stron skanów dla modelu, JPEG ~80%, dłuższy bok do 1280 px (nie trafiają do odpowiedzi API).
+  OCR czyta stronę w pełnej rozdzielczości osobno i daje bloki jak dla plików tekstowych.
 
 **FormSpec** (`spec.py`), pola z wartościami domyślnymi, więc stare FormSpec są poprawne:
 - `FieldSpec.blocks`, `SectionSpec.blocks`: ID bloków, z których pochodzi element (etykieta, opcje).
@@ -111,6 +112,14 @@ Ustalony w PR „document-contract” ([zadanie](tasks/document-contract.md)). Z
 - `unreferenced`: bloki bez pola, sekcji ani roli (tytuły i zwykły tekst; do sprawdzenia, czy nic nie znika).
 - `candidatesWithoutField`: bloki z kandydatem na pole bez pola i bez `SKIP`.
 - `unknownRefs`: ID z FormSpec, których nie ma w dokumencie (halucynacje).
+- `metrics` (`null` dla `/compile`): czasy etapów (`steps`: check, extract, presort, model, compile),
+  `calls[]` z każdym wywołaniem modelu (`seconds`, `firstTokenS`, `promptTokens`, `completionTokens`,
+  `costUsd`, `imageTokensEst`, `answerNulls`/`answerEmptyLists`/`answerFalse`), sumy i rozmiar wyniku
+  (`pages`, `sections`, `fields`, `lintErrors`). Plik jest opisany skrótem `fileSha`, bez nazwy i treści.
+- `dictionaries`: propozycje nowych słowników (rozszerzenie II, `dictionaries.py`), każda z `dictionaryName`,
+  `title`, `description`, `structure` (kolumny `kod`, `nazwa`), `entries`, `source` i `usage` (strona, sekcja,
+  pole, proponowana zmiana). JSON formularza się nie zmienia: nieznany platformie `dictionaryName` dałby po
+  imporcie puste pole, więc opcje zostają w polu.
 
 Pierwsza wersja: jeden blok na wiersz tekstu, kandydaci z wzorców w tekście (formularze z pól tekstowych
 bez `____`, np. nr 2, nie mają jeszcze kandydatów). Kompilator jeszcze nie korzysta z bloków.
