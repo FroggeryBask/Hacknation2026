@@ -35,7 +35,7 @@ flowchart LR
 | `web` | `node:22.23.5-alpine3.24` + Next.js | opcjonalny frontend: upload i podgląd JSON | 3000 |
 
 Domyślnie (`docker compose up`) `ollama` i `model` się nie uruchamiają (profil `ollama`), a `api` woła
-model open-weight na Eden AI (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, odpowiednik lokalnego `qwen3-vl:30b`).
+model open-weight na Eden AI (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017`, wagi na licencji MIT; offline: lokalny `qwen3-vl:8b`).
 Koszt każdej odpowiedzi Eden trafia do `llm.EDEN_USAGE`, a suma od startu kontenera jest w `GET /health` (`usage`);
 budżet zespołu: [eden-budzet.md](eden-budzet.md).
 
@@ -118,8 +118,8 @@ linii LF (`.gitattributes`), więc checkout na Windows nie zmienia tego, co traf
 ### Koszt
 
 - **Licencje**: zero. Wszystkie komponenty są open source, nic nie wymaga zakupu licencji komercyjnej.
-- **Usługi zewnętrzne**: Eden AI (domyślnie) kosztuje ok. 0,005 USD za formularz; tryb offline (Ollama): zero.
-  Model: `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`, budżet: [eden-budzet.md](eden-budzet.md).
+- **Usługi zewnętrzne**: Eden AI (domyślnie) kosztuje ok. 0,001–0,004 USD za formularz (3–25 s); tryb offline (Ollama): zero.
+  Model: `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017`, budżet: [eden-budzet.md](eden-budzet.md).
 - **Sprzęt**: jeden serwer z Dockerem. Model 8B działa na CPU (wolniej) albo na GPU z co najmniej 8 GB VRAM
   (szybciej). Mniejszy model (np. `qwen3-vl:4b`, `qwen3-vl:2b`) to zmiana jednej zmiennej
   `AUTOFORMULARZ_LLM_MODEL`, bez zmian w kodzie, kosztem jakości.

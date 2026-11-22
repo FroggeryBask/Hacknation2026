@@ -40,7 +40,7 @@ services:
     env_file: .env
     environment:
       AUTOFORMULARZ_LLM_PROVIDER: ${AUTOFORMULARZ_LLM_PROVIDER:-eden}
-      AUTOFORMULARZ_EDEN_MODEL: ${AUTOFORMULARZ_EDEN_MODEL:-deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct}
+      AUTOFORMULARZ_EDEN_MODEL: ${AUTOFORMULARZ_EDEN_MODEL:-deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017}
       AUTOFORMULARZ_OLLAMA_URL: http://ollama:11434
       # The key reaches only the API (from .env at runtime), never the image or the frontend.
       EDENAI_API_KEY: ${EDENAI_API_KEY:-}

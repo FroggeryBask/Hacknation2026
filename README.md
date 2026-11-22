@@ -38,7 +38,7 @@ Zapisz `.env` jako UTF-8 bez BOM (domyślnie tak robią VS Code i Notatnik w Win
 
 ### 2a. Eden AI (domyślnie)
 
-Model open-weight w chmurze organizatorów (`deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct`): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
+Model open-weight w chmurze organizatorów (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017`, wagi otwarte na licencji MIT): bez pobierania ~6 GB modelu i bez wymagań pamięci dla modelu. W `.env` dopisz klucz zespołu `EDENAI_API_KEY=...`, potem:
 
 ```bash
 docker compose up --build
@@ -138,7 +138,7 @@ Zmienne środowiskowe API (prefiks `AUTOFORMULARZ_`). Pełna lista z wartościam
 | `AUTOFORMULARZ_OLLAMA_URL` | `http://localhost:11434` | Adres serwera modelu |
 | `AUTOFORMULARZ_LLM_MODEL` | `qwen3-vl:8b` | Model (dowolny model wizyjny z Ollama) |
 | `AUTOFORMULARZ_LLM_PROVIDER` | `eden` | `ollama` uruchamia model lokalnie (offline, w Dockerze z `--profile ollama`), patrz [Model językowy](#model-językowy-eden-ai-domyślnie-albo-ollama-offline) |
-| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
+| `AUTOFORMULARZ_EDEN_MODEL` / `EDENAI_API_KEY` | `deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017` / brak | Model i klucz Eden AI (klucz wymagany przy `eden`) |
 | `AUTOFORMULARZ_LLM_TIMEOUT_S` | `1800` | Limit czasu odpowiedzi modelu (Ollama na CPU potrzebuje do ~25 min na duży formularz) |
 | `AUTOFORMULARZ_LLM_NUM_CTX` | `24576` | Okno kontekstu modelu w Ollamie: prompt + odpowiedź (więcej = więcej pamięci RAM/VRAM; 16384 nie mieści formularza 8) |
 | `AUTOFORMULARZ_LLM_MAX_TOKENS` | `12000` | Maksymalna długość odpowiedzi modelu. Gdy model zaczyna powtarzać sekcje (zapętlenie), używana jest kompletna część odpowiedzi sprzed powtórzeń, z uwagą w wyniku; Ollama przerywa generowanie od razu |
@@ -232,7 +232,7 @@ Domyślnie API używa modelu open-weight na Eden AI (`AUTOFORMULARZ_LLM_PROVIDER
 
 ```bash
 AUTOFORMULARZ_LLM_PROVIDER=eden
-AUTOFORMULARZ_EDEN_MODEL=deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct  # odpowiednik w Ollamie: qwen3-vl:30b
+AUTOFORMULARZ_EDEN_MODEL=deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017  # offline (Ollama): qwen3-vl:8b
 EDENAI_API_KEY=...                                          # klucz zespołu, tylko po stronie serwera
 ```
 

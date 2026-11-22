@@ -25,7 +25,7 @@ def eden(**kw) -> Settings:
     base = {
         "llm_provider": "eden",
         "eden_api_key": KEY,
-        "eden_model": "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct",
+        "eden_model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
     }
     return Settings(_env_file=None, **(base | kw))
 
@@ -72,7 +72,7 @@ def test_default_provider_is_eden(monkeypatch):
         monkeypatch.delenv(name, raising=False)
     s = Settings(_env_file=None)
     assert s.llm_provider == "eden"
-    assert s.eden_model == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"  # open-weight, the team's model
+    assert s.eden_model == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017"  # open-weight, the team's model
     assert s.llm_max_tokens == 12000
 
 
@@ -89,7 +89,7 @@ def test_eden_request_shape(post, nadplata_spec):
     assert call["url"].endswith("/chat/completions")
     assert call["headers"]["Authorization"] == f"Bearer {KEY}"
     body = call["json"]
-    assert body["model"] == "deepinfra/Qwen/Qwen3-VL-30B-A3B-Instruct"
+    assert body["model"] == "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017"
     assert body["temperature"] == 0
     assert body["response_format"]["type"] == "json_schema"
     assert body["response_format"]["json_schema"]["schema"] == model_schema()
