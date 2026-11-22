@@ -170,13 +170,18 @@ def test_key_never_in_errors(post, monkeypatch):
             generate_spec(doc(text="x"), eden())
         errors.append(e.value)
 
+    tries: list[int] = []
+
     def down(*_, **__):
+        tries.append(1)
         raise httpx.ConnectError("boom")
 
     monkeypatch.setattr(llm.httpx, "stream", down)
+    monkeypatch.setattr(llm, "EDEN_CONNECT_RETRY_S", (0, 0))
     with pytest.raises(LLMError) as e:
         generate_spec(doc(text="x"), eden())
     errors.append(e.value)
+    assert len(tries) == 3  # the first try and one after each pause
     assert [x.code for x in errors] == [
         "LLM_ERROR",
         "LLM_BAD_OUTPUT",
@@ -256,6 +261,50 @@ def test_eden_truncated_answer_fails_without_retry(post, monkeypatch):
     assert e.value.code == "LLM_TRUNCATED" and len(rec.calls) == 1
     assert llm.EDEN_USAGE[0]["cost"] == 0.0054
     assert e.value.partial == '{"title": "x", "pages": [{"ti'
+
+
+def test_connect_error_is_retried_after_pauses():
+    """No connection (Docker Desktop DNS: "[Errno -5] No address associated with hostname"): nothing was
+    sent, so the call is made again after each pause."""
+    slept: list[float] = []
+    tries = iter([httpx.ConnectError("dns"), httpx.ConnectError("dns"), "ok"])
+
+    def connect():
+        outcome = next(tries)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+    assert llm.connect_with_retry(connect, (1, 2, 4), sleep=slept.append) == "ok"
+    assert slept == [1, 2]
+
+
+def test_only_connect_errors_are_retried():
+    """A read timeout or a dropped stream may come after the request reached the model (paid): no retry."""
+    slept: list[float] = []
+
+    def timeout():
+        raise httpx.ReadTimeout("slow")
+
+    with pytest.raises(httpx.ReadTimeout):
+        llm.connect_with_retry(timeout, (1, 2), sleep=slept.append)
+    assert slept == []
+
+
+def test_eden_call_retried_after_connect_error(post, nadplata_spec, monkeypatch):
+    rec = post(completion(spec_json(nadplata_spec)))
+    stream = llm.httpx.stream
+    failures = iter([httpx.ConnectError("dns")])
+
+    def flaky(*a, **k):
+        if (err := next(failures, None)) is not None:
+            raise err
+        return stream(*a, **k)
+
+    monkeypatch.setattr(llm.httpx, "stream", flaky)
+    monkeypatch.setattr(llm, "EDEN_CONNECT_RETRY_S", (0,))
+    assert generate_spec(doc(text="x"), eden()) == nadplata_spec
+    assert len(rec.calls) == 1
 
 
 def test_ollama_truncated_answer_fails_without_retry(post):

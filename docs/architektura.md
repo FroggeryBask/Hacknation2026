@@ -32,7 +32,7 @@ flowchart LR
 | `api` | `python:3.14.10-slim-trixie` + nasz kod | REST API, cała logika konwersji | 8000 |
 | `ollama` | `ollama/ollama:0.40.17` | serwer modelu (CPU lub GPU) | tylko w sieci Dockera |
 | `model` | `ollama/ollama:0.40.17` | jednorazowe pobranie modelu do wolumenu, potem kończy pracę | brak |
-| `web` | `node:22.23.5-alpine3.24` + Next.js | opcjonalny frontend: upload i podgląd JSON | 3000 |
+| `web` | `node:22.23.5-alpine3.24` + Next.js | opcjonalny frontend: upload jednego lub wielu plików (batch), podgląd e-formularza i JSON | 3000 |
 
 Domyślnie (`docker compose up`) `ollama` i `model` się nie uruchamiają (profil `ollama`), a `api` woła
 model open-weight na Eden AI (`deepinfra/deepseek-ai/DeepSeek-V4.1-Flash`; offline Ollama z `qwen3-vl:8b`).
