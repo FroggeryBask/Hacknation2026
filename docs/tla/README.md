@@ -10,10 +10,10 @@ Wzory: tablica identyfikacji COI na Behance (`materialy/inspo_prezentacja`), prz
 
 | Plik | Do czego | Miejsce na tekst |
 |---|---|---|
-| `01-tytul.jpg` | slajd tytułowy: granat, znak COI po prawej | do x ≈ 680 px |
+| `01-tytul.jpg` | slajd tytułowy: granat, znak COI w prawym dolnym rogu | cały slajd poza prawym dolnym rogiem (od x ≈ 870, y ≈ 360) |
 | `02-sekcja.jpg` | przerywnik, np. „Demo”: ogromne koło magenty | lewa połowa |
 | `03-tresc-jasna.jpg` | zwykła treść: biel, blade koło w rogu | cały slajd poza prawym górnym rogiem |
-| `04-tresc-jasna-bok.jpg` | liczby, wnioski: raster kropek, jasny znak COI po prawej | do x ≈ 820 px |
+| `04-tresc-jasna-bok.jpg` | liczby, wnioski: raster kropek, jasny znak COI po prawej | do x ≈ 880 px |
 | `05-tresc-ciemna.jpg` | treść na granacie, dwa duże ciemne koła | cały slajd poza prawym górnym rogiem |
 | `06-mobywatel.jpg` | demo, zrzuty ekranu (jasne jak mObywatel) | cały slajd |
 | `07-kola.jpg` | treść z akcentem: blade koła i niebieskie koło po prawej | do x ≈ 900 px |

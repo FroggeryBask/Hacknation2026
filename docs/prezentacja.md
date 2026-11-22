@@ -8,9 +8,8 @@ description: Cyfryzacja formularzy urzędowych, HackNation 2026, zadanie COI
 style: |
   /* Motyw na wzór identyfikacji COI (Behance 223311653, coi.gov.pl):
      Inter Light w nagłówkach, granat #0b1a4f, królewski błękit #1f3ea6,
-     magenta #8e1a6c→#e3125a, lawenda. Grafiki jak na tablicy COI: płaskie
-     koło, prostokąt magenty, lawendowy kwadrat z jasnym pasem, mały
-     magentowy kwadrat na krawędzi. Bez logo COI. */
+     magenta #8e1a6c→#e3125a, lawenda. Tła z docs/tla (znak COI ze strony
+     „Pracuj z nami”, koła, kreska nagłówka są w obrazkach). Bez logo COI. */
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
   :root {
     --ink: #0b1a4f;
@@ -39,26 +38,6 @@ style: |
     justify-content: flex-start;
   }
   section { position: relative; overflow: hidden; }
-  /* linia jak na kafelkach Strefy Wiedzy COI: szara kreska z magentowym końcem */
-  section::before {
-    content: "";
-    position: absolute; left: 80px; width: 1120px; top: 44px; height: 2px;
-    background: linear-gradient(90deg, var(--line) calc(100% - 88px), var(--crimson-2) calc(100% - 88px));
-  }
-  section.dark::before { background: linear-gradient(90deg, #2c3d7a calc(100% - 88px), var(--crimson-2) calc(100% - 88px)); }
-
-  /* Grafiki z tablicy COI (Behance): płaskie formy z liniowym gradientem, nakładane na siebie */
-  .deco, .deco div { position: absolute; }
-  .deco { inset: 0; pointer-events: none; z-index: 0; }
-  section > :not(.deco, footer, header) { position: relative; z-index: 1; }
-  .deco .round { border-radius: 50%; }
-  .deco .mag { background: linear-gradient(90deg, #8e1a6c, #e3125a); }
-  .deco .pix { background: linear-gradient(135deg, #e3125a, #8e1a6c); }
-  .deco .royal { background: linear-gradient(100deg, #2a4cc0, #1c379a 70%); }
-  .deco .lav { background: linear-gradient(180deg, #eef1fb, #a9b7e8); }
-  .deco .lav-strip { background: linear-gradient(90deg, rgba(255,255,255,.85), rgba(255,255,255,0)); }
-  .deco .deep { background: linear-gradient(180deg, #1c379a, #0b1a4f); }
-  section:has(.deco)::before { display: none; }
 
   h1 { font-size: 64px; font-weight: 300; line-height: 1.08; margin: 0 0 24px; letter-spacing: -0.02em; }
   h2 { font-size: 42px; font-weight: 300; line-height: 1.15; margin: 0 0 32px; letter-spacing: -0.015em; }
@@ -91,7 +70,6 @@ style: |
 
   /* Tytuł */
   section.title { justify-content: center; }
-  section.title::before { display: none; }
   section.title h1 { font-size: 80px; max-width: 620px; }
   /* „Papierowy wniosek” w dwóch liniach, strzałka na środku tego bloku, „e-formularz” bez dzielenia */
   section.title h1.hero-title { display: flex; align-items: center; gap: 28px; max-width: none; }
@@ -100,36 +78,8 @@ style: |
   section.title p { font-size: 26px; color: #d3d9ef; max-width: 540px; }
   section.title::after, section.title footer { display: none; }
 
-  /* Tytuł: billboard „Ludzie. Innowacje. Technologie.” (magenta u góry, koło, lawendowy kwadrat) */
-  .hero .mag { left: 610px; top: 0; width: 440px; height: 118px; }
-  .hero .royal { left: 1000px; top: 170px; width: 720px; height: 720px; }
-  .hero .deep { left: 1050px; top: 0; width: 230px; height: 150px; }
-  .hero .lav { left: 1040px; top: 390px; width: 240px; height: 330px; }
-  .hero .lav-strip { left: 1040px; top: 390px; width: 80px; height: 330px; }
-  .hero .pix { left: 1010px; top: 420px; width: 30px; height: 30px; }
-
-  /* Ciemne plansze: wycinek koła i pas magenty przy prawej krawędzi */
-  .dark-deco .royal { left: 1010px; top: -250px; width: 520px; height: 520px; }
-  .dark-deco .mag { left: 760px; top: 0; width: 250px; height: 54px; }
-  .dark-deco .lav { left: 1214px; top: 110px; width: 66px; height: 110px; }
-  .dark-deco .pix { left: 1194px; top: 110px; width: 20px; height: 20px; }
-
-  /* Jasne plansze: mały układ w prawym górnym rogu (lawendowe koło, granatowy kwadrat, magenta) */
-  .corner .lavc { left: 1110px; top: -110px; width: 280px; height: 280px;
-    background: linear-gradient(200deg, #eef1fb, #9fb0e6); }
-  .corner .deep { left: 1190px; top: 0; width: 90px; height: 100px; }
-  .corner .pix { left: 1166px; top: 100px; width: 24px; height: 24px; }
-
-  /* Plansza z liczbami: ekran „Tworzymy nowoczesne rozwiązania” (lawendowy panel z kołem po prawej) */
-  section.stage { background: var(--soft); padding-right: 360px; }
-  .stage-deco .panel { left: 950px; top: 0; width: 330px; height: 720px;
-    background: linear-gradient(180deg, #d9e0f7, #b9c5ef); }
-  .stage-deco .disc { left: 1000px; top: 120px; width: 470px; height: 470px;
-    background: linear-gradient(90deg, #7f93d6, #c9d3f3 70%, #e9edfa); }
-  .stage-deco .deep { left: 1170px; top: 355px; width: 110px; height: 115px;
-    background: linear-gradient(135deg, #e9edfa, #2f458f); }
-  .stage-deco .white { left: 1170px; top: 470px; width: 110px; height: 120px; background: linear-gradient(180deg, #f5f7fd, #dfe5f8); }
-  .stage-deco .pix { left: 950px; top: 300px; width: 52px; height: 52px; }
+  /* Plansza z liczbami: tło 04 ze znakiem COI po prawej, treść do x ≈ 880 px */
+  section.stage { padding-right: 400px; }
 
   .eq { display: flex; align-items: center; gap: 18px; font-size: 32px; font-weight: 300; margin: 0 0 18px; }
   .eq .op { color: #ff6fa6; font-size: 40px; }
@@ -150,11 +100,13 @@ style: |
   .card { background: var(--soft); padding: 24px 28px; border-top: 4px solid var(--blue); }
   .card.hl { border-image: var(--magenta) 1; border-top-width: 4px; border-top-style: solid; }
   .card p { margin: 0; font-size: 21px; color: var(--muted); }
+  .card ul { margin: 8px 0 0; font-size: 21px; color: var(--muted); } .card li { margin: 4px 0; } .card li strong { color: var(--ink); }
   .big { font-size: 68px; font-weight: 300; color: var(--crimson); line-height: 1; margin-bottom: 10px; letter-spacing: -0.02em; }
   .big.word { font-size: 40px; line-height: 1.1; }
   section.stage .cols3 .big { height: 90px; display: flex; align-items: flex-end; }
   section.stage .cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   section.dark .big { color: #ff6fa6; }
+  .layer { font-size: 16px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 8px; }
   .flow { display: flex; align-items: stretch; gap: 10px; margin: 8px 0 28px; }
   .flow div { flex: 1; background: var(--soft); padding: 14px 12px; font-size: 19px; text-align: center; border-top: 4px solid var(--blue); }
   .flow div.ai { border-image: var(--magenta) 1; border-top-width: 4px; border-top-style: solid; }
@@ -162,6 +114,7 @@ style: |
   .flow span { align-self: center; color: var(--blue-2); }
   .shot { background: var(--soft); border: 2px dashed var(--line); color: var(--muted); display: flex; align-items: center; justify-content: center; text-align: center; font-size: 21px; height: 420px; }
   .shot img { max-width: 100%; max-height: 100%; }
+  .shot.img { background: none; border: 0; height: 440px; } .shot.img img { box-shadow: 0 2px 16px rgba(11,26,79,.18); }
   section.dense table { font-size: 17px; }
   section.dense th, section.dense td { padding: 4px 10px; }
   section.dense .card { align-self: start; }
@@ -172,11 +125,11 @@ footer: autoformularz · HackNation 2026 · zadanie COI
 <!-- _class: title -->
 <!-- _paginate: false -->
 
-<div class="deco hero"><div class="round royal"></div><div class="deep"></div><div class="mag"></div><div class="lav"></div><div class="lav-strip"></div><div class="pix"></div></div>
+![bg](tla/01-tytul.jpg)
 
 <h1 class="hero-title"><span>Papierowy<br>wniosek</span><span class="arrow">→</span><span class="to">e-formularz</span></h1>
 
-Z papierowego wniosku do e-formularza gotowego do importu w kilka minut, na otwartym modelu.
+Przez urzędnika w&nbsp;kilka minut
 
 <!--
 Mówca: jedno zdanie o tym, co robimy. Zespół przedstawiamy na końcu.
@@ -186,9 +139,9 @@ Mówca: jedno zdanie o tym, co robimy. Zespół przedstawiamy na końcu.
 
 <!-- _class: dark -->
 
-<div class="deco dark-deco"><div class="round royal"></div><div class="mag"></div><div class="lav"></div><div class="pix"></div></div>
+![bg](tla/05-tresc-ciemna.jpg)
 
-## Urzędnik podaje plik. Buduje e-usługę
+## Urzędnik ma plik. Chce zbudować e-usługę
 
 <div class="eq">
 <span>Znany wniosek</span><span class="op">×</span><span>inny urząd</span><span class="op">=</span><span>nowe</span>
@@ -205,9 +158,11 @@ Mówca: jedno zdanie o tym, co robimy. Zespół przedstawiamy na końcu.
 
 ---
 
-<div class="deco corner"><div class="round lavc"></div><div class="deep"></div><div class="pix"></div></div>
+![bg](tla/03-tresc-jasna.jpg)
 
 <div class="one"><span class="n">1</span><div><span>Plik</span><span>Wywołanie REST</span><span>Gotowy JSON</span></div></div>
+
+<p class="layer">Frontend</p>
 
 <div class="steps">
 <div><b>Plik</b><small>PDF · DOC · DOCX · ODS<br>XLSX · JPG · PNG</small></div><span>→</span>
@@ -215,6 +170,8 @@ Mówca: jedno zdanie o tym, co robimy. Zespół przedstawiamy na końcu.
 <div><b>JSON</b><small>W formacie COI</small></div><span>→</span>
 <div><b>E-formularz</b><small>Gotowy. Po prostu.</small></div>
 </div>
+
+<p class="layer">Backend</p>
 
 <div class="flow">
 <div>odczyt<br>bloki z ID</div><span>→</span>
@@ -225,11 +182,9 @@ Mówca: jedno zdanie o tym, co robimy. Zespół przedstawiamy na końcu.
 <div>linter<br>reguły techniczne</div>
 </div>
 
-Model tylko klasyfikuje bloki i wypełnia mały FormSpec, a <em>JSON COI buduje kod</em>.
-
 ---
 
-<div class="deco corner"><div class="round lavc"></div><div class="deep"></div><div class="pix"></div></div>
+![bg](tla/03-tresc-jasna.jpg)
 
 ## Mniej dla modelu, mniej błędów
 
@@ -252,7 +207,7 @@ Model tylko klasyfikuje bloki i wypełnia mały FormSpec, a <em>JSON COI buduje 
 
 <!-- _class: dense -->
 
-<div class="deco corner"><div class="round lavc"></div><div class="deep"></div><div class="pix"></div></div>
+![bg](tla/03-tresc-jasna.jpg)
 
 ## Budowanie JSON dla COI: kompilator, bez modelu
 
@@ -267,7 +222,7 @@ Model tylko klasyfikuje bloki i wypełnia mały FormSpec, a <em>JSON COI buduje 
 <div>
 
 - **Kanon:** usuwa duplikaty sekcji, sekcje szablonu, wybory z jedną opcją i pola powtarzające tytuł
-- **Stabilne identyfikatory:** stabilniejszy determinizm
+- **Stabilne identyfikatory (UUIDv5):** lepszy determinizm
 - **Format pilnowany testami**
 
 </div>
@@ -275,34 +230,35 @@ Model tylko klasyfikuje bloki i wypełnia mały FormSpec, a <em>JSON COI buduje 
 
 ---
 
-<div class="deco corner"><div class="round lavc"></div><div class="deep"></div><div class="pix"></div></div>
+![bg](tla/03-tresc-jasna.jpg)
 
 ## Kontrola jakości
 
 <div class="cols">
 <div class="card">
 <h3>Pokrycie</h3>
-<p>Porównanie, które bloki dokumentu trafiły do formularza.</p>
+<p>Porównanie bloki dokumentu vs bloki formularza</p>
 </div>
 <div class="card hl">
 <h3>Skan bezpieczeństwa formularza</h3>
-<p>Prośby o hasła, PIN, kody SMS i dane karty</p>
-<p>Linki spoza gov.pl albo bez HTTPS</p>
-<p>Tekst skierowany do modelu (prompt injection, PL i EN)</p>
-<p>Ukryte znaki, HTML i skrypty</p>
-<p>Bardzo długie etykiety</p><br>
-<p>Tylko ostrzega, nigdy nie zmienia JSON-a.</p>
+<p>Sprawdzamy, czy plik nie zawierał</p>
+<ul>
+<li>pytań, o które urząd nigdy by nie pytał <strong>Hasła, PIN, Dane kart</strong></li>
+<li>linków spoza gov.pl albo bez https</li>
+<li>prompt injections</li>
+<li>ukrytych znaków, HTML i skryptów</li>
+</ul>
 </div>
 </div>
 
 ---
 
-<div class="deco corner"><div class="round lavc"></div><div class="deep"></div><div class="pix"></div></div>
+![bg](tla/06-mobywatel.jpg)
 
 ## Interfejs dla urzędnika
 
 <div class="cols">
-<div class="shot">ZRZUT: postęp na żywo<br>i formularz z sekcją warunkową<br>oraz błędem walidacji</div>
+<div class="shot img"><img src="zrzuty/formularz-walidacja.png" alt="E-formularz z podsumowaniem błędu walidacji"></div>
 <div>
 
 - Dynamiczne, warunkowe formularze z walidacją
@@ -311,7 +267,9 @@ Model tylko klasyfikuje bloki i wypełnia mały FormSpec, a <em>JSON COI buduje 
 - Prosty interfejs, który chroni przed utratą postępów
 - Link do klauzuli informacyjnej przy zgodzie
 - Dostępność (a11y)
-- Wiele plików naraz (batch)
+- Upload wielu plików naraz (batch)
+
+Wideo: <a href="https://drive.google.com/file/d/1R41hzPY-2XGb4rstmdMXj6w0sqbB5rDl/view?usp=sharing">Google Drive</a>
 
 </div>
 </div>
@@ -324,7 +282,7 @@ Renderer czyta wyłącznie COI JSON i ewaluuje states, więc podgląd i plik imp
 
 <!-- _class: stage -->
 
-<div class="deco stage-deco"><div class="panel"></div><div class="round disc"></div><div class="deep"></div><div class="white"></div><div class="pix"></div></div>
+![bg](tla/04-tresc-jasna-bok.jpg)
 
 ## Zamknięty system
 
@@ -340,7 +298,7 @@ Czas przetworzenia formularza: <em>średnio 7,4 s</em>
 
 ---
 
-<div class="deco corner"><div class="round lavc"></div><div class="deep"></div><div class="pix"></div></div>
+![bg](tla/03-tresc-jasna.jpg)
 
 ## Kompletność
 
@@ -359,7 +317,7 @@ Czas przetworzenia formularza: <em>średnio 7,4 s</em>
 
 <!-- _class: dark -->
 
-<div class="deco dark-deco"><div class="round royal"></div><div class="mag"></div><div class="lav"></div><div class="pix"></div></div>
+![bg](tla/05-tresc-ciemna.jpg)
 
 <div class="cols">
 <div>

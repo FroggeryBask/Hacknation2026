@@ -204,7 +204,7 @@ def tytul():
     img = canvas(NAVY)
     paint(img, np.ones_like(X), ramp(linear(0, 0, 0, W), [(0, NAVY_DEEP), (0.6, NAVY), (1, NAVY)]))
     paint(img, circle(1180, 980, 760), ramp(linear(270, 0, 980, 760), [(0, "#102366"), (1, "#0d1d58")]), 0.8)
-    emblem(img, 1040, 300, 230, CIEMNY, fade_to=NAVY)
+    emblem(img, 1100, 540, 180, CIEMNY, fade_to=NAVY, sphere=False)
     grain(img, 0.012)
     return save(img, "01-tytul.png")
 
@@ -228,11 +228,9 @@ def sekcja():
 
 
 def tresc_jasna():
-    """Treść, jasna: jak sekcje strony COI — biel, kreska, blada duża kula w rogu z małą szarą kulką."""
+    """Treść, jasna: jak sekcje strony COI — biel, kreska, blada duża kula w rogu."""
     img = canvas("#ffffff")
     paint(img, circle(1240, -40, 300), ramp(linear(135, 1540, -340, 850), [(0, "#f7f8fb"), (1, "#eef0f5")]))
-    sx, sy, sr = 1028, 172, 22
-    paint(img, circle(sx, sy, sr), ramp(conic(sx, sy, 0), JASNY["sphere"]))
     header_line(img, 900)
     grain(img, 0.006)
     return save(img, "03-tresc-jasna.png")
@@ -242,8 +240,8 @@ def tresc_jasna_bok():
     """Liczby/wnioski: ekran „Tworzymy nowoczesne rozwiązania” — raster kropek, znak COI po prawej."""
     img = canvas(SOFT)
     paint(img, np.ones_like(X), ramp(linear(0, 0, 0, W), [(0, "#f6f7fc"), (1, "#e7ecf8")]))
-    dot_grid(img, 300, 860, 9, "#9aa8d8", 0.75, radius=1.5, both_ends=True)
-    emblem(img, 1090, 300, 200, JASNY)
+    dot_grid(img, 300, 880, 9, "#9aa8d8", 0.75, radius=1.5, both_ends=True)
+    emblem(img, 1120, 300, 170, JASNY)
     grain(img, 0.006)
     return save(img, "04-tresc-jasna-bok.png")
 
@@ -254,8 +252,6 @@ def tresc_ciemna():
     paint(img, np.ones_like(X), ramp(linear(0, 0, 0, W), [(0, NAVY_DEEP), (0.6, NAVY), (1, NAVY)]))
     paint(img, circle(-100, 900, 620), "#102366", 0.6)
     paint(img, circle(1260, -60, 330), ramp(linear(135, 1590, -390, 900), [(0, "#1a3590"), (1, "#112770")]), 0.9)
-    sx, sy, sr = 1027, 173, 22
-    paint(img, circle(sx, sy, sr), ramp(conic(sx, sy, 0), CIEMNY["sphere"]))
     paint(img, rect(80, 44, 820, 2), "#2c3d7a")
     grain(img, 0.012)
     return save(img, "05-tresc-ciemna.png")
