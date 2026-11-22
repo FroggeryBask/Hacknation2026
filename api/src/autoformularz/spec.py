@@ -204,6 +204,9 @@ class FormSpec(BaseModel):
     consents: list[str] = Field(
         default_factory=list, description="Statements the applicant confirms (besides the GDPR consent)."
     )
+    # Set by the code (presort), not by the model: statements the paper makes conditional ("dotyczy
+    # wyłącznie …", "zaznacza się, jeżeli …"), so ticking them is optional (form 8: the compost bin).
+    optional_consents: list[str] = Field(default_factory=list)
     summary: str | None = Field(default=None, description="Optional info on what happens after sending.")
     signed: bool = True
     pages: list[PageSpec] = Field(
@@ -247,4 +250,5 @@ def model_schema() -> dict:
     field["required"] = [*field.get("required", []), "required"]
     field["properties"]["required"].pop("default", None)
     defs["ApplicantSpec"]["properties"].pop("pesel", None)  # the code decides (presort)
+    schema["properties"].pop("optional_consents", None)  # the code decides (presort)
     return schema

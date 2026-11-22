@@ -60,6 +60,8 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
   z sytuacjami, a dane dla każdej sytuacji jako pola z `show_if` na tej opcji.
 - Oświadczenie, które można zaznaczyć albo nie, i które zmienia sprawę (np. ulga, zwolnienie), to pole
   SINGLE_CHOICE z opcjami TAK/NIE, nie `consents`.
+- Słowa rozdzielone ukośnikiem z odnośnikiem do „niepotrzebne skreślić” (np. „wynajem/użyczenie*”,
+  „pies/suka”) to wybór jednej z nich: pole SINGLE_CHOICE z tymi opcjami.
 - Pola pokazywane warunkowo (np. „jeśli zaznaczono TAK, podaj…”) opisz przez `show_if` z etykietą pola wyboru
   i wartością opcji.
 - Gdy dane się powtarzają (kilka osób, pojazdów, działek, zawodów), użyj sekcji z `repeating: true`.

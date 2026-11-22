@@ -319,3 +319,21 @@ def test_scan_of_material_1_keeps_street_and_precinct():
     assert "przy ulicy" in seen and "w obrębie" in seen
     assert p.entity
     assert ["przy ulicy"] in p.optional.values()  # OCR's quote for the raised "1)"
+
+
+def test_statement_the_paper_makes_conditional_is_optional():
+    from autoformularz.presort import conditional_consents
+
+    texts = {
+        "b1": "D.4 OŚWIADCZENIE (DOTYCZY WYŁĄCZNIE WŁAŚCICIELI NIERUCHOMOŚCI ZABUDOWANYCH BUDYNKAMI",
+        "b2": "Oświadczam, że nieruchomość wyposażona jest w przydomowy kompostownik, w którym kompostowane są",
+        "b3": "wytworzone na jej terenie bioodpady stanowiące odpady komunalne.",
+        "b4": "",  # a GDPR block, blanked: windows never join lines apart on paper
+        "b5": "Załączniki, jeżeli dotyczy.",
+        "b6": "Psy nie będą wykorzystywane do polowań.",
+    }
+    statements = [
+        "Nieruchomość jest wyposażona w przydomowy kompostownik, w którym kompostowane są bioodpady",
+        "Psy nie będą wykorzystywane do polowań",
+    ]
+    assert conditional_consents(statements, texts) == statements[:1]

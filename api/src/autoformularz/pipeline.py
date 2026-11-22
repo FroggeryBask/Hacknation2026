@@ -66,12 +66,13 @@ def from_spec(spec: FormSpec, document: Document | None = None, *, quiet: bool =
 def score(spec: FormSpec, document: Document) -> tuple[int, int, int, int]:
     """How good an answer is, higher is better, compared in this order: lint errors, places to fill in on
     the paper that got no field (the form skipped something), elements the canon had to drop (made-up,
-    repeated or template sections and fields), and the number of fields kept."""
+    repeated or template sections and fields), and the number of fields and statements kept."""
     result = from_spec(spec, quiet=True)
     errors = sum(i.level == "error" for i in result.issues)
     missing = len(coverage(result.spec, document).candidates_without_field)
     dropped = sum(n.startswith("Pominięto") for n in result.notes)
-    fields = sum(len(s.fields) for p in result.spec.pages for s in p.sections)
+    # Statements count with fields: made-up ones are already gone (presort.grounded_consents).
+    fields = sum(len(s.fields) for p in result.spec.pages for s in p.sections) + len(result.spec.consents)
     return (-errors, -missing, -dropped, fields)
 
 
