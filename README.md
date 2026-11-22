@@ -119,6 +119,7 @@ docker run --rm -p 8000:8000 --add-host=host.docker.internal:host-gateway \
 | kontener `ollama` kończy się bez błędu, model się nie ładuje | za mało pamięci dla Dockera, patrz wyżej |
 | `additional privileges requested: pass "--allow=fs.read=Dockerfile.web"` | Compose 5 buduje przez bake i na Windows w Git Bash źle porównuje ścieżki (`/c/...` vs `C:\...`); uruchom polecenie w PowerShellu albo cmd |
 | `autoformularz-token`: „Zasady kontroli aplikacji” (Windows) | Smart App Control blokuje plik `.exe` utworzony przez uv; token z kontenera: `docker compose exec api autoformularz-token` |
+| `LLM_UNAVAILABLE` „Model językowy jest niedostępny (Eden AI)”, w logu `No address associated with hostname` | DNS sieci lokalnej źle odpowiada na zapytanie IPv6 o `api.edenai.run` (Docker Desktop). API pyta najpierw o IPv4 i ponawia połączenie (1, 2, 4, 8 s), więc nie powinno się już zdarzać; jeśli się zdarzy, zmień DNS karty sieciowej (np. na DNS operatora) i uruchom ponownie Docker Desktop |
 | port 8000 lub 3000 zajęty | zatrzymaj lokalne `uvicorn` / `npm run dev` albo zmień port w `docker-compose.yml` |
 
 ## Licencje

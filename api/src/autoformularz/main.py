@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
-from autoformularz import jobs, pipeline
+from autoformularz import jobs, net, pipeline
 from autoformularz.auth import require_jwt
 from autoformularz.config import Settings, get_settings
 from autoformularz.lint import as_dicts, lint
@@ -44,6 +44,7 @@ def setup_logging() -> None:
 
 
 setup_logging()
+net.install()  # IPv4-first host lookups: Docker Desktop DNS fails Eden's lookup otherwise (net.py)
 warn_if_dev_provider(get_settings())
 
 Auth = Annotated[dict | None, Depends(require_jwt)]

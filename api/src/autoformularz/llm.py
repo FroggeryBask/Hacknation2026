@@ -436,6 +436,29 @@ class Answer:
 
 NO_THINK = "/no_think"  # Qwen3 soft switch: hybrid models skip reasoning; Instruct models ignore it
 
+# Pauses before connecting to Eden again. A connect error (DNS, refused) comes before anything is sent,
+# so a retry costs nothing. Docker Desktop on some networks: the local DNS answers the IPv6 query for
+# api.edenai.run (an IPv4-only host) with "no such domain", Docker keeps that answer for a few seconds and
+# then the IPv4 lookup fails too ("[Errno -5] No address associated with hostname"), so one of several
+# forms sent at once failed. Measured 2026-11-22 in the api container, 3 lookups at once: every one passed
+# by the third retry (1 + 2 + 4 s).
+EDEN_CONNECT_RETRY_S = (1.0, 2.0, 4.0, 8.0)
+
+
+def connect_with_retry[T](
+    connect: Callable[[], T],
+    pauses: tuple[float, ...] = EDEN_CONNECT_RETRY_S,
+    sleep: Callable[[float], None] = time.sleep,
+) -> T:
+    """`connect()`, again after each pause while it fails to connect; the last error is raised."""
+    for pause in pauses:
+        try:
+            return connect()
+        except httpx.ConnectError as e:
+            log.warning("Eden AI: no connection (%s), next try in %g s", e, pause)
+            sleep(pause)
+    return connect()
+
 
 def thinking_off(settings: Settings) -> bool:
     return settings.eden_reasoning_effort.strip().lower() in ("none", "disable")
@@ -494,7 +517,8 @@ def _call_eden(
         call = metrics.start_call("eden", settings.eden_model or "", payload["messages"], images)
         call.max_tokens = payload["max_tokens"]
         sse: dict | None = None
-        try:
+
+        def send() -> tuple[httpx.Response, dict | None]:
             with httpx.stream(
                 "POST",
                 url,
@@ -506,9 +530,12 @@ def _call_eden(
                     r.read()
                     if r.status_code != 200:
                         call.finish_reason = f"http {r.status_code}"
-                    return r, None, answer
-                sse = _read_sse(r, answer)
-                return r, sse, answer
+                    return r, None
+                return r, _read_sse(r, answer)
+
+        try:
+            r, sse = connect_with_retry(send, EDEN_CONNECT_RETRY_S)
+            return r, sse, answer
         except httpx.HTTPError as e:
             log.warning("Eden AI call failed: %s: %s", type(e).__name__, e)
             raise LLMError("LLM_UNAVAILABLE", "Model językowy jest niedostępny (Eden AI).", 503) from e
