@@ -642,7 +642,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                   <FormSection
                     title={
                       batchRunning
-                        ? "Tworzymy formularze"
+                        ? "Generowanie formularzy"
                         : finished.length
                           ? "Formularze są gotowe"
                           : "Nie udało się utworzyć formularzy"
