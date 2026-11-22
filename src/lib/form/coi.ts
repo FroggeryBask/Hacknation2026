@@ -7,6 +7,7 @@ import {
   type FieldValue,
   NIP,
   PESEL,
+  PHONE,
   pattern,
   REGON,
   type Validator,
@@ -31,6 +32,8 @@ export type CoiField = {
   defaultValueType?: "EXTERNAL_SYSTEM" | null;
   dictionaryName?: string | null;
   searchEnabled?: boolean | null;
+  /** Regular expression for the value (design standard: "Numer KRS" `^\d{10}$`). */
+  pattern?: string;
   states?: CoiState[];
   tooltipMessage?: string;
   consentSectionConfig?: {
@@ -130,8 +133,90 @@ export const validatorNames = (f: CoiField): string[] =>
 export const isRequired = (f: CoiField) =>
   validatorNames(f).includes("REQUIRED");
 
-export const fieldValidators = (f: CoiField) =>
-  validatorNames(f).flatMap((v) => VALIDATORS[v] ?? []);
+/** Longest `pattern` we compile: the JSON may come from an uploaded file. */
+const MAX_PATTERN = 200;
+
+/**
+ * The field's own format, as in the design standard ("Numer KRS": Pattern
+ * `^\d{10}$`, message "Wpisz 10 cyfr."). The message is the field's hint when
+ * it reads like one ("Wpisz…"), else a general one. A pattern that is too long
+ * or not a valid regular expression is ignored.
+ */
+export function patternValidator(f: CoiField): Validator | undefined {
+  if (typeof f.pattern !== "string" || !f.pattern) return undefined;
+  if (f.pattern.length > MAX_PATTERN) return undefined;
+  let re: RegExp;
+  try {
+    re = new RegExp(f.pattern, "u");
+  } catch {
+    return undefined;
+  }
+  const hint = (f.description ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const message =
+    /^Wpisz\b/.test(hint) && hint.length <= 120
+      ? hint
+      : "Wpisz wartość w poprawnym formacie.";
+  return pattern(re, message);
+}
+
+/* ------------------------------------------------------------------ */
+/* Length limits ("Wszelkie ułatwienia … długość pola", task 3.3.VI)   */
+/* ------------------------------------------------------------------ */
+
+// COI JSON has no length setting, so the renderer sets one per kind of data.
+// Identifiers: their full length with separators (NIP "123-456-32-18").
+const VALIDATOR_LENGTH: Record<string, number> = {
+  PESEL: 11,
+  NIP: 13,
+  REGON: 14,
+  ZIP_CODE: 6,
+  EMAIL: 254, // longest valid e-mail address (RFC 5321)
+  EPUAP: 100,
+  ADE: 30,
+  SERIAL_NUMBER_ID_CARD: 10,
+};
+export const TEXT_LIMIT = 255; // as the form title in "Reguły techniczne"
+export const TEXTAREA_LIMIT = 2000;
+export const NUMBER_LIMIT = 15;
+export const PHONE_LIMIT = 20; // "+48 600 100 200" with spaces
+
+/**
+ * A phone number field: the COI validator list has no phone validator, so it
+ * is recognised by its name ("numer_telefonu", "Telefon kontaktowy") when it
+ * has no other format.
+ */
+export const isPhone = (f: CoiField) =>
+  f.type === "TEXT_FIELD" &&
+  !validatorNames(f).some((v) => v in VALIDATOR_LENGTH) &&
+  /telefon|\btel\b|komórk/i.test(`${f.techName} ${f.title}`);
+
+/** Longest value the field takes. */
+export function fieldMaxLength(f: CoiField): number {
+  if (f.type === "TEXTAREA") return TEXTAREA_LIMIT;
+  if (f.type === "NUMBER") return NUMBER_LIMIT;
+  const known = validatorNames(f)
+    .map((v) => VALIDATOR_LENGTH[v])
+    .filter(Boolean);
+  if (known.length) return Math.min(...known);
+  // A fixed number of digits in the field's own pattern: "^\d{10}$" (KRS).
+  const digits =
+    typeof f.pattern === "string" && /^\^\\d\{(\d+)\}\$$/.exec(f.pattern);
+  if (digits) return Number(digits[1]);
+  if (isPhone(f)) return PHONE_LIMIT;
+  return TEXT_LIMIT;
+}
+
+export const fieldValidators = (f: CoiField): Validator[] => {
+  const own = patternValidator(f);
+  return [
+    ...validatorNames(f).flatMap((v) => VALIDATORS[v] ?? []),
+    ...(own ? [own] : []),
+    ...(isPhone(f) ? [PHONE] : []),
+  ];
+};
 
 /* ------------------------------------------------------------------ */
 /* Options: own options or a dictionary (materialy/ "Słowniki")        */

@@ -304,16 +304,22 @@ class Standard:
                     default="MLPZ.surname",
                     external=True,
                 ),
-                b.field(
-                    "TEXT_FIELD",
-                    "numer_pesel",
-                    "Numer PESEL",
-                    validation=req(True, "PESEL"),
-                    read_only=True,
-                    default="MLPZ.pesel",
-                    external=True,
-                ),
-            ],
+            ]
+            + (
+                [
+                    b.field(
+                        "TEXT_FIELD",
+                        "numer_pesel",
+                        "Numer PESEL",
+                        validation=req(True, "PESEL"),
+                        read_only=True,
+                        default="MLPZ.pesel",
+                        external=True,
+                    )
+                ]
+                if self.spec.applicant.pesel  # only when the paper asks (reference 1 has none, 5 has it)
+                else []
+            ),
         )
 
     def address(self, tech: str, title: str, suffix: str, *, prefill: bool, states: list[Json] | None = None):
@@ -443,10 +449,19 @@ class Standard:
                 [
                     b.field("TEXT_FIELD", "imie_inna_osoba", "Imię", validation=req(True)),
                     b.field("TEXT_FIELD", "nazwisko_inna_osoba", "Nazwisko", validation=req(True)),
-                    b.field(
-                        "TEXT_FIELD", "numer_pesel_inna_osoba", "Numer PESEL", validation=req(True, "PESEL")
-                    ),
-                ],
+                ]
+                + (
+                    [
+                        b.field(
+                            "TEXT_FIELD",
+                            "numer_pesel_inna_osoba",
+                            "Numer PESEL",
+                            validation=req(True, "PESEL"),
+                        )
+                    ]
+                    if self.spec.applicant.pesel
+                    else []
+                ),
                 states=show(self.c_other),
             ),
             self.address(
@@ -638,7 +653,7 @@ class Standard:
             b.section(
                 "podglad_uzupelnionego_wniosku",
                 "Podgląd uzupełnionego wniosku",
-                [b.field("INFO_SECTION", "podglad", description=preview)],
+                [b.field("TEXT_BLOCK", "podglad_1", description=preview)],
             )
         )
         return out

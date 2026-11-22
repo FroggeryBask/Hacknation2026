@@ -50,7 +50,7 @@ export function FieldDemos() {
       <div className="flex flex-col gap-4">
         <FormSection
           title="Pola (molekuły)"
-          description="Każde pole odpowiada typowi komponentu z reguł technicznych (field.type w JSON). Pola wymagane nie mają znacznika, opcjonalne mają dopisek „(opcjonalnie)”."
+          description="Każde pole odpowiada typowi komponentu z reguł technicznych (field.type w JSON). Pola wymagane są bez znacznika, opcjonalne mają dopisek „(opcjonalnie)” (jak w wizualizacji COI)."
         >
           <Demo type="TEXT_FIELD">
             <TextField

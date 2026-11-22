@@ -39,7 +39,8 @@ Walidatory (`src/lib/form/validators.ts`) mają nazwy z reguł technicznych: `PE
 
 - Jedna kolumna, pola pogrupowane w sekcje tematyczne (białe karty na tle `page`).
 - Kolejność stron: dane stron → sprawa → kontakt i oświadczenia → podsumowanie i podgląd (`FINISH`, bez pól).
-- Pola wymagane są bez znacznika. Opcjonalne mają dopisek „(opcjonalnie)”.
+- Jak w wizualizacji COI: pola wymagane są bez znacznika, opcjonalne mają dopisek „(opcjonalnie)”. Bez dopisku są też pola tylko do odczytu i pola z polem wyboru „Brak …” (ulica, numer lokalu).
+- Pola tekstowe mają limit znaków (zob. decisions.md) i licznik „12 / 255 znaków” widoczny przy pisaniu i po wypełnieniu; ostatnie 10% limitu w kolorze ostrzeżenia, czytnik ekranu podaje, ile znaków zostało.
 - Dane z rejestru (MLPZ/PESEL) pokazuj jako `readOnly` (szare tło, bez ramki).
 - Pokazuj tylko potrzebne pola: warunek SHOW = renderowanie warunkowe (`useWatch`). Ukryte pole nie jest walidowane.
 - Błąd pojawia się pod polem: ikona i czerwony tekst, krótko, w stronie czynnej („Uzupełnij to pole.”). Fokus przechodzi na pierwsze błędne pole.
@@ -54,7 +55,7 @@ Walidatory (`src/lib/form/validators.ts`) mają nazwy z reguł technicznych: `PE
 
 - `states` (`SHOW`, `READ_ONLY`): JSONata na kopii JSON-a z `__userAnswer` (`src/lib/form/coi.ts`), liczone po każdej zmianie odpowiedzi. Ukryte pole nie jest renderowane ani walidowane, ale jego odpowiedź zostaje.
 - `validation`: `REQUIRED` + walidatory z reguł technicznych (`PESEL`, `NIP`, `REGON`, `ZIP_CODE`, `EMAIL`, `EPUAP`, `ADE`, `SERIAL_NUMBER_ID_CARD`). Toleruje `{}` zamiast `[]` (wzór 1).
-- Podgląd struktury: pola nie są wypełniane (`defaultValue` i `EXTERNAL_SYSTEM` uzupełnia platforma e-usług), a każdą zakładkę można otworzyć ze steppera lub przyciskiem „Dalej” bez wypełniania pól wymaganych (`freeNavigation`).
+- Podgląd: wartości wpisane w JSON (nazwa urzędu, „Polska”) są widoczne, dane z rejestrów (`EXTERNAL_SYSTEM`: MLPZ, PESEL) uzupełnia platforma, więc pole tylko do odczytu tego rodzaju ma podpowiedź „Uzupełni się automatycznie z danych logowania”. „Dalej” sprawdza stronę (zostaje z listą błędów), a stepper otwiera tylko strony już osiągnięte.
 - `dictionaryName`: `Kraje`, `TERYT_*` (na razie lista województw, bez powiatu i gminy).
 
 ## Nowy formularz (ręcznie)

@@ -45,6 +45,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
   type FileValue,
+  maxChars,
+  NUMBER,
   requiredMessage,
   type Validator,
 } from "@/lib/form/validators";
@@ -59,7 +61,7 @@ export type BaseFieldProps = {
   name: string;
   label: string;
   description?: ReactNode;
-  /** Optional fields get the "(opcjonalnie)" suffix; required ones get no marker. */
+  /** Required fields get a red asterisk (legend above the form); read-only ones none. */
   required?: boolean;
   readOnly?: boolean;
   validators?: Validator[];
@@ -82,8 +84,13 @@ export function FieldError({ id, error }: { id: string; error?: string }) {
   );
 }
 
-function labelText(label: string, required?: boolean, readOnly?: boolean) {
-  return required || readOnly ? label : `${label} (opcjonalnie)`;
+/**
+ * As the COI visualisation: required fields have no marker, optional ones the
+ * suffix "(opcjonalnie)". Read-only fields and fields with a "Brak …" checkbox
+ * (the checkbox is how to leave them empty) get no suffix.
+ */
+function labelText(label: string, required?: boolean, plain?: boolean) {
+  return required || plain ? label : `${label} (opcjonalnie)`;
 }
 
 /** Vertical field: label, description, control, error (in that order). */
@@ -94,6 +101,7 @@ export function FormField({
   description,
   required,
   readOnly,
+  plainLabel,
   error,
   className,
   children,
@@ -104,6 +112,8 @@ export function FormField({
   description?: ReactNode;
   required?: boolean;
   readOnly?: boolean;
+  /** No "(opcjonalnie)": the field has a "Brak …" checkbox. */
+  plainLabel?: boolean;
   error?: string;
   className?: string;
   children: ReactNode;
@@ -115,7 +125,7 @@ export function FormField({
       className={cn("gap-1.5 data-[invalid=true]:text-foreground", className)}
     >
       <FieldLabel htmlFor={id} className="font-normal text-foreground">
-        {labelText(label, required, readOnly)}
+        {labelText(label, required, readOnly || plainLabel)}
       </FieldLabel>
       {description && (
         <FieldDescription id={`${id}-desc`}>{description}</FieldDescription>
@@ -126,10 +136,49 @@ export function FormField({
   );
 }
 
-const describedBy = (id: string, description?: unknown, error?: string) =>
-  [description && `${id}-desc`, error && `${id}-err`]
+const describedBy = (
+  id: string,
+  description?: unknown,
+  error?: string,
+  counted?: boolean,
+) =>
+  [description && `${id}-desc`, counted && `${id}-count`, error && `${id}-err`]
     .filter(Boolean)
     .join(" ") || undefined;
+
+/**
+ * "12 / 255 znaków" under a field. For free text (limit of 50 or more), the
+ * last 10% turns to the warning colour and screen readers hear how many
+ * characters are left.
+ */
+export function CharCount({
+  id,
+  length,
+  max,
+}: {
+  id: string;
+  length: number;
+  max: number;
+}) {
+  const left = max - length;
+  // Only free text warns near its limit; a full PESEL or postcode is complete,
+  // not a problem.
+  const near = max >= 50 && left <= Math.floor(max * 0.1);
+  return (
+    <p
+      id={`${id}-count`}
+      className={cn(
+        "text-right text-xs text-muted-foreground",
+        near && "font-bold text-warning",
+      )}
+    >
+      {length} / {max} znaków
+      <span className="sr-only" aria-live="polite">
+        {near ? `Zostało znaków: ${left}.` : ""}
+      </span>
+    </p>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* TEXT_FIELD / NUMBER / DATEPICKER                                    */
@@ -166,22 +215,27 @@ export function TextField({
   const form = useFormApi();
   const noValueKey = `${name}__brak`;
   const noValue = form.values[noValueKey] === true;
-  const { id, value, setValue, error } = useField<string>(name, {
+  const { id, value, setValue, onBlur, error } = useField<string>(name, {
     required:
       required && !readOnly
         ? type === "date"
           ? requiredMessage.date
           : requiredMessage.text
         : undefined,
-    validators,
+    validators: maxLength
+      ? [...(validators ?? []), maxChars(maxLength)]
+      : validators,
     skip: noValue,
     defaultValue,
   });
+  // The counter shows once the field has a value: shown on focus already, it
+  // would vanish on blur from an empty field and shift the page under a click.
+  const counted = !!maxLength && !readOnly && type !== "date" && !!value;
   const aria = {
     id,
     name,
     "aria-invalid": !!error || undefined,
-    "aria-describedby": describedBy(id, description, error),
+    "aria-describedby": describedBy(id, description, error, counted),
     "aria-required": required || undefined,
   };
 
@@ -193,11 +247,17 @@ export function TextField({
       description={description}
       required={required}
       readOnly={readOnly}
+      plainLabel={!!noValueLabel}
       error={error}
       className={className}
     >
       {readOnly ? (
-        <Input {...aria} readOnly value={value ?? ""} />
+        <Input
+          {...aria}
+          readOnly
+          placeholder={placeholder}
+          value={value ?? ""}
+        />
       ) : (
         <InputGroup>
           <InputGroupInput
@@ -211,6 +271,7 @@ export function TextField({
             disabled={noValue}
             value={value ?? ""}
             onChange={(e) => setValue(e.target.value)}
+            onBlur={onBlur}
           />
           {value && type !== "date" && (
             <InputGroupAddon align="inline-end">
@@ -224,6 +285,9 @@ export function TextField({
             </InputGroupAddon>
           )}
         </InputGroup>
+      )}
+      {counted && maxLength && (
+        <CharCount id={id} length={(value ?? "").length} max={maxLength} />
       )}
       {noValueLabel && (
         <Field orientation="horizontal" className="gap-2">
@@ -244,8 +308,18 @@ export function TextField({
   );
 }
 
+/**
+ * Numbers as text with a numeric keyboard: a browser `type="number"` field
+ * hides what was typed when it is not a number, so it could not be checked.
+ */
 export function NumberField(props: Omit<TextFieldProps, "type">) {
-  return <TextField {...props} type="number" inputMode="numeric" />;
+  return (
+    <TextField
+      {...props}
+      inputMode="decimal"
+      validators={[NUMBER, ...(props.validators ?? [])]}
+    />
+  );
 }
 
 export function DateField(props: Omit<TextFieldProps, "type">) {
@@ -266,9 +340,9 @@ export function TextareaField({
   maxLength = 2000,
   className,
 }: BaseFieldProps & { maxLength?: number }) {
-  const { id, value, setValue, error } = useField<string>(name, {
-    required: required ? requiredMessage.text : undefined,
-    validators,
+  const { id, value, setValue, onBlur, error } = useField<string>(name, {
+    required: required && !readOnly ? requiredMessage.text : undefined,
+    validators: [...(validators ?? []), maxChars(maxLength)],
   });
   return (
     <FormField
@@ -287,13 +361,14 @@ export function TextareaField({
         readOnly={readOnly}
         maxLength={maxLength}
         aria-invalid={!!error || undefined}
-        aria-describedby={describedBy(id, description, error)}
+        aria-describedby={describedBy(id, description, error, !readOnly)}
         value={value ?? ""}
         onChange={(e) => setValue(e.target.value)}
+        onBlur={onBlur}
       />
-      <p className="text-right text-xs text-muted-foreground">
-        {(value ?? "").length} / {maxLength} znaków
-      </p>
+      {!readOnly && (
+        <CharCount id={id} length={(value ?? "").length} max={maxLength} />
+      )}
     </FormField>
   );
 }

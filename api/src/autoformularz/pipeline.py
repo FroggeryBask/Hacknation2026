@@ -11,6 +11,7 @@ from autoformularz.check import (
     coverage,
     dedupe,
     drop_broken_conditions,
+    drop_paper_only_fields,
     drop_standard_sections,
     printed_amounts_as_info,
 )
@@ -43,6 +44,7 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     spec, repeated = dedupe(spec)
     spec, standard = drop_standard_sections(spec)
     spec, amounts = printed_amounts_as_info(spec)
+    spec, paper = drop_paper_only_fields(spec)
     spec, conditions = drop_broken_conditions(spec)  # last: the rules above may drop a controlling field
     form, warnings = compile_form(spec, document)
     progress.stage("Sprawdzanie reguł technicznych")
@@ -50,7 +52,10 @@ def from_spec(spec: FormSpec, document: Document | None = None) -> Result:
     errors = sum(i.level == "error" for i in issues)
     progress.item(f"Błędy: {errors}, ostrzeżenia: {len(issues) - errors}")
     return Result(
-        form=form, spec=spec, issues=issues, notes=repeated + standard + amounts + conditions + warnings
+        form=form,
+        spec=spec,
+        issues=issues,
+        notes=repeated + standard + amounts + paper + conditions + warnings,
     )
 
 

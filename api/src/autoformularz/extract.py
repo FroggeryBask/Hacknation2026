@@ -149,15 +149,66 @@ def docx_text(data: bytes) -> str:
 
     A PDF converted to DOCX may put every word in its own text box anchored to the page (material 8:
     651 boxes). Such boxes that follow each other at the same height are joined into one line, left to
-    right (`_join_placed`), so the model gets lines of text instead of single words."""
+    right (`_join_placed`), so the model gets lines of text instead of single words.
+
+    Footnote and endnote marks get their numbers and the notes' text comes at the end, as on a printed
+    page (`_number_note_references`, `_note_lines`)."""
     body = docx.Document(io.BytesIO(data)).element.body
+    notes = _number_note_references(body)
     items: list[str | Placed] = []
     for el in body:
         if el.tag == f"{W}p":
             items.extend(_paragraph_lines(el))
         elif el.tag == f"{W}tbl":
             items.extend(_table_rows(el))
-    return "\n".join(_dedupe(_join_placed(items)))
+    return "\n".join(_dedupe(_join_placed(items)) + _note_lines(data, notes))
+
+
+NOTE_PARTS = {f"{W}footnoteReference": "word/footnotes.xml", f"{W}endnoteReference": "word/endnotes.xml"}
+
+
+def _number_note_references(body) -> dict[tuple[str, str], str]:
+    """Footnote and endnote references are not text in DOCX: Word draws their numbers. Without them the
+    text loses marks like "(nr telefonu/adres e-mail)1)" that say which data are optional (material 1).
+    Each reference is replaced by its number (1, 2, … in order of first use, as Word numbers them); a
+    reference followed by its own custom mark keeps that mark. Returns {(part, note id): number}."""
+    numbers: dict[tuple[str, str], str] = {}
+    counters: dict[str, int] = {}
+    for ref in list(body.iter(*NOTE_PARTS)):
+        if (ref.get(f"{W}customMarkFollows") or "").lower() in ("1", "true", "on"):
+            continue
+        part = NOTE_PARTS[ref.tag]
+        key = (part, ref.get(f"{W}id") or "")
+        if key not in numbers:
+            counters[part] = counters.get(part, 0) + 1
+            numbers[key] = str(counters[part])
+        mark = ref.makeelement(f"{W}t", {})
+        mark.text = numbers[key]
+        ref.getparent().replace(ref, mark)
+    return numbers
+
+
+def _note_lines(data: bytes, numbers: dict[tuple[str, str], str]) -> list[str]:
+    """Text of the referenced footnotes and endnotes, at the end of the document as on a printed page:
+    "1) Dane nieobowiązkowe." (Word draws the note's own mark, so its number is added here)."""
+    if not numbers:
+        return []
+    out: list[str] = []
+    with zipfile.ZipFile(io.BytesIO(data)) as z:
+        names = set(z.namelist())
+        for part in dict.fromkeys(part for part, _ in numbers):
+            if part not in names:
+                continue
+            root = ElementTree.fromstring(z.read(part))
+            tag = "footnote" if part.endswith("footnotes.xml") else "endnote"
+            for note in root.iter(f"{W}{tag}"):
+                number = numbers.get((part, note.get(f"{W}id") or ""))
+                if number is None:
+                    continue
+                text = re.sub(r"\s+", " ", "".join(t.text or "" for t in note.iter(f"{W}t"))).strip()
+                if text:
+                    out.append(f"{number}{text}" if text[0] in ").]" else f"{number}) {text}")
+    return out
 
 
 def _join_placed(items: list[str | Placed]) -> list[str]:

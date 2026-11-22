@@ -175,6 +175,10 @@ class ApplicantSpec(BaseModel):
         default=False, description="The paper form has company/institution data (NIP, REGON, KRS, name)."
     )
     entity_nip_only: bool = Field(default=False, description="Paper form asks only name + NIP of entity.")
+    # Set by the code (presort: the paper mentions PESEL outside the GDPR clause), not by the model. The
+    # COI references follow the paper: material 1 (no PESEL on paper) has none, its visualisation too;
+    # material 5 (PESEL on paper) has it. Default True keeps saved specs as they were.
+    pesel: bool = Field(default=True, description="The paper form asks for a PESEL.")
 
 
 class FormSpec(BaseModel):
@@ -194,15 +198,18 @@ class FormSpec(BaseModel):
         "paper-only text; consecutive blocks with the same role as one range (block..to). Not for field "
         "labels, options or headings (blocks without a role are allowed).",
     )
-    pages: list[PageSpec] = Field(
-        max_length=MAX_PAGES,
-        description="Case-specific pages only (subject of the application), each page once.",
-    )
+    # Before `pages` too: the model writes the statements first. Written after the pages, they were lost
+    # whenever the model kept adding sections (forms 2, 3, 4, 6: "Podpis", "Data", "Podpis", …) and the
+    # answer was cut, and the model then turned them into TAK/NIE fields instead.
     consents: list[str] = Field(
         default_factory=list, description="Statements the applicant confirms (besides the GDPR consent)."
     )
     summary: str | None = Field(default=None, description="Optional info on what happens after sending.")
     signed: bool = True
+    pages: list[PageSpec] = Field(
+        max_length=MAX_PAGES,
+        description="Case-specific pages only (subject of the application), each page once.",
+    )
 
     def roles(self) -> dict[str, Role]:
         """Role of each block, ranges expanded. A later entry wins for a block listed twice."""
@@ -239,4 +246,5 @@ def model_schema() -> dict:
     field = defs["FieldSpec"]
     field["required"] = [*field.get("required", []), "required"]
     field["properties"]["required"].pop("default", None)
+    defs["ApplicantSpec"]["properties"].pop("pesel", None)  # the code decides (presort)
     return schema

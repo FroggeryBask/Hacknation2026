@@ -8,13 +8,15 @@ import {
   ExternalLink,
   FileText,
   LoaderCircle,
+  ShieldAlert,
   TriangleAlert,
   Upload,
   X,
 } from "lucide-react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { AiIcon } from "@/components/form/ai-icon";
+import { ClauseContext, clauseLines } from "@/components/form/clause";
 import { CoiFormView } from "@/components/form/coi-form";
 import { FieldError, InfoSection } from "@/components/form/fields";
 import { FormSection, Stepper } from "@/components/form/layout";
@@ -31,6 +33,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import type { CoiForm } from "@/lib/form/coi";
+import { type Finding, scanForm } from "@/lib/form/safety";
+import { JsonView } from "./json-view";
 
 // Same list as api/src/autoformularz/upload.py (EXTENSIONS).
 const FORMATS = ["pdf", "doc", "docx", "ods", "xlsx", "jpg", "jpeg", "png"];
@@ -49,7 +53,16 @@ type Issue = {
   message: string;
   path: string;
 };
-type Result = { form: CoiForm; issues: Issue[]; notes: string[] };
+type Result = {
+  form: CoiForm;
+  issues: Issue[];
+  notes: string[];
+  // `?details=true`: source blocks and the model's spec (roles mark the GDPR clause).
+  document?: { blocks: { id: string; text: string }[] };
+  spec?: {
+    block_roles?: { block: string; to?: string | null; role: string }[];
+  };
+};
 /** A pipeline stage, or what the model or the code found in it (api progress.py). */
 type Progress = { kind: "stage" | "item"; text: string };
 type Job = {
@@ -145,7 +158,28 @@ const formatSize = (b: number) =>
 const extension = (name: string) =>
   name.includes(".") ? (name.split(".").pop()?.toLowerCase() ?? "") : "";
 
+// Task, "Walidacja nazwy pliku" (same rules as api/src/autoformularz/upload.py).
+const MAX_NAME_LENGTH = 250;
+const FORBIDDEN_CHARS = [
+  ";",
+  ":",
+  ">",
+  "<",
+  "/",
+  "\\",
+  "|",
+  "'",
+  "*",
+  "%",
+  "$",
+];
+
 function checkFile(f: File, maxSizeMb: number): string | undefined {
+  if (f.name.length > MAX_NAME_LENGTH)
+    return `Nazwa pliku jest za długa (${f.name.length} znaków). Może mieć najwyżej ${MAX_NAME_LENGTH} znaków. Zmień nazwę pliku i dodaj go ponownie.`;
+  const bad = FORBIDDEN_CHARS.filter((c) => f.name.includes(c));
+  if (bad.length)
+    return `Nazwa pliku zawiera niedozwolone znaki: ${bad.join(" ")}. Zmień nazwę pliku i dodaj go ponownie.`;
   if (!FORMATS.includes(extension(f.name)))
     return "Ten format pliku nie jest obsługiwany. Wybierz plik PDF, DOC, DOCX, ODS, XLSX, JPG lub PNG.";
   if (f.size === 0) return "Plik jest pusty.";
@@ -173,6 +207,37 @@ function download(form: CoiForm, sourceName: string) {
   a.download = `${base}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/** Findings of the safety scan: what and where, to check before publishing. */
+function Findings({ findings }: { findings: Finding[] }) {
+  return (
+    <section
+      aria-labelledby="findings-title"
+      className="flex flex-col gap-2 rounded-lg border-2 border-warning p-4"
+    >
+      <h3
+        id="findings-title"
+        className="flex items-center gap-2 text-sm font-bold"
+      >
+        <ShieldAlert className="size-4 shrink-0 text-warning" aria-hidden />
+        Treść do sprawdzenia: {findings.length}
+      </h3>
+      <p className="text-sm text-muted-foreground">
+        Te fragmenty nie wyglądają na zwykłą treść formularza urzędowego. Mogą
+        pochodzić z dokumentu, który próbuje wpłynąć na model AI (prompt
+        injection), albo z błędu modelu.
+      </p>
+      <ul className="flex flex-col gap-2 text-sm">
+        {findings.map((f) => (
+          <li key={`${f.code}-${f.where}-${f.message}`}>
+            {f.message}
+            <span className="block text-muted-foreground">{f.where}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
 }
 
 function useElapsed(running: boolean) {
@@ -254,6 +319,7 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
   const [dragging, setDragging] = useState(false);
   const [state, setState] = useState<State>({ step: "idle" });
   const [run, setRun] = useState(0);
+  const [view, setView] = useState<"form" | "json">("form");
   const input = useRef<HTMLInputElement>(null);
   const abort = useRef<AbortController>(null);
   // Move focus to the new step only after a user action, not on page load.
@@ -360,6 +426,16 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
   };
 
   const result = state.step === "done" ? state.result : undefined;
+  // Content the model may have copied from a hostile document (safety.ts).
+  const findings = useMemo(
+    () => (result ? scanForm(result.form) : []),
+    [result],
+  );
+  // The information clause cut from the document: shown behind the consent's link.
+  const clause = useMemo(
+    () => clauseLines(result?.document?.blocks, result?.spec?.block_roles),
+    [result],
+  );
   const errors = result?.issues.filter((i) => i.level === "error") ?? [];
   const warnings = result?.issues.filter((i) => i.level === "warning") ?? [];
   const stepLabel = (i: number) => `Krok ${i + 1}: ${STEPS[i]}`;
@@ -549,6 +625,8 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                         <span className="font-bold">{result.form.title}</span>
                         {" · "}
                         Błędy: {errors.length} · Ostrzeżenia: {warnings.length}
+                        {findings.length > 0 &&
+                          ` · Treść do sprawdzenia: ${findings.length}`}
                       </p>
                     }
                   >
@@ -608,13 +686,57 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
                         </ul>
                       </InfoSection>
                     )}
+                    {findings.length > 0 && <Findings findings={findings} />}
                     <div className="flex flex-wrap gap-3">
-                      <Button
-                        onClick={() => file && download(result.form, file.name)}
-                      >
-                        <Download data-icon="inline-start" aria-hidden />
-                        Pobierz JSON
-                      </Button>
+                      {findings.length > 0 ? (
+                        <AlertDialog>
+                          <AlertDialogTrigger
+                            render={
+                              <Button>
+                                <Download
+                                  data-icon="inline-start"
+                                  aria-hidden
+                                />
+                                Pobierz JSON
+                              </Button>
+                            }
+                          />
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Formularz zawiera treść do sprawdzenia
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Znaleźliśmy miejsca do sprawdzenia:{" "}
+                                {findings.length}. Mogą pochodzić z dokumentu
+                                źródłowego, który próbuje wpłynąć na model AI.
+                                Sprawdź je przed publikacją formularza.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>
+                                Wróć i sprawdź
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() =>
+                                  file && download(result.form, file.name)
+                                }
+                              >
+                                Pobierz mimo to
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      ) : (
+                        <Button
+                          onClick={() =>
+                            file && download(result.form, file.name)
+                          }
+                        >
+                          <Download data-icon="inline-start" aria-hidden />
+                          Pobierz JSON
+                        </Button>
+                      )}
                       <AlertDialog>
                         <AlertDialogTrigger
                           render={
@@ -661,10 +783,34 @@ export function UploadForm({ maxSizeMb }: { maxSizeMb: number }) {
             transition={{ delay: 0.25 }}
             className="flex flex-1 flex-col border-t"
           >
-            <p className="mx-auto w-full max-w-2xl px-4 pt-8 text-sm font-bold uppercase tracking-wide text-muted-foreground">
-              Podgląd e-formularza
-            </p>
-            <CoiFormView key={run} form={result.form} />
+            <fieldset className="mx-auto flex w-full max-w-2xl gap-2 px-4 pt-8">
+              <legend className="sr-only">Widok wyniku</legend>
+              <Button
+                variant={view === "form" ? "default" : "outline"}
+                size="sm"
+                aria-pressed={view === "form"}
+                onClick={() => setView("form")}
+              >
+                Podgląd e-formularza
+              </Button>
+              <Button
+                variant={view === "json" ? "default" : "outline"}
+                size="sm"
+                aria-pressed={view === "json"}
+                onClick={() => setView("json")}
+              >
+                JSON
+              </Button>
+            </fieldset>
+            {view === "form" ? (
+              <ClauseContext.Provider value={clause}>
+                <CoiFormView key={run} form={result.form} />
+              </ClauseContext.Provider>
+            ) : (
+              <div className="mx-auto w-full max-w-2xl px-4 py-6">
+                <JsonView data={result.form} />
+              </div>
+            )}
           </motion.div>
         )}
       </div>
