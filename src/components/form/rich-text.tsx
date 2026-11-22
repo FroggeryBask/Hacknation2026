@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, type ReactNode, useSyncExternalStore } from "react";
+import { ClauseLink, isClauseLink } from "./clause";
 import { ExternalLinkText } from "./fields";
 
 /*
@@ -52,6 +53,7 @@ function convert(node: ChildNode, key: number, inline: boolean): ReactNode {
       const href = el.getAttribute("href")?.trim() ?? "";
       const text = el.textContent?.trim();
       if (!text) return null; // icon-only anchors (img) from the editor
+      if (isClauseLink(href)) return <ClauseLink key={key}>{text}</ClauseLink>;
       return /^https?:\/\//.test(href) ? (
         <ExternalLinkText key={key} href={href}>
           {text}
