@@ -1,7 +1,7 @@
 {
   "source": "materialy/9. Wniosek o przyznanie stypendium, nagrody lub wyróżnienia sportowego Rady Miasta (Połączenie 3 wniosków w 1) - formularze do cyfryzacji/Wniosek o przyznanie stypendium.docx",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,34 +41,19 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Pominięto powtórzoną sekcję „Opinia macierzystego klubu sportowego”.",
-    "Pominięto powtórzoną sekcję „Dodatkowe informacje”.",
-    "„Inna dyscyplina sportowa”: warunek na nieistniejącej opcji „Inna dyscyplina” usunięty, pola nieobowiązkowe.",
-    "Strona „Rodzaj wniosku” ma mało pól: jej sekcje są na stronie „Dane wnioskodawcy”."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 267,
-    "referenced": 153,
+    "referenced": 161,
     "unreferenced": [
+      "b5",
+      "b9",
       "b10",
       "b11",
       "b12",
-      "b24",
-      "b35",
-      "b36",
-      "b41",
-      "b43",
-      "b48",
-      "b71",
-      "b73",
-      "b77",
-      "b79",
-      "b81",
-      "b83",
-      "b84",
-      "b86",
       "b90",
+      "b95",
+      "b101",
       "b104",
       "b105",
       "b106",
@@ -83,6 +68,7 @@
       "b115",
       "b116",
       "b117",
+      "b118",
       "b119",
       "b120",
       "b121",
@@ -93,6 +79,7 @@
       "b126",
       "b127",
       "b128",
+      "b129",
       "b130",
       "b131",
       "b132",
@@ -105,16 +92,20 @@
       "b139",
       "b140",
       "b141",
+      "b142",
       "b143",
       "b144",
       "b145",
+      "b146",
       "b147",
+      "b148",
       "b149",
       "b150",
       "b151",
       "b152",
-      "b154",
       "b158",
+      "b163",
+      "b169",
       "b172",
       "b173",
       "b174",
@@ -129,6 +120,7 @@
       "b183",
       "b184",
       "b185",
+      "b186",
       "b187",
       "b188",
       "b189",
@@ -139,46 +131,33 @@
       "b194",
       "b195",
       "b196",
-      "b198",
-      "b199",
-      "b204",
-      "b206",
-      "b209",
-      "b211",
-      "b213",
-      "b214",
-      "b215",
-      "b216",
-      "b218",
-      "b220",
+      "b197",
       "b221",
+      "b222",
       "b223",
+      "b224",
       "b225",
       "b226",
+      "b227",
       "b228",
+      "b229",
       "b230",
       "b231",
       "b232",
+      "b233",
       "b234",
+      "b235",
       "b236",
       "b237",
-      "b240",
-      "b246",
-      "b253"
+      "b251",
+      "b259",
+      "b265"
     ],
     "candidates": 158,
     "candidatesWithoutField": [
+      "b5",
       "b36",
-      "b41",
-      "b43",
-      "b73",
-      "b77",
-      "b83",
-      "b84",
-      "b92",
       "b95",
-      "b98",
-      "b99",
       "b101",
       "b109",
       "b110",
@@ -206,10 +185,7 @@
       "b145",
       "b151",
       "b152",
-      "b160",
       "b163",
-      "b166",
-      "b167",
       "b169",
       "b177",
       "b178",
@@ -227,25 +203,14 @@
       "b193",
       "b194",
       "b195",
-      "b204",
-      "b206",
-      "b209",
-      "b213",
-      "b218",
-      "b220",
       "b223",
       "b225",
       "b228",
       "b231",
       "b234",
       "b237",
-      "b240",
-      "b248",
       "b251",
-      "b256",
       "b259",
-      "b262",
-      "b263",
       "b265"
     ],
     "unknownRefs": []
@@ -257,56 +222,6 @@
     "costUsd": 0
   },
   "proposedDictionaries": [
-    {
-      "dictionaryName": "SPOSOBY_DORECZENIA",
-      "title": "Sposób doręczenia korespondencji",
-      "description": "Jak urząd ma przekazać odpowiedź lub decyzję.",
-      "structure": [
-        {
-          "name": "kod",
-          "type": "string",
-          "description": "Stały identyfikator pozycji (wartość zapisywana w odpowiedzi)"
-        },
-        {
-          "name": "nazwa",
-          "type": "string",
-          "description": "Tekst widoczny na liście"
-        }
-      ],
-      "fieldTypes": [
-        "SELECT",
-        "RADIO",
-        "CHECKBOX"
-      ],
-      "entries": [
-        {
-          "kod": "E_DORECZENIA",
-          "nazwa": "e-Doręczenia"
-        },
-        {
-          "kod": "SKRZYNKA_EPUAP",
-          "nazwa": "skrzynka ePUAP"
-        },
-        {
-          "kod": "POCZTA_TRADYCYJNA",
-          "nazwa": "poczta tradycyjna"
-        },
-        {
-          "kod": "ODBIOR_OSOBISTY_W_URZEDZIE",
-          "nazwa": "odbiór osobisty w urzędzie"
-        }
-      ],
-      "source": null,
-      "usage": [
-        {
-          "page": "Dane wnioskodawcy",
-          "section": "Dane klubu sportowego",
-          "field": "Preferowany sposób korespondencji z urzędem",
-          "fieldType": "SINGLE_CHOICE",
-          "change": "pole listy rozwijanej z dictionaryName „SPOSOBY_DORECZENIA” zamiast opcji wpisanych w polu"
-        }
-      ]
-    },
     {
       "dictionaryName": "DYSCYPLINY_SPORTOWE",
       "title": "Dyscypliny sportowe",
@@ -331,83 +246,83 @@
       "entries": [
         {
           "kod": "GIMNASTYKA_ARTYSTYCZNA",
-          "nazwa": "gimnastyka artystyczna"
+          "nazwa": "Gimnastyka artystyczna"
         },
         {
           "kod": "HOKEJ",
-          "nazwa": "hokej"
+          "nazwa": "Hokej"
         },
         {
           "kod": "KARATE",
-          "nazwa": "karate"
+          "nazwa": "Karate"
         },
         {
           "kod": "KOLARSTWO",
-          "nazwa": "kolarstwo"
+          "nazwa": "Kolarstwo"
         },
         {
           "kod": "KOSZYKOWKA",
-          "nazwa": "koszykówka"
+          "nazwa": "Koszykówka"
         },
         {
           "kod": "LEKKOATLETYKA",
-          "nazwa": "lekkoatletyka"
+          "nazwa": "Lekkoatletyka"
         },
         {
           "kod": "LUCZNICTWO",
-          "nazwa": "łucznictwo"
+          "nazwa": "Łucznictwo"
         },
         {
           "kod": "LYZWIARSTWO",
-          "nazwa": "łyżwiarstwo"
+          "nazwa": "Łyżwiarstwo"
         },
         {
           "kod": "NARCIARSTWO_KLASYCZNE",
-          "nazwa": "narciarstwo klasyczne"
+          "nazwa": "Narciarstwo klasyczne"
         },
         {
           "kod": "PILKA_NOZNA",
-          "nazwa": "piłka nożna"
+          "nazwa": "Piłka nożna"
         },
         {
           "kod": "PILKA_RECZNA",
-          "nazwa": "piłka ręczna"
+          "nazwa": "Piłka ręczna"
         },
         {
           "kod": "PILKA_SIATKOWA",
-          "nazwa": "piłka siatkowa"
+          "nazwa": "Piłka siatkowa"
         },
         {
           "kod": "PILKA_WODNA",
-          "nazwa": "piłka wodna"
+          "nazwa": "Piłka wodna"
         },
         {
           "kod": "SPORT_MOTOCYKLOWY",
-          "nazwa": "sport motocyklowy"
+          "nazwa": "Sport motocyklowy"
         },
         {
           "kod": "SPORTY_WALKI",
-          "nazwa": "sporty walki"
+          "nazwa": "Sporty walki"
         },
         {
           "kod": "SPORTY_WODNE",
-          "nazwa": "sporty wodne"
+          "nazwa": "Sporty wodne"
         },
         {
           "kod": "TENIS_STOLOWY",
-          "nazwa": "tenis stołowy"
+          "nazwa": "Tenis stołowy"
         },
         {
           "kod": "TENIS_ZIEMNY",
-          "nazwa": "tenis ziemny"
+          "nazwa": "Tenis ziemny"
         },
         {
           "kod": "UNIHOKEJ",
-          "nazwa": "unihokej"
+          "nazwa": "Unihokej"
         },
         {
           "kod": "ZAPASY",
-          "nazwa": "zapasy"
+          "nazwa": "Zapasy"
         }
       ],
       "source": "Wykaz dyscyplin polskich związków sportowych (Ministerstwo Sportu); poniżej pozycje z formularza.",
@@ -418,13 +333,6 @@
           "field": "Dyscypliny sportowe",
           "fieldType": "MULTI_CHOICE",
           "change": "pole listy rozwijanej z dictionaryName „DYSCYPLINY_SPORTOWE” zamiast opcji wpisanych w polu"
-        },
-        {
-          "page": "Dane sportowca",
-          "section": "Dyscypliny sportowe",
-          "field": "Inna dyscyplina sportowa",
-          "fieldType": "TEXT",
-          "change": "pole listy rozwijanej z dictionaryName „DYSCYPLINY_SPORTOWE” zamiast pola tekstowego"
         }
       ]
     }

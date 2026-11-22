@@ -1,7 +1,7 @@
 {
   "source": "materialy/6. Wniosek o wydanie zezwolenia na zajęcie pasa drogowego w celu prowadzenia robót - formularze do cyfryzacji/Wniosek o wydanie zezwolenia na zajęcie pasa drogowego.docx",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,15 +41,11 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Sekcja „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 49,
-    "referenced": 48,
-    "unreferenced": [
-      "b20"
-    ],
+    "referenced": 49,
+    "unreferenced": [],
     "candidates": 20,
     "candidatesWithoutField": [],
     "unknownRefs": []

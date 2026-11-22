@@ -1,7 +1,7 @@
 {
   "source": "materialy/3. Wniosek o wydanie zaświadczenia - formularze do cyfryzacji/Wniosek o wydanie zaświadczenia.docx",
   "sourceFormat": "docx",
-  "model": "zapisany FormSpec",
+  "model": "deepinfra/deepseek-ai/DeepSeek-V4.1-Flash-1017",
   "errors": 0,
   "issues": [
     {
@@ -41,13 +41,16 @@
       "path": "Kontakt i zgody › Dane do kontaktu › Adres e-mail"
     }
   ],
-  "notes": [
-    "Sekcja „Dane wnioskodawcy” jest w części standardowej formularza (pominięta)."
-  ],
+  "notes": [],
   "coverage": {
     "blocks": 27,
-    "referenced": 27,
-    "unreferenced": [],
+    "referenced": 23,
+    "unreferenced": [
+      "b5",
+      "b6",
+      "b7",
+      "b13"
+    ],
     "candidates": 11,
     "candidatesWithoutField": [
       "b24"

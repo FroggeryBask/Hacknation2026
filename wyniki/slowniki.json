@@ -79,57 +79,6 @@
     ]
   },
   {
-    "dictionaryName": "SPOSOBY_DORECZENIA",
-    "title": "Sposób doręczenia korespondencji",
-    "description": "Jak urząd ma przekazać odpowiedź lub decyzję.",
-    "structure": [
-      {
-        "name": "kod",
-        "type": "string",
-        "description": "Stały identyfikator pozycji (wartość zapisywana w odpowiedzi)"
-      },
-      {
-        "name": "nazwa",
-        "type": "string",
-        "description": "Tekst widoczny na liście"
-      }
-    ],
-    "fieldTypes": [
-      "SELECT",
-      "RADIO",
-      "CHECKBOX"
-    ],
-    "entries": [
-      {
-        "kod": "E_DORECZENIA",
-        "nazwa": "e-Doręczenia"
-      },
-      {
-        "kod": "SKRZYNKA_EPUAP",
-        "nazwa": "skrzynka ePUAP"
-      },
-      {
-        "kod": "POCZTA_TRADYCYJNA",
-        "nazwa": "poczta tradycyjna"
-      },
-      {
-        "kod": "ODBIOR_OSOBISTY_W_URZEDZIE",
-        "nazwa": "odbiór osobisty w urzędzie"
-      }
-    ],
-    "source": null,
-    "usage": [
-      {
-        "form": 9,
-        "page": "Dane wnioskodawcy",
-        "section": "Dane klubu sportowego",
-        "field": "Preferowany sposób korespondencji z urzędem",
-        "fieldType": "SINGLE_CHOICE",
-        "change": "pole listy rozwijanej z dictionaryName „SPOSOBY_DORECZENIA” zamiast opcji wpisanych w polu"
-      }
-    ]
-  },
-  {
     "dictionaryName": "DYSCYPLINY_SPORTOWE",
     "title": "Dyscypliny sportowe",
     "description": "Dyscyplina uprawiana przez sportowca.",
@@ -153,83 +102,83 @@
     "entries": [
       {
         "kod": "GIMNASTYKA_ARTYSTYCZNA",
-        "nazwa": "gimnastyka artystyczna"
+        "nazwa": "Gimnastyka artystyczna"
       },
       {
         "kod": "HOKEJ",
-        "nazwa": "hokej"
+        "nazwa": "Hokej"
       },
       {
         "kod": "KARATE",
-        "nazwa": "karate"
+        "nazwa": "Karate"
       },
       {
         "kod": "KOLARSTWO",
-        "nazwa": "kolarstwo"
+        "nazwa": "Kolarstwo"
       },
       {
         "kod": "KOSZYKOWKA",
-        "nazwa": "koszykówka"
+        "nazwa": "Koszykówka"
       },
       {
         "kod": "LEKKOATLETYKA",
-        "nazwa": "lekkoatletyka"
+        "nazwa": "Lekkoatletyka"
       },
       {
         "kod": "LUCZNICTWO",
-        "nazwa": "łucznictwo"
+        "nazwa": "Łucznictwo"
       },
       {
         "kod": "LYZWIARSTWO",
-        "nazwa": "łyżwiarstwo"
+        "nazwa": "Łyżwiarstwo"
       },
       {
         "kod": "NARCIARSTWO_KLASYCZNE",
-        "nazwa": "narciarstwo klasyczne"
+        "nazwa": "Narciarstwo klasyczne"
       },
       {
         "kod": "PILKA_NOZNA",
-        "nazwa": "piłka nożna"
+        "nazwa": "Piłka nożna"
       },
       {
         "kod": "PILKA_RECZNA",
-        "nazwa": "piłka ręczna"
+        "nazwa": "Piłka ręczna"
       },
       {
         "kod": "PILKA_SIATKOWA",
-        "nazwa": "piłka siatkowa"
+        "nazwa": "Piłka siatkowa"
       },
       {
         "kod": "PILKA_WODNA",
-        "nazwa": "piłka wodna"
+        "nazwa": "Piłka wodna"
       },
       {
         "kod": "SPORT_MOTOCYKLOWY",
-        "nazwa": "sport motocyklowy"
+        "nazwa": "Sport motocyklowy"
       },
       {
         "kod": "SPORTY_WALKI",
-        "nazwa": "sporty walki"
+        "nazwa": "Sporty walki"
       },
       {
         "kod": "SPORTY_WODNE",
-        "nazwa": "sporty wodne"
+        "nazwa": "Sporty wodne"
       },
       {
         "kod": "TENIS_STOLOWY",
-        "nazwa": "tenis stołowy"
+        "nazwa": "Tenis stołowy"
       },
       {
         "kod": "TENIS_ZIEMNY",
-        "nazwa": "tenis ziemny"
+        "nazwa": "Tenis ziemny"
       },
       {
         "kod": "UNIHOKEJ",
-        "nazwa": "unihokej"
+        "nazwa": "Unihokej"
       },
       {
         "kod": "ZAPASY",
-        "nazwa": "zapasy"
+        "nazwa": "Zapasy"
       }
     ],
     "source": "Wykaz dyscyplin polskich związków sportowych (Ministerstwo Sportu); poniżej pozycje z formularza.",
@@ -241,14 +190,6 @@
         "field": "Dyscypliny sportowe",
         "fieldType": "MULTI_CHOICE",
         "change": "pole listy rozwijanej z dictionaryName „DYSCYPLINY_SPORTOWE” zamiast opcji wpisanych w polu"
-      },
-      {
-        "form": 9,
-        "page": "Dane sportowca",
-        "section": "Dyscypliny sportowe",
-        "field": "Inna dyscyplina sportowa",
-        "fieldType": "TEXT",
-        "change": "pole listy rozwijanej z dictionaryName „DYSCYPLINY_SPORTOWE” zamiast pola tekstowego"
       }
     ]
   }

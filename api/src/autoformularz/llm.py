@@ -74,6 +74,8 @@ dostają rolę w `block_roles` (INSTRUCTION, SKIP). Wyjątek: adres lub dane, kt
   z sytuacjami, a dane dla każdej sytuacji jako pola z `show_if` na tej opcji.
 - Oświadczenie, które można zaznaczyć albo nie, i które zmienia sprawę (np. ulga, zwolnienie), to pole
   SINGLE_CHOICE z opcjami TAK/NIE, nie `consents`.
+- Słowa rozdzielone ukośnikiem z odnośnikiem do „niepotrzebne skreślić” (np. „wynajem/użyczenie*”,
+  „pies/suka”) to wybór jednej z nich: pole SINGLE_CHOICE z tymi opcjami.
 - Pola pokazywane warunkowo (np. „jeśli zaznaczono TAK, podaj…”) opisz przez `show_if` z etykietą pola wyboru
   i wartością opcji.
 - Gdy dane się powtarzają (kilka osób, pojazdów, działek, zawodów), użyj sekcji z `repeating: true`.
@@ -267,7 +269,7 @@ def _call_ollama(
         "think": False,
         "keep_alive": settings.llm_keep_alive,
         "options": {
-            "temperature": 0,
+            "temperature": settings.llm_temperature,
             "num_ctx": settings.llm_num_ctx,
             "num_predict": settings.llm_max_tokens,
         },
@@ -465,7 +467,7 @@ def _call_eden(
     url = f"{settings.eden_base_url.rstrip('/')}/chat/completions"
     payload = {
         "model": settings.eden_model,
-        "temperature": 0,
+        "temperature": settings.llm_temperature,
         "max_tokens": settings.llm_max_tokens,
         # /no_think is a Qwen3 switch; other models (DeepSeek) only get reasoning_effort
         "messages": _eden_messages(

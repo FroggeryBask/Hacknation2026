@@ -605,7 +605,10 @@ class Standard:
             "Jeśli widzisz uzupełnione dane, sprawdź, czy są poprawne. Możesz je zmienić lub usunąć.",
         )
         consents = [
-            {"description": html(PAPER_REF.sub("", text)), "required": not OPTIONAL_CONSENT.search(text)}
+            {
+                "description": html(PAPER_REF.sub("", text)),
+                "required": not OPTIONAL_CONSENT.search(text) and text not in self.spec.optional_consents,
+            }
             for text in self.spec.consents
         ]
         consents.append(
