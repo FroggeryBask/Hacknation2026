@@ -257,3 +257,40 @@ def test_pesel_only_when_the_paper_asks():
         data = path.read_bytes()
         p = presort(extract(validate_upload(path.name, data, 50 * 2**20), data))
         assert p.pesel is asks, pattern
+
+
+# ---------------------------------------------------------------- template tail, statements first
+
+
+def test_statements_come_before_pages_in_the_model_schema():
+    from autoformularz.spec import model_schema
+
+    keys = list(model_schema()["properties"])
+    assert keys.index("consents") < keys.index("pages")
+
+
+def test_template_sections_after_the_form_stop_the_stream():
+    def section(title, label):
+        return json.dumps({"title": title, "fields": [{"label": label, "kind": "TEXT", "required": True}]})
+
+    own = [section("Opłata skarbowa", "Kwota"), section("Uzasadnienie", "Uzasadnienie")]
+    # Long enough to pass a check point (every REPEAT_CHECK_CHARS characters) after the tail began.
+    tail = [
+        section(t, f"{t} wnioskodawcy")
+        for t in ("Dane kontaktowe", "Podpis", "Data", "Podgląd", "Podpis", "Data")
+    ] * 3
+    head = '{"title": "Wniosek", "authority_kind": "organ", "authority_name": "Wójt", "consents": ["Znam regulamin"], "pages": [{"title": "Opłata", "sections": ['
+    text = head + ", ".join(own + tail) + "]}]}"
+    answer = Answer()
+    stopped = None
+    try:
+        for i in range(0, len(text), 40):
+            answer.add(text[i : i + 40])
+    except LLMError as e:
+        stopped = e
+    assert stopped is not None
+    spec = salvage(stopped.partial)
+    assert spec.consents == ["Znam regulamin"]
+    out, _ = drop_paper_only_fields(spec)
+    titles = [s.title for p in out.pages for s in p.sections]
+    assert titles[:2] == ["Opłata skarbowa", "Uzasadnienie"] and "Podpis" not in titles

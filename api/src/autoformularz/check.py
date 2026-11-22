@@ -166,6 +166,22 @@ def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
 # personal, address or contact data or paper-only items. "Oświadczenia wnioskodawcy" (statements) or
 # "Miejsce utrzymywania psa" (subject data) stay. A contact section counts only under a generic title:
 # "Osoba do kontaktu w sprawie najmu" is subject data, not the applicant's contact.
+# Sections the compiler or the platform adds, or that exist only on paper: signature, preview, date, the
+# GDPR consent and clause. A model that has described the form's own sections often goes on writing these
+# (forms 2, 3, 4, 6), then loops on them; the canon drops them and the stream stops on them (llm.py).
+PLATFORM_TITLE = re.compile(
+    r"^\s*(podpis\w*( wnioskodawcy)?|podgl[aą]d\w*( i podpis)?|data( i podpis)?|miejscowo\w+ i data|"
+    r"klauzul\w*( informacyjn\w*)?|rodo|zgod\w* na przetwarzanie( danych( osobowych)?)?|"
+    r"przetwarzanie danych osobowych|ochrona danych osobowych)\s*$",
+    re.IGNORECASE,
+)
+# PLATFORM_TITLE plus the template's applicant and contact parts: the end of the form's own sections.
+TEMPLATE_TITLE = re.compile(
+    PLATFORM_TITLE.pattern.removesuffix(r")\s*$")
+    + r"|dane (wnioskodawcy|kontaktowe|do kontaktu|pe[lł]nomocnika)|kontakt|wnioskodawca)\s*$",
+    re.IGNORECASE,
+)
+
 STANDARD_TITLE = re.compile(
     r"wnioskodawc|pełnomocni|składając|^\s*(dane kontaktowe|dane do kontaktu|kontakt)\s*$"
     r"|^\s*adres (zamieszkania|siedziby)(\s*/\s*(zamieszkania|siedziby))?\s*$",
@@ -400,6 +416,9 @@ def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) 
     for page in spec.pages:
         sections = []
         for s in page.sections:
+            if PLATFORM_TITLE.match(s.title) and s.show_if is None:
+                notes.append(f"Pominięto sekcję „{s.title}”: dodaje ją platforma lub jest tylko na papierze.")
+                continue
             fields = [f for f in s.fields if not drop(f, s.title)]
             if fields:
                 sections.append(s.model_copy(update={"fields": fields}))

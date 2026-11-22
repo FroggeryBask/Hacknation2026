@@ -198,15 +198,18 @@ class FormSpec(BaseModel):
         "paper-only text; consecutive blocks with the same role as one range (block..to). Not for field "
         "labels, options or headings (blocks without a role are allowed).",
     )
-    pages: list[PageSpec] = Field(
-        max_length=MAX_PAGES,
-        description="Case-specific pages only (subject of the application), each page once.",
-    )
+    # Before `pages` too: the model writes the statements first. Written after the pages, they were lost
+    # whenever the model kept adding sections (forms 2, 3, 4, 6: "Podpis", "Data", "Podpis", …) and the
+    # answer was cut, and the model then turned them into TAK/NIE fields instead.
     consents: list[str] = Field(
         default_factory=list, description="Statements the applicant confirms (besides the GDPR consent)."
     )
     summary: str | None = Field(default=None, description="Optional info on what happens after sending.")
     signed: bool = True
+    pages: list[PageSpec] = Field(
+        max_length=MAX_PAGES,
+        description="Case-specific pages only (subject of the application), each page once.",
+    )
 
     def roles(self) -> dict[str, Role]:
         """Role of each block, ranges expanded. A later entry wins for a block listed twice."""

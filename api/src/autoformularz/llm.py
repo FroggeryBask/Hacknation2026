@@ -15,6 +15,7 @@ import httpx
 from pydantic import ValidationError
 
 from autoformularz import progress
+from autoformularz.check import TEMPLATE_TITLE
 from autoformularz.config import Settings
 from autoformularz.document import FILL_LINE, Document
 from autoformularz.spec import FormSpec, model_schema
@@ -332,6 +333,13 @@ class Answer:
             if found and first_repeat(found[1]):
                 log.warning("Model started repeating sections: stopped after %d characters.", self.size)
                 raise LLMError("LLM_TRUNCATED", "Model zaczął powtarzać sekcje.", partial=text)
+            # The form's own sections are done and the model goes on with the template's ("Dane
+            # kontaktowe", "Podpis", "Data", "Podpis", …): stop, nothing after them belongs to the form.
+            if found and template_tail(found[1]) >= TEMPLATE_TAIL:
+                log.warning(
+                    "Model started writing template sections: stopped after %d characters.", self.size
+                )
+                raise LLMError("LLM_TRUNCATED", "Model zaczął dopisywać części szablonu.", partial=text)
             # A loop inside one section: the same field again and again (form 1: "Numer porządkowy" 22
             # times). The section never closes, so the check above never sees it.
             if field_loop(text) is not None:
@@ -541,8 +549,22 @@ def first_repeat(pages: list[dict]) -> tuple[int, int] | None:
     return None
 
 
-# A field (label and source blocks) written this many times in the open section is a loop. A real section repeats a label at
-# most twice in a row of a table, and those rows point to other blocks; three is never seen on the materials.
+TEMPLATE_TAIL = 2
+
+
+def template_tail(pages: list[dict]) -> int:
+    """How many of the last complete sections in a row are template or paper-only sections
+    (check.TEMPLATE_TITLE), after at least one section of the form's own."""
+    titles = [str(s.get("title") or "") for p in pages for s in p["sections"] if isinstance(s, dict)]
+    for run, title in enumerate(reversed(titles)):
+        if not TEMPLATE_TITLE.match(title):
+            return run
+    return 0  # only template sections: nothing of the form's own yet
+
+
+# A field (label and source blocks) written this many times in the open section is a loop. A real section
+# repeats a label at most twice in a row of a table, and those rows point to other blocks; three is never
+# seen on the materials.
 FIELD_LOOP = 3
 _FIELDS = re.compile(r'"fields"\s*:\s*\[')
 
