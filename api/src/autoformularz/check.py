@@ -103,6 +103,7 @@ def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
     seen_pages: set[str] = set()
     # section key -> (list holding the kept copy, its index): the kept copy may get a wider condition
     seen_sections: dict[tuple[str, tuple[str, ...]], tuple[list, int]] = {}
+    seen_fields: set[tuple[str, tuple[str, ...]]] = set()  # (label, source blocks) of kept sections
     pages = []
     for page in spec.pages:
         key = page.model_dump_json()
@@ -126,6 +127,18 @@ def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
                 labels.append(f.label)
                 fields.append(f)
             skey = (section.title, tuple(labels))
+            # The same fields from the same source blocks under another title: a loop that renamed the
+            # section (form 1: "Lokalizacja budynku" written again as "Informacje o budynku").
+            content = len(fields) >= 2 and all(f.blocks for f in fields)
+            ckey = ("\0blocks", tuple((f.label, *f.blocks) for f in fields))
+            if content and ckey in seen_sections:
+                skey = ckey
+            # A shorter copy: every field (label and source blocks) already in an earlier section, and no
+            # condition of its own (form 1 as a spreadsheet: "Dane o budynku" with 2 of the 4 building fields).
+            parts = {(f.label, tuple(f.blocks)) for f in fields}
+            if fields and section.show_if is None and all(f.blocks for f in fields) and parts <= seen_fields:
+                notes.append(f"Pominięto sekcję „{section.title}”: jej pola są już we wcześniejszej sekcji.")
+                continue
             if skey in seen_sections:
                 where, i = seen_sections[skey]
                 kept = where[i]
@@ -136,6 +149,9 @@ def dedupe(spec: FormSpec) -> tuple[FormSpec, list[str]]:
                 notes.append(f"Pominięto powtórzoną sekcję „{section.title}”.")
                 continue
             seen_sections[skey] = (sections, len(sections))
+            seen_fields.update((f.label, tuple(f.blocks)) for f in fields if f.blocks)
+            if content:
+                seen_sections.setdefault(ckey, (sections, len(sections)))
             sections.append(section.model_copy(update={"fields": fields}))
         if sections:
             pages.append(page.model_copy(update={"sections": sections}))
@@ -334,4 +350,61 @@ def printed_amounts_as_info(spec: FormSpec) -> tuple[FormSpec, list[str]]:
         )
         for p in spec.pages
     ]
+    return spec.model_copy(update={"pages": pages}), notes
+
+
+def _words(text: str) -> set[str]:
+    return {w for w in re.findall(r"\w+", text.lower()) if len(w) > 2}
+
+
+def drop_paper_only_fields(spec: FormSpec, paper: frozenset[str] = frozenset()) -> tuple[FormSpec, list[str]]:
+    """Canon, fifth rule (before the conditions check, which then frees what referred to a dropped field):
+    - a field made only from `paper` blocks is not something to fill in: form 1's model turned the end of
+      the signature footnote ("podpis osobisty albo podpis zaufany") into "Załączniki", "Oświadczenie" and
+      "Podpis". Only blocks the code recognised count (presort passes them: GDPR clause, signature lines,
+      footnotes); the model's own SKIP roles do not, it gave them to real fields too (form 6: the
+      contractor's phone number),
+    - a single-choice field with one option that only repeats the form title ("Rodzaj wniosku: Ustalenie
+      numeru porządkowego budynku" in "Wniosek o ustalenie numeru porządkowego") asks nothing, unless a
+      condition refers to it.
+    A section left without fields is dropped."""
+    title = _words(spec.title)
+    referred = {
+        _key(c.field)
+        for p in spec.pages
+        for s in p.sections
+        for c in [s.show_if, *(f.show_if for f in s.fields)]
+        if c is not None
+    }
+    notes: list[str] = []
+
+    def drop(f: FieldSpec, section: str) -> bool:
+        if f.blocks and all(b in paper for b in f.blocks):
+            notes.append(f"Pominięto pole „{f.label}” w sekcji „{section}”: z tekstu tylko na papierze.")
+            return True
+        if f.kind is Kind.SINGLE_CHOICE and len(f.options) == 1 and _key(f.label) not in referred:
+            option = _words(f.options[0])
+            if option and len(option & title) >= 0.6 * len(option):
+                notes.append(f"Pominięto pole „{f.label}”: jedyna opcja powtarza tytuł wniosku.")
+                return True
+        # A field named like the whole request ("Wniosek o ustalenie numeru porządkowego budynku") is the
+        # title or the request sentence, not something to fill in.
+        label = _words(f.label)
+        restates = len(label) >= 3 and len(label & title) >= 0.8 * len(label)
+        if f.kind is not Kind.INFO and restates and _key(f.label) not in referred:
+            notes.append(f"Pominięto pole „{f.label}”: powtarza tytuł wniosku.")
+            return True
+        return False
+
+    pages = []
+    for page in spec.pages:
+        sections = []
+        for s in page.sections:
+            fields = [f for f in s.fields if not drop(f, s.title)]
+            if fields:
+                sections.append(s.model_copy(update={"fields": fields}))
+            elif s.fields:
+                notes.append(f"Pominięto sekcję „{s.title}” (bez pól do wypełnienia).")
+        if sections:
+            pages.append(page.model_copy(update={"sections": sections}))
     return spec.model_copy(update={"pages": pages}), notes

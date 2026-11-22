@@ -175,6 +175,10 @@ class ApplicantSpec(BaseModel):
         default=False, description="The paper form has company/institution data (NIP, REGON, KRS, name)."
     )
     entity_nip_only: bool = Field(default=False, description="Paper form asks only name + NIP of entity.")
+    # Set by the code (presort: the paper mentions PESEL outside the GDPR clause), not by the model. The
+    # COI references follow the paper: material 1 (no PESEL on paper) has none, its visualisation too;
+    # material 5 (PESEL on paper) has it. Default True keeps saved specs as they were.
+    pesel: bool = Field(default=True, description="The paper form asks for a PESEL.")
 
 
 class FormSpec(BaseModel):
@@ -239,4 +243,5 @@ def model_schema() -> dict:
     field = defs["FieldSpec"]
     field["required"] = [*field.get("required", []), "required"]
     field["properties"]["required"].pop("default", None)
+    defs["ApplicantSpec"]["properties"].pop("pesel", None)  # the code decides (presort)
     return schema
